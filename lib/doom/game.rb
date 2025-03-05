@@ -49,7 +49,8 @@ module Doom
 
     def button_down(id)
       close if id == Gosu::KB_ESCAPE
-      @logger.info("Game closing") if id == Gosu::KB_ESCAPE
+      close if (id == Gosu::KB_W && (Gosu.button_down?(Gosu::KB_LEFT_META) || Gosu.button_down?(Gosu::KB_RIGHT_META)))
+      @logger.info("Game closing") if id == Gosu::KB_ESCAPE || (id == Gosu::KB_W && (Gosu.button_down?(Gosu::KB_LEFT_META) || Gosu.button_down?(Gosu::KB_RIGHT_META)))
     end
     
     private

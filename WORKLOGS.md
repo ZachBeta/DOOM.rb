@@ -31,7 +31,9 @@
 ## In Progress
 
 ## Next
-- [ ] allow cmd+w to close the window for easier dev loop
+- [x] allow cmd+w to close the window for easier dev loop
+  - cmd+w and esc both quit the process
+- [ ] move more verbose logging into another file, consider log levels so we can pull them into context in cursor, update cursor rules accordingly
 - [ ] add more tests to improve coverage
 - [ ] Implement texture mapping for walls
 - [ ] Add simple HUD elements
