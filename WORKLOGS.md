@@ -43,6 +43,7 @@
   - Create demo system for replaying gameplay
 
 - [ ] Features
+  - show frame rate FPS in top left display
   - Implement console for commands and cheats
   - Implement texture mapping for walls
   - Create gem structure (local only)
