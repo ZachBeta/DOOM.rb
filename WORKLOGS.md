@@ -20,9 +20,9 @@
   - Refactored Map into smaller classes (Map, Grid)
   - Refactored Game class and extracted InputHandler and GameClock
   - Applied Single Responsibility Principle throughout the codebase
+- [x] Updated cursor rules with project-specific guidelines for code quality and upcoming features
 
 ## In Progress
-- [ ] update cursor rules with any learnings as we go
 - [ ] Improve logging to feed logs into cursor context while debugging - not too noisy tho, this will blow up the context window
 
 # Next

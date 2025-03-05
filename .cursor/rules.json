@@ -7,7 +7,7 @@
       "patterns": [
         {
           "pattern": "\\.rb$",
-          "instructions": "Write Ruby code following Practical Object-Oriented Design principles by Sandi Metz. Focus on single responsibility, dependency injection, and composition over inheritance."
+          "instructions": "Write Ruby code following Practical Object-Oriented Design principles by Sandi Metz. Focus on single responsibility, dependency injection, and composition over inheritance. Keep classes small and focused with clear public interfaces."
         }
       ]
     },
@@ -26,8 +26,8 @@
       "description": "Encourage TDD practices",
       "patterns": [
         {
-          "pattern": "_spec\\.rb$|_test\\.rb$",
-          "instructions": "Write tests that focus on behavior rather than implementation details. Follow the Arrange-Act-Assert pattern."
+          "pattern": "_test\\.rb$",
+          "instructions": "Write Minitest tests that focus on behavior rather than implementation details. Follow the Arrange-Act-Assert pattern. Ensure tests are isolated and don't depend on each other."
         }
       ]
     },
@@ -42,22 +42,62 @@
       ]
     },
     {
-      "name": "Frequent Commits",
-      "description": "Commit early, commit often",
+      "name": "Game Architecture",
+      "description": "Maintain clean game architecture",
       "patterns": [
         {
-          "pattern": ".*",
-          "instructions": "Suggest committing changes after each meaningful unit of work is complete. Keep commits small, focused, and with descriptive messages that explain the 'why' not just the 'what'."
+          "pattern": "lib/doom/.*\\.rb$",
+          "instructions": "Maintain separation of concerns between game components. Keep rendering logic separate from game logic. Use composition over inheritance. Follow the Single Responsibility Principle. Prefer small, focused classes with clear public interfaces."
         }
       ]
     },
     {
-      "name": "Functional Main App",
-      "description": "Ensure the main app is always in a functional state",
+      "name": "Performance Considerations",
+      "description": "Keep performance in mind for game code",
       "patterns": [
         {
-          "pattern": ".*",
-          "instructions": "Prioritize keeping the main application in a runnable state at all times. Use feature flags, branch by abstraction, or small incremental changes to avoid breaking functionality. Suggest running the app after significant changes."
+          "pattern": "renderer\\.rb$|ray.*\\.rb$",
+          "instructions": "Be mindful of performance in rendering and physics code. Avoid unnecessary object creation in tight loops. Consider using memoization or caching for expensive calculations. Use profiling to identify bottlenecks."
+        }
+      ]
+    },
+    {
+      "name": "Logging Best Practices",
+      "description": "Use logging effectively",
+      "patterns": [
+        {
+          "pattern": "logger\\.rb$|.*\\.rb$",
+          "instructions": "Use appropriate log levels (debug, info, warn, error). Keep logs informative but not too verbose to avoid context window bloat. Log important state changes and errors, but avoid logging in tight loops."
+        }
+      ]
+    },
+    {
+      "name": "Collision Detection",
+      "description": "Guidelines for implementing collision detection",
+      "patterns": [
+        {
+          "pattern": "player\\.rb$|movement\\.rb$|collision.*\\.rb$",
+          "instructions": "Implement collision detection using simple geometric calculations. Consider using a grid-based approach for efficiency. Separate collision detection logic from movement logic."
+        }
+      ]
+    },
+    {
+      "name": "Texture Mapping",
+      "description": "Guidelines for implementing texture mapping",
+      "patterns": [
+        {
+          "pattern": "renderer\\.rb$|texture.*\\.rb$|wall.*\\.rb$",
+          "instructions": "Implement texture mapping by calculating texture coordinates based on wall hit positions. Use efficient texture lookup methods. Consider caching textures for performance."
+        }
+      ]
+    },
+    {
+      "name": "WAD File Parsing",
+      "description": "Guidelines for implementing WAD file parsing",
+      "patterns": [
+        {
+          "pattern": "wad.*\\.rb$|parser.*\\.rb$",
+          "instructions": "Implement WAD file parsing using a clean, modular approach. Separate concerns between file I/O, data structure parsing, and game object creation. Use streaming approaches for large files."
         }
       ]
     }
