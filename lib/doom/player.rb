@@ -81,13 +81,11 @@ module Doom
     end
 
     def strafe_left(delta_time)
-      # Move perpendicular to direction
       strafe_vector = Vector[@player.direction[1], -@player.direction[0]]
       move(strafe_vector, delta_time)
     end
 
     def strafe_right(delta_time)
-      # Move perpendicular to direction (opposite of strafe_left)
       strafe_vector = Vector[-@player.direction[1], @player.direction[0]]
       move(strafe_vector, delta_time)
     end
@@ -95,18 +93,31 @@ module Doom
     private
 
     def move(direction_vector, delta_time)
-      return unless @player.map # Skip movement if map isn't set
+      return unless @player.map
 
       movement = direction_vector * (MOVE_SPEED * delta_time)
       new_position = @player.position + movement
       
-      # In noclip mode, bypass collision detection
       if @player.noclip_mode
         @player.update_position(new_position)
       else
-        # Only update position if there's no collision
+        # Try full movement first
         unless @collision_detector.collides?(@player.map, new_position)
           @player.update_position(new_position)
+          return
+        end
+
+        # Try sliding along X axis
+        x_slide = Vector[@player.position[0] + movement[0], @player.position[1]]
+        unless @collision_detector.collides?(@player.map, x_slide)
+          @player.update_position(x_slide)
+          return
+        end
+
+        # Try sliding along Y axis
+        y_slide = Vector[@player.position[0], @player.position[1] + movement[1]]
+        unless @collision_detector.collides?(@player.map, y_slide)
+          @player.update_position(y_slide)
         end
       end
     end

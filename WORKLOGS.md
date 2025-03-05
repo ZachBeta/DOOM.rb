@@ -31,6 +31,8 @@
 - [ ] player movement - the player can get stuck on walls, make the collision feel more like doom by allowing the player to slide along the wall
 
 # Next
+- [ ] update cursor rules to prefer explanatory code and tests over comments
+- [ ] allow cmd+w to close the window for easier dev loop
 - [ ] Implement texture mapping for walls
 - [ ] Add simple HUD elements
 - [ ] Create demo system for replaying gameplay (for testing)
