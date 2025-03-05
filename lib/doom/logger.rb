@@ -1,4 +1,33 @@
+require 'fileutils'
+
 module Doom
+  class LogManager
+    def initialize
+      FileUtils.mkdir_p('logs')
+      @game_log = File.open('logs/game.log', 'a')
+      @debug_log = File.open('logs/debug.log', 'a')
+    end
+
+    def write(message, level)
+      timestamp = Time.now.strftime('%Y-%m-%d %H:%M:%S.%L')
+      formatted_message = "[#{timestamp}] [#{level.upcase}] #{message}"
+      
+      case level
+      when :debug
+        @debug_log.puts(formatted_message)
+        @debug_log.flush
+      else
+        @game_log.puts(formatted_message)
+        @game_log.flush
+      end
+    end
+
+    def close
+      @game_log.close
+      @debug_log.close
+    end
+  end
+
   class Logger
     LEVELS = {
       debug: 0,
@@ -11,7 +40,7 @@ module Doom
     def initialize(level = :info, output = $stdout)
       @level = LEVELS.fetch(level, 1)
       @output = output
-      @log_file = File.open('doom.log', 'a')
+      @log_manager = LogManager.new
     end
 
     def debug(message)
@@ -39,12 +68,13 @@ module Doom
     def log(message, level)
       return unless LEVELS[level] >= @level
 
-      timestamp = Time.now.strftime('%Y-%m-%d %H:%M:%S.%L')
-      formatted_message = "[#{timestamp}] [#{level.upcase}] #{message}"
+      @log_manager.write(message, level)
       
-      @output.puts(formatted_message)
-      @log_file.puts(formatted_message)
-      @log_file.flush
+      # Only show non-debug messages in console
+      if level != :debug
+        timestamp = Time.now.strftime('%Y-%m-%d %H:%M:%S.%L')
+        @output.puts("[#{timestamp}] [#{level.upcase}] #{message}")
+      end
     end
   end
 end 

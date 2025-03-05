@@ -87,7 +87,7 @@
       "patterns": [
         {
           "pattern": "logger\\.rb$|.*\\.rb$",
-          "instructions": "Use appropriate log levels (debug, info, warn, error). Keep logs informative but not too verbose to avoid context window bloat. Log important state changes and errors, but avoid logging in tight loops. Periodically review logging patterns and suggest improvements to balance between useful debugging information and context window efficiency."
+          "instructions": "Use appropriate log levels: debug for detailed development info (goes to debug.log), info/warn/error/fatal for important game events (goes to game.log). Keep debug logs verbose for development but keep game.log clean. Log important state changes and errors in game.log, detailed debugging info in debug.log. Consider log levels when adding new logging statements."
         }
       ]
     },
