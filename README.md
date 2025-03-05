@@ -6,12 +6,21 @@ A Ruby implementation of the classic DOOM game engine.
 
 DOOM.rb aims to recreate the core mechanics of the original DOOM game using Ruby. This project serves as both a learning exercise in game development and a demonstration of Ruby's capabilities for graphics and game programming.
 
-## Features (Planned)
+## Current Features
 
-- 3D rendering engine
+- Basic 3D rendering engine with raycasting
+- Simple map representation
+- Player movement controls
+- Basic window creation and rendering loop
+
+## Planned Features
+
+- Collision detection with walls
+- Texture mapping for walls
+- HUD and minimap
 - Level loading from WAD files
 - Enemy AI
-- Player movement and combat
+- Player combat
 - Sound effects and music
 
 ## Getting Started
@@ -32,12 +41,19 @@ bundle install
 ### Running the Game
 
 ```bash
-ruby lib/doom.rb
+rake doom
+```
+
+### Running Tests
+
+```bash
+rake test
 ```
 
 ## Project Structure
 
 - `lib/` - Core game engine code
+- `test/` - Test files
 - `assets/` - Game assets (textures, sounds, etc.)
 - `levels/` - WAD files and level data
 

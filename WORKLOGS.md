@@ -15,19 +15,15 @@
 - [x] Implemented basic logging system for debugging
 - [x] Added Rakefile for running the game `rake doom` and for running tests `rake test`
 
-## Now
-- [ ] swap out rspec for minitest - the less magic and metaprogramming the better
-- [ ] controls are inverted for strafing
-- [ ] improve logging to be able to feed logs into cursor context while debugging and iterating
-- [ ] steer architecture to be more LLM friendly - small classes with simple public methods that are easy to reason about and do not require us to load them into context
-- [ ] maybe split worklogs up
+## In Progress
+- [ ] Improve logging to feed logs into cursor context while debugging
+- [ ] Make architecture more LLM friendly - small classes with simple public methods
 - [ ] Add collision detection with walls
 - [ ] Implement texture mapping for walls
 - [ ] Add simple HUD elements
-
-- [ ] demo system to be able to replay the game - makes it easier for system and acceptance testing
-- [ ] minimap
-- [ ] hud
+- [ ] Create demo system for replaying gameplay (for testing)
+- [ ] Implement minimap
+- [ ] Add HUD with player stats
 
 ## Next
 - [ ] Implement WAD file parser
@@ -35,7 +31,7 @@
 - [ ] Implement sound effects
 - [ ] Add music playback
 
-## Soon
+## Future
 - [ ] Implement more advanced lighting
 - [ ] Add multiplayer support
 - [ ] Create level editor 
