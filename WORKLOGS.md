@@ -26,9 +26,9 @@
 - [x] Implemented noclip mode to bypass collision detection (toggle with N key)
 - [x] Fixed collision detection bug with Vector objects
 - [x] Improved test design by replacing mocks with real test objects
+- [x] player movement - the player can get stuck on walls, make the collision feel more like doom by allowing the player to slide along the wall
 
 ## In Progress
-- [ ] player movement - the player can get stuck on walls, make the collision feel more like doom by allowing the player to slide along the wall
 
 ## Next
 - [ ] allow cmd+w to close the window for easier dev loop
@@ -40,8 +40,8 @@
 - [ ] Improve logging to feed logs into cursor context while debugging - not too noisy tho, this will blow up the context window
 
 ## Soon
-- [ ] console
-- [ ] make a gem, don't bother publishing, just keep it local for now
+- [ ] console - this allows us to toggle config like noclip and in the future implement cheat codes
+- [ ] make a gem, don't bother publishing yet, just keep it local for now
 - [ ] Implement WAD file parser
 - [ ] Add enemies and weapons
 - [ ] Implement sound effects
