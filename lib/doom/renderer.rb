@@ -1,3 +1,4 @@
+require 'gosu'
 require_relative 'map'
 
 module Doom
