@@ -46,6 +46,7 @@
   - Implement console for commands and cheats
   - Implement texture mapping for walls
   - Create gem structure (local only)
+  - find open source doom ports with compatible licenses, especially https://github.com/id-Software/DOOM though I believe it's GPL, so we might need to GPL this code, we can use this as a compatibility test for feature parity
 
 ## Future
 - [ ] Content & Gameplay
