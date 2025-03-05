@@ -40,6 +40,26 @@
           "instructions": "Document public interfaces clearly but avoid excessive comments in implementation code. Let well-named methods and variables speak for themselves."
         }
       ]
+    },
+    {
+      "name": "Frequent Commits",
+      "description": "Commit early, commit often",
+      "patterns": [
+        {
+          "pattern": ".*",
+          "instructions": "Suggest committing changes after each meaningful unit of work is complete. Keep commits small, focused, and with descriptive messages that explain the 'why' not just the 'what'."
+        }
+      ]
+    },
+    {
+      "name": "Functional Main App",
+      "description": "Ensure the main app is always in a functional state",
+      "patterns": [
+        {
+          "pattern": ".*",
+          "instructions": "Prioritize keeping the main application in a runnable state at all times. Use feature flags, branch by abstraction, or small incremental changes to avoid breaking functionality. Suggest running the app after significant changes."
+        }
+      ]
     }
   ]
 } 
