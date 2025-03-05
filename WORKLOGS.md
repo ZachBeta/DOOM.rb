@@ -23,6 +23,7 @@
 - [x] Updated cursor rules with project-specific guidelines for code quality and upcoming features
 
 ## In Progress
+- [ ] ensure the cursor rules are "self healing" and establish that we should change them as we iterate
 - [ ] Improve logging to feed logs into cursor context while debugging - not too noisy tho, this will blow up the context window
 
 # Next
@@ -34,6 +35,7 @@
 - [ ] Add HUD with player stats
 
 ## Soon
+* [ ] make a gem, don't bother publishing, just keep it local for now
 - [ ] Implement WAD file parser
 - [ ] Add enemies and weapons
 - [ ] Implement sound effects
