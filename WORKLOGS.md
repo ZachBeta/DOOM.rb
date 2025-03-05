@@ -44,7 +44,6 @@
 - [ ] Developer Tools
   - Implement console for commands and cheats
   - Create demo system for replaying gameplay
-  - Add more tests to improve coverage
 
 - [ ] Graphics & Engine
   - Implement texture mapping for walls
@@ -65,6 +64,9 @@
   - Add multiplayer support
   - Create level editor 
 
+
+- [ ] Developer Tools
+  - Add more tests to improve coverage
 - [ ] Performance & Display
   - Profile and optimize rendering loop
   - Add performance monitoring tools
