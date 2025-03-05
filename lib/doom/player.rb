@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'matrix'
 
 module Doom
@@ -97,7 +99,7 @@ module Doom
 
       movement = direction_vector * (MOVE_SPEED * delta_time)
       new_position = @player.position + movement
-      
+
       if @player.noclip_mode
         @player.update_position(new_position)
       else
@@ -116,9 +118,7 @@ module Doom
 
         # Try sliding along Y axis
         y_slide = Vector[@player.position[0], @player.position[1] + movement[1]]
-        unless @collision_detector.collides?(@player.map, y_slide)
-          @player.update_position(y_slide)
-        end
+        @player.update_position(y_slide) unless @collision_detector.collides?(@player.map, y_slide)
       end
     end
   end
@@ -143,7 +143,7 @@ module Doom
     def rotate(angle)
       cos_angle = Math.cos(angle)
       sin_angle = Math.sin(angle)
-      
+
       rotate_direction(cos_angle, sin_angle)
       rotate_plane(cos_angle, sin_angle)
     end
@@ -151,8 +151,8 @@ module Doom
     def rotate_direction(cos_angle, sin_angle)
       old_dir_x = @player.direction[0]
       new_direction = Vector[
-        @player.direction[0] * cos_angle - @player.direction[1] * sin_angle,
-        old_dir_x * sin_angle + @player.direction[1] * cos_angle
+        (@player.direction[0] * cos_angle) - (@player.direction[1] * sin_angle),
+        (old_dir_x * sin_angle) + (@player.direction[1] * cos_angle)
       ]
       @player.update_direction(new_direction)
     end
@@ -160,8 +160,8 @@ module Doom
     def rotate_plane(cos_angle, sin_angle)
       old_plane_x = @player.plane[0]
       new_plane = Vector[
-        @player.plane[0] * cos_angle - @player.plane[1] * sin_angle,
-        old_plane_x * sin_angle + @player.plane[1] * cos_angle
+        (@player.plane[0] * cos_angle) - (@player.plane[1] * sin_angle),
+        (old_plane_x * sin_angle) + (@player.plane[1] * cos_angle)
       ]
       @player.update_plane(new_plane)
     end
@@ -174,7 +174,7 @@ module Doom
       # Extract x and y from the Vector
       x = position[0]
       y = position[1]
-      
+
       # Check the current cell
       return true if map.wall_at?(x.to_i, y.to_i)
 
@@ -194,4 +194,4 @@ module Doom
       ]
     end
   end
-end 
+end

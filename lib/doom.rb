@@ -4,4 +4,4 @@
 require_relative 'doom/game'
 
 # Start the game
-Doom::Game.new.start 
+Doom::Game.new.start

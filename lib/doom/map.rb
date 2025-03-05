@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Doom
   class Map
     attr_reader :width, :height
@@ -42,13 +44,14 @@ module Doom
 
     def wall_at?(x, y)
       return true if out_of_bounds?(x, y)
+
       @data[y.to_i][x.to_i] == WALL
     end
 
     private
 
     def out_of_bounds?(x, y)
-      x < 0 || y < 0 || x >= @width || y >= @height
+      x.negative? || y.negative? || x >= @width || y >= @height
     end
   end
-end 
+end

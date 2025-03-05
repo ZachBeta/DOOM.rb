@@ -1,5 +1,7 @@
-require "test_helper"
-require "doom/renderer"
+# frozen_string_literal: true
+
+require 'test_helper'
+require 'doom/renderer'
 
 module Doom
   class MockPlayer
@@ -14,8 +16,8 @@ module Doom
 
   class MockMap
     def wall_at?(x, y)
-      x == 6 && y == 5 ||  # Wall one unit to the right of default player position
-      x < 0 || y < 0 || x >= 10 || y >= 10  # Boundary walls
+      (x == 6 && y == 5) || # Wall one unit to the right of default player position
+        x.negative? || y.negative? || x >= 10 || y >= 10 # Boundary walls
     end
   end
 
@@ -26,7 +28,7 @@ module Doom
 
     def test_ray_initialization
       ray = Ray.new(@player, 400, 800)
-      
+
       assert_in_delta 0.0, ray.camera_x
       assert_in_delta 1.0, ray.direction_x
       assert_in_delta 0.0, ray.direction_y
@@ -36,7 +38,7 @@ module Doom
       left_ray = Ray.new(@player, 0, 800)
       right_ray = Ray.new(@player, 800, 800)
 
-      assert_in_delta -1.0, left_ray.camera_x
+      assert_in_delta(-1.0, left_ray.camera_x)
       assert_in_delta 1.0, right_ray.camera_x
     end
   end
@@ -61,7 +63,7 @@ module Doom
     def setup
       @map = MockMap.new
       @player = MockPlayer.new
-      @ray = Ray.new(@player, 400, 800)  # Center ray
+      @ray = Ray.new(@player, 400, 800) # Center ray
     end
 
     def test_ray_cast_hits_wall
@@ -69,13 +71,13 @@ module Doom
       intersection = caster.cast
 
       assert_instance_of WallIntersection, intersection
-      assert_in_delta 1.0, intersection.distance  # Wall is 1 unit away
-      assert_equal 0, intersection.side  # Hit on x-axis
+      assert_in_delta 1.0, intersection.distance # Wall is 1 unit away
+      assert_equal 0, intersection.side # Hit on x-axis
     end
 
     def test_ray_cast_with_angled_ray
       angled_ray = Ray.new(
-        MockPlayer.new([5, 5], [0.7071, 0.7071]),  # 45-degree angle
+        MockPlayer.new([5, 5], [0.7071, 0.7071]), # 45-degree angle
         400,
         800
       )
@@ -83,7 +85,7 @@ module Doom
       intersection = caster.cast
 
       assert_instance_of WallIntersection, intersection
-      assert intersection.distance > 1.0  # Diagonal distance should be greater
+      assert intersection.distance > 1.0 # Diagonal distance should be greater
     end
   end
-end 
+end

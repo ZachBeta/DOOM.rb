@@ -1,5 +1,7 @@
-require "test_helper"
-require "doom/map"
+# frozen_string_literal: true
+
+require 'test_helper'
+require 'doom/map'
 
 module Doom
   class MapTest < Minitest::Test
@@ -46,4 +48,4 @@ module Doom
       assert @grid.wall_at?(0, 3)
     end
   end
-end 
+end

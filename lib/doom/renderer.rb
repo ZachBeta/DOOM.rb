@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'gosu'
 require_relative 'map'
 
@@ -62,7 +64,7 @@ module Doom
       south: Gosu::Color.new(255, 0, 255, 0),    # Green
       east: Gosu::Color.new(255, 0, 0, 255),     # Blue
       west: Gosu::Color.new(255, 255, 255, 0)    # Yellow
-    }
+    }.freeze
 
     def initialize(window, map)
       @window = window
@@ -87,12 +89,12 @@ module Doom
       return unless intersection
 
       line_height = (height / intersection.distance).to_i
-      
-      draw_start = [-line_height / 2 + height / 2, 0].max
-      draw_end = [line_height / 2 + height / 2, height - 1].min
-      
+
+      draw_start = [(-line_height / 2) + (height / 2), 0].max
+      draw_end = [(line_height / 2) + (height / 2), height - 1].min
+
       color = determine_wall_color(intersection)
-      
+
       @window.draw_line(
         x, draw_start, color,
         x, draw_end, color
@@ -100,18 +102,18 @@ module Doom
     end
 
     def determine_wall_color(intersection)
-      color = if intersection.side == 0
-                intersection.ray_dir_x > 0 ? WALL_COLORS[:east] : WALL_COLORS[:west]
+      color = if intersection.side.zero?
+                intersection.ray_dir_x.positive? ? WALL_COLORS[:east] : WALL_COLORS[:west]
               else
-                intersection.ray_dir_y > 0 ? WALL_COLORS[:south] : WALL_COLORS[:north]
+                intersection.ray_dir_y.positive? ? WALL_COLORS[:south] : WALL_COLORS[:north]
               end
-      
+
       # Make color darker for y-sides
       if intersection.side == 1
         color = color.dup
         color.alpha = 200
       end
-      
+
       color
     end
   end
@@ -120,9 +122,9 @@ module Doom
     attr_reader :direction_x, :direction_y, :camera_x
 
     def initialize(player, screen_x, screen_width)
-      @camera_x = 2 * screen_x.to_f / screen_width - 1
-      @direction_x = player.direction[0] + player.plane[0] * @camera_x
-      @direction_y = player.direction[1] + player.plane[1] * @camera_x
+      @camera_x = (2 * screen_x.to_f / screen_width) - 1
+      @direction_x = player.direction[0] + (player.plane[0] * @camera_x)
+      @direction_y = player.direction[1] + (player.plane[1] * @camera_x)
     end
   end
 
@@ -146,23 +148,27 @@ module Doom
     def setup_dda
       @delta_dist_x = @ray.direction_x.abs < 0.00001 ? Float::INFINITY : (1.0 / @ray.direction_x.abs)
       @delta_dist_y = @ray.direction_y.abs < 0.00001 ? Float::INFINITY : (1.0 / @ray.direction_y.abs)
-      
-      @step_x = @ray.direction_x < 0 ? -1 : 1
-      @step_y = @ray.direction_y < 0 ? -1 : 1
-      
-      @side_dist_x = @ray.direction_x < 0 ? 
-        (@player.position[0] - @map_x) * @delta_dist_x : 
-        (@map_x + 1.0 - @player.position[0]) * @delta_dist_x
-      @side_dist_y = @ray.direction_y < 0 ? 
-        (@player.position[1] - @map_y) * @delta_dist_y : 
-        (@map_y + 1.0 - @player.position[1]) * @delta_dist_y
-      
+
+      @step_x = @ray.direction_x.negative? ? -1 : 1
+      @step_y = @ray.direction_y.negative? ? -1 : 1
+
+      @side_dist_x = if @ray.direction_x.negative?
+                       (@player.position[0] - @map_x) * @delta_dist_x
+                     else
+                       (@map_x + 1.0 - @player.position[0]) * @delta_dist_x
+                     end
+      @side_dist_y = if @ray.direction_y.negative?
+                       (@player.position[1] - @map_y) * @delta_dist_y
+                     else
+                       (@map_y + 1.0 - @player.position[1]) * @delta_dist_y
+                     end
+
       @hit = false
       @side = 0
     end
 
     def perform_dda
-      while !@hit
+      until @hit
         if @side_dist_x < @side_dist_y
           @side_dist_x += @delta_dist_x
           @map_x += @step_x
@@ -172,18 +178,18 @@ module Doom
           @map_y += @step_y
           @side = 1
         end
-        
+
         @hit = @map.wall_at?(@map_x, @map_y)
       end
     end
 
     def calculate_intersection
-      perp_wall_dist = if @side == 0
-                        (@map_x - @player.position[0] + (1 - @step_x) / 2) / @ray.direction_x
-                      else
-                        (@map_y - @player.position[1] + (1 - @step_y) / 2) / @ray.direction_y
-                      end
-      
+      perp_wall_dist = if @side.zero?
+                         (@map_x - @player.position[0] + ((1 - @step_x) / 2)) / @ray.direction_x
+                       else
+                         (@map_y - @player.position[1] + ((1 - @step_y) / 2)) / @ray.direction_y
+                       end
+
       WallIntersection.new(
         distance: perp_wall_dist,
         side: @side,
@@ -240,9 +246,7 @@ module Doom
     def draw_walls
       @map.height.times do |y|
         @map.width.times do |x|
-          if @map.wall_at?(x, y)
-            draw_cell(x, y, WALL_COLOR)
-          end
+          draw_cell(x, y, WALL_COLOR) if @map.wall_at?(x, y)
         end
       end
     end
@@ -261,18 +265,18 @@ module Doom
     def draw_player(player)
       x = @window.width - MINIMAP_SIZE - MINIMAP_MARGIN + (player.position[0] * @cell_size)
       y = @window.height - MINIMAP_SIZE - MINIMAP_MARGIN + (player.position[1] * @cell_size)
-      
+
       @window.draw_quad(
         x - PLAYER_SIZE, y - PLAYER_SIZE, PLAYER_COLOR,
         x + PLAYER_SIZE, y - PLAYER_SIZE, PLAYER_COLOR,
         x - PLAYER_SIZE, y + PLAYER_SIZE, PLAYER_COLOR,
         x + PLAYER_SIZE, y + PLAYER_SIZE, PLAYER_COLOR
       )
-      
+
       # Draw player direction line
-      dir_x = x + player.direction[0] * PLAYER_SIZE * 2
-      dir_y = y + player.direction[1] * PLAYER_SIZE * 2
+      dir_x = x + (player.direction[0] * PLAYER_SIZE * 2)
+      dir_y = y + (player.direction[1] * PLAYER_SIZE * 2)
       @window.draw_line(x, y, PLAYER_COLOR, dir_x, dir_y, PLAYER_COLOR)
     end
   end
-end 
+end

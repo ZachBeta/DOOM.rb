@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'fileutils'
 require 'logger'
 
@@ -12,9 +14,8 @@ module Doom
     end
 
     def write(message, level)
-      timestamp = Time.now.strftime('%Y-%m-%d %H:%M:%S.%L')
-      formatted_message = "[#{timestamp}] [#{level.upcase}] #{message}"
-      
+      Time.now.strftime('%Y-%m-%d %H:%M:%S.%L')
+
       case level
       when :debug
         @debug_log.send(level, message)
@@ -42,7 +43,7 @@ module Doom
     end
 
     def setup_logger_formatting(logger)
-      logger.formatter = proc do |severity, datetime, progname, msg|
+      logger.formatter = proc do |severity, datetime, _progname, msg|
         "[#{datetime.strftime('%Y-%m-%d %H:%M:%S.%L')}] [#{severity}] #{msg}\n"
       end
     end
@@ -94,16 +95,16 @@ module Doom
       return unless should_log?(level)
 
       @log_manager.write(message, level)
-      
+
       # Only show non-debug/verbose messages in console
-      if level != :debug && level != :verbose
-        timestamp = Time.now.strftime('%Y-%m-%d %H:%M:%S.%L')
-        @output.puts("[#{timestamp}] [#{level.upcase}] #{message}")
-      end
+      return unless level != :debug && level != :verbose
+
+      timestamp = Time.now.strftime('%Y-%m-%d %H:%M:%S.%L')
+      @output.puts("[#{timestamp}] [#{level.upcase}] #{message}")
     end
 
     def should_log?(level)
       LEVELS[level] >= @level
     end
   end
-end 
+end

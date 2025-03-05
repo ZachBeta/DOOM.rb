@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'gosu'
 
 module Doom
@@ -33,7 +35,7 @@ module Doom
         @player.strafe_right(delta_time)
         movement << 'right'
       end
-      
+
       @logger.verbose("Movement: #{movement.join(', ')}") unless movement.empty?
     end
 
@@ -47,21 +49,21 @@ module Doom
         @player.rotate_right(delta_time)
         rotation << 'right'
       end
-      
+
       @logger.verbose("Rotation: #{rotation.join(', ')}") unless rotation.empty?
     end
-    
+
     def handle_special_keys(window)
       # We need to track key presses to avoid toggling multiple times per press
       @last_n_state ||= false
       n_pressed = window.button_down?(Gosu::KB_N)
-      
+
       if n_pressed && !@last_n_state
         @player.toggle_noclip
         @logger.info("Noclip mode #{@player.noclip_mode ? 'enabled' : 'disabled'}")
       end
-      
+
       @last_n_state = n_pressed
     end
   end
-end 
+end

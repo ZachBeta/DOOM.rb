@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rake/testtask'
 
 desc 'Run the DOOM.rb game'
@@ -13,4 +15,4 @@ Rake::TestTask.new(:test) do |t|
   t.verbose = true
 end
 
-task default: :doom 
+task default: :doom

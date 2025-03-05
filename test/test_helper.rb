@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'minitest/autorun'
 require 'minitest/pride'
 require 'matrix'
@@ -10,4 +12,4 @@ SimpleCov.start do
 end
 
 # Don't require the entire doom.rb file as it starts the game
-# Instead, require only the specific files needed for testing 
+# Instead, require only the specific files needed for testing
