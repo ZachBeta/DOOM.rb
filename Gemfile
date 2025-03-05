@@ -9,3 +9,4 @@ gem "minitest", "~> 5.18.0"  # Testing framework
 gem "pry", "~> 0.14.2"       # Debugging tool
 gem "matrix", "~> 0.4.2"     # Matrix operations for 3D math
 gem "rake", "~> 13.0.6"      # Task automation
+gem "simplecov", "~> 0.22.0", require: false  # Test coverage reporting
