@@ -11,14 +11,21 @@
 - [x] Implemented basic raycasting renderer
 - [x] Added player movement controls
 - [x] Fixed inverted strafing controls
+- [x] Swapped out RSpec for Minitest
+- [x] Implemented basic logging system for debugging
 
 ## Now
 - [ ] swap out rspec for minitest - the less magic and metaprogramming the better
 - [ ] controls are inverted for strafing
 - [ ] improve logging to be able to feed logs into cursor context while debugging and iterating
+- [ ] steer architecture to be more LLM friendly - small classes with simple public methods that are easy to reason about and do not require us to load them into context
+- [ ] maybe split worklogs up
 - [ ] Add collision detection with walls
 - [ ] Implement texture mapping for walls
 - [ ] Add simple HUD elements
+
+- [ ] demo system to be able to replay the game - makes it easier for system and acceptance testing
+- [ ] minimap
 
 ## Next
 - [ ] Implement WAD file parser

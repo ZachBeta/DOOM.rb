@@ -1,6 +1,7 @@
 require 'gosu'
 require_relative 'renderer'
 require_relative 'player'
+require_relative 'logger'
 
 module Doom
   class Game < Gosu::Window
@@ -12,12 +13,18 @@ module Doom
       super(SCREEN_WIDTH, SCREEN_HEIGHT)
       self.caption = TITLE
       
+      @logger = Logger.new(:debug)
+      @logger.info("Initializing DOOM.rb")
+      
       @renderer = Renderer.new(self)
       @player = Player.new
       @last_time = Gosu.milliseconds
+      
+      @logger.info("Game initialized successfully")
     end
 
     def start
+      @logger.info("Starting game loop")
       show
     end
 
@@ -28,6 +35,8 @@ module Doom
 
       handle_input(delta_time)
       @player.update(delta_time)
+      
+      @logger.debug("Player position: #{@player.position}, direction: #{@player.direction}")
     end
 
     def draw
@@ -36,6 +45,7 @@ module Doom
 
     def button_down(id)
       close if id == Gosu::KB_ESCAPE
+      @logger.info("Game closing") if id == Gosu::KB_ESCAPE
     end
 
     private
