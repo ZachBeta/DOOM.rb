@@ -42,8 +42,6 @@
 
 ## Next
 - [ ] Graphics & Engine
-  - Implement texture mapping for walls
-  - Create gem structure (local only)
   - Research open source DOOM ports for compatibility
     - Analyze https://github.com/id-Software/DOOM (GPL licensed)
     - Consider GPL licensing implications
@@ -54,6 +52,10 @@
   - Create demo system for replaying gameplay
 
 ## Future
+- [ ] Graphics & Engine
+  - Implement texture mapping for walls
+  - Create gem structure (local only)
+
 - [ ] Content & Gameplay
   - Implement WAD file parser
   - Add enemies and weapons
