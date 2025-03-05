@@ -21,9 +21,9 @@
   - Refactored Game class and extracted InputHandler and GameClock
   - Applied Single Responsibility Principle throughout the codebase
 - [x] Updated cursor rules with project-specific guidelines for code quality and upcoming features
+- [x] Implemented self-healing cursor rules that evolve with the project
 
 ## In Progress
-- [ ] ensure the cursor rules are "self healing" and establish that we should change them as we iterate
 - [ ] Improve logging to feed logs into cursor context while debugging - not too noisy tho, this will blow up the context window
 
 # Next

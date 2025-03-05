@@ -2,12 +2,22 @@
   "version": 1,
   "rules": [
     {
+      "name": "Self-Healing Rules",
+      "description": "Ensure cursor rules evolve with the project",
+      "patterns": [
+        {
+          "pattern": "\\.cursor/rules\\.json$|WORKLOGS\\.md$",
+          "instructions": "These rules should evolve as the project evolves. When implementing new features or refactoring code, consider if the cursor rules need updating to reflect new patterns or best practices. Suggest rule updates when appropriate based on the current state of the project. Periodically review rules for relevance and accuracy."
+        }
+      ]
+    },
+    {
       "name": "Ruby Style Guide",
       "description": "Follow Sandi Metz's POODR principles for Ruby code",
       "patterns": [
         {
           "pattern": "\\.rb$",
-          "instructions": "Write Ruby code following Practical Object-Oriented Design principles by Sandi Metz. Focus on single responsibility, dependency injection, and composition over inheritance. Keep classes small and focused with clear public interfaces."
+          "instructions": "Write Ruby code following Practical Object-Oriented Design principles by Sandi Metz. Focus on single responsibility, dependency injection, and composition over inheritance. Keep classes small and focused with clear public interfaces. If you notice code that doesn't follow these principles, suggest refactoring."
         }
       ]
     },
@@ -17,7 +27,7 @@
       "patterns": [
         {
           "pattern": ".*",
-          "instructions": "Keep explanations and follow-up questions to a minimum to save tokens. Focus on delivering working code with just enough context."
+          "instructions": "Keep explanations and follow-up questions to a minimum to save tokens. Focus on delivering working code with just enough context. If responses become too verbose, suggest ways to be more concise."
         }
       ]
     },
@@ -67,7 +77,7 @@
       "patterns": [
         {
           "pattern": "logger\\.rb$|.*\\.rb$",
-          "instructions": "Use appropriate log levels (debug, info, warn, error). Keep logs informative but not too verbose to avoid context window bloat. Log important state changes and errors, but avoid logging in tight loops."
+          "instructions": "Use appropriate log levels (debug, info, warn, error). Keep logs informative but not too verbose to avoid context window bloat. Log important state changes and errors, but avoid logging in tight loops. Periodically review logging patterns and suggest improvements to balance between useful debugging information and context window efficiency."
         }
       ]
     },
@@ -98,6 +108,16 @@
         {
           "pattern": "wad.*\\.rb$|parser.*\\.rb$",
           "instructions": "Implement WAD file parsing using a clean, modular approach. Separate concerns between file I/O, data structure parsing, and game object creation. Use streaming approaches for large files."
+        }
+      ]
+    },
+    {
+      "name": "Project Evolution Tracking",
+      "description": "Track project evolution and update rules accordingly",
+      "patterns": [
+        {
+          "pattern": "WORKLOGS\\.md$|README\\.md$",
+          "instructions": "Monitor project progress through WORKLOGS.md and README.md. When new features are completed or planned, suggest updates to cursor rules that would help with implementing those features. Ensure rules stay aligned with the current project priorities."
         }
       ]
     }
