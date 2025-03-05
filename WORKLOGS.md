@@ -31,6 +31,7 @@
 - [ ] Improve logging to feed logs into cursor context while debugging - not too noisy tho, this will blow up the context window
 
 # Next
+- [ ] player movement - the player can get stuck on walls, make the collision feel more like doom by allowing the player to slide along the wall
 - [ ] Implement texture mapping for walls
 - [ ] Add simple HUD elements
 - [ ] Create demo system for replaying gameplay (for testing)
