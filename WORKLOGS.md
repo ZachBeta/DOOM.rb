@@ -13,6 +13,7 @@
 - [x] Fixed inverted strafing controls
 - [x] Swapped out RSpec for Minitest
 - [x] Implemented basic logging system for debugging
+- [x] Added Rakefile for running the game `rake doom` and for running tests `rake test`
 
 ## Now
 - [ ] swap out rspec for minitest - the less magic and metaprogramming the better
@@ -26,6 +27,7 @@
 
 - [ ] demo system to be able to replay the game - makes it easier for system and acceptance testing
 - [ ] minimap
+- [ ] hud
 
 ## Next
 - [ ] Implement WAD file parser
