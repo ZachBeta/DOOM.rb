@@ -40,6 +40,12 @@
 - [x] Performance & Display
   - Show frame rate (FPS) in top left display
 
+- [x] Graphics & Engine
+  - Out of scope - this is a proof of concept implementation, and NOT a product
+    - Analyze PrBoom+ for modern features balance
+    - Review ZDoom for advanced features
+    
+
 ## Next
 * [ ] Feature list
     - Document feature parity goals with Chocolate Doom first
@@ -47,8 +53,6 @@
 - [ ] Graphics & Engine
   - Research open source DOOM ports for compatibility
     - Study Chocolate Doom for vanilla accuracy
-    - Analyze PrBoom+ for modern features balance
-    - Review ZDoom for advanced features
     - Consider GPL licensing implications when code is currently MIT licensed
       - https://www.gnu.org/licenses/license-list.en.html
           X11 License (#X11License)
@@ -97,3 +101,21 @@
 - [ ] Performance & Display
   - Profile and optimize rendering loop
   - Add performance monitoring tools
+
+- [ ] Graphics & Engine
+  - Research open source DOOM ports for compatibility
+    - Study Chocolate Doom for vanilla accuracy
+    - Consider GPL licensing implications when code is currently MIT licensed
+      - https://www.gnu.org/licenses/license-list.en.html
+          X11 License (#X11License)
+          This is a lax permissive non-copyleft free software license, compatible with the GNU GPL. Older versions of XFree86 used the same license, and some of the current variants of XFree86 also do. Later versions of XFree86 are distributed under the XFree86 1.1 license.
+
+          Some people call this license “the MIT License,” but that term is misleading, since MIT has used many licenses for software. It is also ambiguous, since the same people also call the Expat license “the MIT License,” failing to distinguish them. We recommend not using the term “MIT License.”
+
+          The difference between the X11 license and the Expat license is that the X11 license contains an extra paragraph about using the X Consortium's name. It is not a big deal, but it is a real difference.
+
+          This is a fine license for a small program. A larger program usually ought to be copyleft; but if you are set on a lax permissive license for one, we recommend the Apache 2.0 license since it protects users from patent treachery.
+
+          ---
+
+          so roughly it feels like MIT is good enough for now, and I can switch to the same license as chocolate doom as this project continues
