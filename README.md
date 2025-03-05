@@ -1,99 +1,67 @@
 # DOOM.rb
 
-A Ruby implementation of the classic DOOM game engine.
+A Ruby implementation of the classic DOOM game engine, focusing on vanilla accuracy inspired by Chocolate DOOM.
 
-For WAD files, use [Freedoom](https://freedoom.github.io/).
+[![Ruby Version](https://img.shields.io/badge/ruby-3.0%2B-ruby.svg)](https://www.ruby-lang.org/)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-## Overview
-
-DOOM.rb aims to recreate the core mechanics of the original DOOM game using Ruby, with a focus on vanilla accuracy inspired by Chocolate DOOM. This project serves as both a learning exercise in game development and a demonstration of Ruby's capabilities for graphics and game programming.
-
-## Current Features
-
-- Basic 3D rendering engine with raycasting
-- Simple map representation
-- Player movement with collision detection and wall sliding
-- Noclip mode (toggle with N key)
-- Minimap in bottom-right corner
-- FPS display in top-left corner
-- Clean, modular architecture following SOLID principles
-- Comprehensive logging system with rotation
-- Test-driven development with real test objects
-
-## In Progress
-
-- Studying original DOOM and Chocolate DOOM source code
-- Planning feature parity with vanilla DOOM
-
-## Planned Features
-
-- Developer console for commands and cheats
-- Texture mapping for walls
-- WAD file loading
-- Enemies and weapons
-- Sound effects and music
-- Advanced lighting
-- Multiplayer support
-
-## Getting Started
-
-### Prerequisites
-
-- Ruby 3.0+
-- Required gems (see Gemfile)
-
-### Installation
+## Quick Start
 
 ```bash
 git clone https://github.com/ZachBeta/DOOM.rb.git
 cd DOOM.rb
 bundle install
-```
 
-### Installing Freedoom
+# Install Freedoom WAD files
+cd levels && curl -L https://github.com/freedoom/freedoom/releases/download/v0.13.0/freedoom-0.13.0.zip -O && unzip freedoom-0.13.0.zip
 
-1. Download Freedoom from [freedoom.github.io](https://freedoom.github.io/)
-2. Extract the downloaded archive into the `levels` directory:
-```bash
-cd levels
-unzip /path/to/freedoom-0.13.0.zip
-```
-
-### Running the Game
-
-```bash
+# Run the game
 rake doom
 ```
 
-### Running Tests
+## Features
+
+✅ **Current**
+- 3D rendering engine with raycasting
+- Player movement with collision detection
+- Noclip mode (N key)
+- Minimap and FPS display
+- Test-driven development
+
+🚧 **In Progress**
+- Vanilla DOOM feature parity
+- Original DOOM source code study
+
+🎯 **Planned**
+- WAD file loading
+- Texture mapping
+- Enemies and weapons
+- Sound and music
+- Multiplayer support
+
+## Development
 
 ```bash
-rake test
+rake test  # Run tests
 ```
 
-## Project Structure
+### Project Structure
+```
+lib/doom/      # Core game components
+├── renderer/  # 3D rendering system
+├── player/    # Player mechanics
+├── map/       # Level handling
+├── input/     # Input handling
+└── logging/   # Logging system
+```
 
-- `lib/` - Core game engine code
-  - `lib/doom/` - Main game components
-  - `lib/doom/renderer/` - Rendering system
-  - `lib/doom/player/` - Player mechanics
-  - `lib/doom/map/` - Map and level handling
-  - `lib/doom/input/` - Input handling
-  - `lib/doom/logging/` - Logging system
-- `test/` - Test files with real test objects
-- `assets/` - Game assets (textures, sounds, etc.)
-- `levels/` - WAD files and level data
-- `.cursor/` - Project tooling and guidelines
+## Credits
 
-## Contributing
+- Based on [can-it-run-doom](https://github.com/zvolchak/can-it-run-doom)
+- Uses [Freedoom](https://freedoom.github.io/) WAD files
+- Original DOOM by id Software
+- Chocolate Doom
+- The doom source port community
+- The Doom Slayer for ripping and tearing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Acknowledgments
-
-- id Software for creating the original DOOM
-- The Ruby community for their excellent libraries and tools 
+[MIT License](LICENSE) 
