@@ -30,12 +30,13 @@
   - Improved test design using real test objects
   - Added window closing with cmd+w and esc
 
-## Next
-- [ ] Logging Improvements
-  - Move verbose logging to separate file
-  - Implement log levels for better cursor context
-  - Update cursor rules accordingly
+- [x] Logging Improvements
+  - Moved verbose logging to separate file
+  - Implemented log levels for better cursor context
+  - Added log rotation to prevent large files
+  - Updated logging across game components
 
+## Next
 - [ ] Testing & Quality
   - Add more tests to improve coverage
   - Create demo system for replaying gameplay

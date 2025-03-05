@@ -1,11 +1,14 @@
 require 'fileutils'
+require 'logger'
 
 module Doom
   class LogManager
+    MAX_LOG_SIZE = 1024 * 1024 # 1MB
+    LOG_SHIFTS = 5 # Keep 5 rotated files
+
     def initialize
       FileUtils.mkdir_p('logs')
-      @game_log = File.open('logs/game.log', 'a')
-      @debug_log = File.open('logs/debug.log', 'a')
+      setup_loggers
     end
 
     def write(message, level)
@@ -14,22 +17,40 @@ module Doom
       
       case level
       when :debug
-        @debug_log.puts(formatted_message)
-        @debug_log.flush
+        @debug_log.send(level, message)
+      when :verbose
+        @verbose_log.debug(message)
       else
-        @game_log.puts(formatted_message)
-        @game_log.flush
+        @game_log.send(level, message)
       end
     end
 
     def close
-      @game_log.close
-      @debug_log.close
+      [@game_log, @debug_log, @verbose_log].each(&:close)
+    end
+
+    private
+
+    def setup_loggers
+      @game_log = ::Logger.new('logs/game.log', LOG_SHIFTS, MAX_LOG_SIZE)
+      @debug_log = ::Logger.new('logs/debug.log', LOG_SHIFTS, MAX_LOG_SIZE)
+      @verbose_log = ::Logger.new('logs/verbose.log', LOG_SHIFTS, MAX_LOG_SIZE)
+
+      setup_logger_formatting(@game_log)
+      setup_logger_formatting(@debug_log)
+      setup_logger_formatting(@verbose_log)
+    end
+
+    def setup_logger_formatting(logger)
+      logger.formatter = proc do |severity, datetime, progname, msg|
+        "[#{datetime.strftime('%Y-%m-%d %H:%M:%S.%L')}] [#{severity}] #{msg}\n"
+      end
     end
   end
 
   class Logger
     LEVELS = {
+      verbose: -1, # More detailed than debug
       debug: 0,
       info: 1,
       warn: 2,
@@ -41,6 +62,10 @@ module Doom
       @level = LEVELS.fetch(level, 1)
       @output = output
       @log_manager = LogManager.new
+    end
+
+    def verbose(message)
+      log(message, :verbose)
     end
 
     def debug(message)
@@ -66,15 +91,19 @@ module Doom
     private
 
     def log(message, level)
-      return unless LEVELS[level] >= @level
+      return unless should_log?(level)
 
       @log_manager.write(message, level)
       
-      # Only show non-debug messages in console
-      if level != :debug
+      # Only show non-debug/verbose messages in console
+      if level != :debug && level != :verbose
         timestamp = Time.now.strftime('%Y-%m-%d %H:%M:%S.%L')
         @output.puts("[#{timestamp}] [#{level.upcase}] #{message}")
       end
+    end
+
+    def should_log?(level)
+      LEVELS[level] >= @level
     end
   end
 end 

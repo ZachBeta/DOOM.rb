@@ -38,8 +38,9 @@ module Doom
       @input_handler.handle_input(self, delta_time)
       @player.update(delta_time)
       
-      @logger.debug("Player position: #{@player.position}, direction: #{@player.direction}")
-      @logger.debug("Noclip mode: #{@player.noclip_mode}")
+      @logger.verbose("Frame delta: #{delta_time}")
+      @logger.verbose("Player position: #{@player.position}, direction: #{@player.direction}")
+      @logger.verbose("Noclip mode: #{@player.noclip_mode}")
     end
 
     def draw
