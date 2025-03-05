@@ -36,13 +36,11 @@
   - Implemented log levels for better cursor context
   - Added log rotation to prevent large files
   - Updated logging across game components
+  
+- [x] Performance & Display
+  - Show frame rate (FPS) in top left display
 
 ## Next
-- [ ] Performance & Display
-  - Show frame rate (FPS) in top left display
-  - Profile and optimize rendering loop
-  - Add performance monitoring tools
-
 - [ ] Developer Tools
   - Implement console for commands and cheats
   - Create demo system for replaying gameplay
@@ -66,3 +64,7 @@
   - Implement advanced lighting
   - Add multiplayer support
   - Create level editor 
+
+- [ ] Performance & Display
+  - Profile and optimize rendering loop
+  - Add performance monitoring tools
