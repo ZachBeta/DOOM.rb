@@ -117,7 +117,7 @@
       "patterns": [
         {
           "pattern": "wad.*\\.rb$|parser.*\\.rb$",
-          "instructions": "Implement WAD file parsing using a clean, modular approach. Separate concerns between file I/O, data structure parsing, and game object creation. Use streaming approaches for large files."
+          "instructions": "Follow vanilla DOOM WAD format specifications. Implement WAD file parsing using a clean, modular approach. Separate concerns between file I/O, data structure parsing, and game object creation. Use streaming approaches for large files."
         }
       ]
     },
@@ -158,6 +158,16 @@
         {
           "pattern": "console.*\\.rb$|command.*\\.rb$",
           "instructions": "Implement developer console using command pattern. Keep console rendering efficient. Support command history, auto-completion, and clear error handling. Make console toggleable and non-intrusive."
+        }
+      ]
+    },
+    {
+      "name": "DOOM Accuracy",
+      "description": "Maintain vanilla DOOM accuracy",
+      "patterns": [
+        {
+          "pattern": "lib/doom/.*\\.rb$",
+          "instructions": "Follow vanilla DOOM behavior as documented in Chocolate DOOM source code. Focus on accurate recreation of original game mechanics. Document any intentional deviations from vanilla behavior."
         }
       ]
     }

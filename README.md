@@ -2,33 +2,38 @@
 
 A Ruby implementation of the classic DOOM game engine.
 
-https://doomwiki.org/wiki/Can_it_run_Doom%3F
-Use https://freedoom.github.io/ wads
+For WAD files, use [Freedoom](https://freedoom.github.io/).
 
 ## Overview
 
-DOOM.rb aims to recreate the core mechanics of the original DOOM game using Ruby. This project serves as both a learning exercise in game development and a demonstration of Ruby's capabilities for graphics and game programming.
+DOOM.rb aims to recreate the core mechanics of the original DOOM game using Ruby, with a focus on vanilla accuracy inspired by Chocolate DOOM. This project serves as both a learning exercise in game development and a demonstration of Ruby's capabilities for graphics and game programming.
 
 ## Current Features
 
 - Basic 3D rendering engine with raycasting
 - Simple map representation
-- Player movement controls with collision detection
-- Wall sliding collision detection
+- Player movement with collision detection and wall sliding
 - Noclip mode (toggle with N key)
 - Minimap in bottom-right corner
+- FPS display in top-left corner
 - Clean, modular architecture following SOLID principles
 - Comprehensive logging system with rotation
 - Test-driven development with real test objects
 
+## In Progress
+
+- Studying original DOOM and Chocolate DOOM source code
+- Planning feature parity with vanilla DOOM
+
 ## Planned Features
 
-- Performance monitoring and FPS display
 - Developer console for commands and cheats
 - Texture mapping for walls
-- Level loading from WAD files
-- Enemy AI and combat
+- WAD file loading
+- Enemies and weapons
 - Sound effects and music
+- Advanced lighting
+- Multiplayer support
 
 ## Getting Started
 
