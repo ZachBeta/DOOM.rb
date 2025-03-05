@@ -12,6 +12,8 @@
 - [x] Added player movement controls
 
 ## Now
+- [ ] swap out rspec for minitest - the less magic and metaprogramming the better
+- [ ] controls are inverted for strafing
 - [ ] Add collision detection with walls
 - [ ] Implement texture mapping for walls
 - [ ] Add simple HUD elements
