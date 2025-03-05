@@ -36,7 +36,7 @@ DOOM.rb aims to recreate the core mechanics of the original DOOM game using Ruby
 ### Installation
 
 ```bash
-git clone https://github.com/yourusername/DOOM.rb.git
+git clone https://github.com/ZachBeta/DOOM.rb.git
 cd DOOM.rb
 bundle install
 ```
