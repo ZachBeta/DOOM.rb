@@ -21,18 +21,18 @@ rake doom
 
 ## Features
 
-✅ **Current**
+### Current ✅
 - 3D rendering engine with raycasting
 - Player movement with collision detection
 - Noclip mode (N key)
 - Minimap and FPS display
 - Test-driven development
 
-🚧 **In Progress**
+### In Progress 🚧
 - Vanilla DOOM feature parity
 - Original DOOM source code study
 
-🎯 **Planned**
+### Planned 🎯
 - WAD file loading
 - Texture mapping
 - Enemies and weapons
@@ -46,6 +46,7 @@ rake test  # Run tests
 ```
 
 ### Project Structure
+
 ```
 lib/doom/      # Core game components
 ├── renderer/  # 3D rendering system
@@ -59,9 +60,12 @@ lib/doom/      # Core game components
 
 - Based on [can-it-run-doom](https://github.com/zvolchak/can-it-run-doom)
 - Uses [Freedoom](https://freedoom.github.io/) WAD files
+- [Can it run Doom?](https://doomwiki.org/wiki/Can_it_run_Doom%3F)
 - Original DOOM by id Software
 - Chocolate Doom
 - The doom source port community
 - The Doom Slayer for ripping and tearing
+
+## License
 
 [MIT License](LICENSE) 
