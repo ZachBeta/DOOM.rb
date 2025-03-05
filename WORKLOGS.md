@@ -19,6 +19,7 @@
   - Added collision detection with walls
   - Implemented noclip mode (toggle with N key)
   - Improved player movement with wall sliding
+  - Added minimap to bottom-right corner with player position and direction
 
 - [x] Architecture & Code Quality
   - Refactored for better LLM interaction with small, focused classes
@@ -42,7 +43,6 @@
   - Create demo system for replaying gameplay
 
 - [ ] Features
-  - Add HUD elements and minimap - use a minimap on bottom of screen rather than the toggle map mode for now
   - Implement console for commands and cheats
   - Implement texture mapping for walls
   - Create gem structure (local only)

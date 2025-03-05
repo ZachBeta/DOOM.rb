@@ -9,11 +9,13 @@ module Doom
       @height = window.height
       @wall_renderer = WallRenderer.new(window, @map)
       @background_renderer = BackgroundRenderer.new(window)
+      @minimap_renderer = MinimapRenderer.new(window, @map)
     end
 
     def render(player)
       @background_renderer.render
       @wall_renderer.render(player, @width, @height)
+      @minimap_renderer.render(player)
     end
   end
 
@@ -198,6 +200,78 @@ module Doom
       @side = side
       @ray_dir_x = ray_dir_x
       @ray_dir_y = ray_dir_y
+    end
+  end
+
+  class MinimapRenderer
+    MINIMAP_SIZE = 150
+    MINIMAP_MARGIN = 10
+    PLAYER_SIZE = 4
+    WALL_COLOR = Gosu::Color.new(255, 200, 200, 200)
+    EMPTY_COLOR = Gosu::Color.new(255, 50, 50, 50)
+    PLAYER_COLOR = Gosu::Color::RED
+
+    def initialize(window, map)
+      @window = window
+      @map = map
+      @cell_size = MINIMAP_SIZE / [@map.width, @map.height].max
+    end
+
+    def render(player)
+      draw_background
+      draw_walls
+      draw_player(player)
+    end
+
+    private
+
+    def draw_background
+      x = @window.width - MINIMAP_SIZE - MINIMAP_MARGIN
+      y = @window.height - MINIMAP_SIZE - MINIMAP_MARGIN
+      @window.draw_quad(
+        x, y, EMPTY_COLOR,
+        x + MINIMAP_SIZE, y, EMPTY_COLOR,
+        x, y + MINIMAP_SIZE, EMPTY_COLOR,
+        x + MINIMAP_SIZE, y + MINIMAP_SIZE, EMPTY_COLOR
+      )
+    end
+
+    def draw_walls
+      @map.height.times do |y|
+        @map.width.times do |x|
+          if @map.wall_at?(x, y)
+            draw_cell(x, y, WALL_COLOR)
+          end
+        end
+      end
+    end
+
+    def draw_cell(x, y, color)
+      base_x = @window.width - MINIMAP_SIZE - MINIMAP_MARGIN + (x * @cell_size)
+      base_y = @window.height - MINIMAP_SIZE - MINIMAP_MARGIN + (y * @cell_size)
+      @window.draw_quad(
+        base_x, base_y, color,
+        base_x + @cell_size, base_y, color,
+        base_x, base_y + @cell_size, color,
+        base_x + @cell_size, base_y + @cell_size, color
+      )
+    end
+
+    def draw_player(player)
+      x = @window.width - MINIMAP_SIZE - MINIMAP_MARGIN + (player.position[0] * @cell_size)
+      y = @window.height - MINIMAP_SIZE - MINIMAP_MARGIN + (player.position[1] * @cell_size)
+      
+      @window.draw_quad(
+        x - PLAYER_SIZE, y - PLAYER_SIZE, PLAYER_COLOR,
+        x + PLAYER_SIZE, y - PLAYER_SIZE, PLAYER_COLOR,
+        x - PLAYER_SIZE, y + PLAYER_SIZE, PLAYER_COLOR,
+        x + PLAYER_SIZE, y + PLAYER_SIZE, PLAYER_COLOR
+      )
+      
+      # Draw player direction line
+      dir_x = x + player.direction[0] * PLAYER_SIZE * 2
+      dir_y = y + player.direction[1] * PLAYER_SIZE * 2
+      @window.draw_line(x, y, PLAYER_COLOR, dir_x, dir_y, PLAYER_COLOR)
     end
   end
 end 
