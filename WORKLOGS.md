@@ -41,11 +41,36 @@
   - Show frame rate (FPS) in top left display
 
 ## Next
+* [ ] Feature list
+    - Document feature parity goals with Chocolate Doom first
+
 - [ ] Graphics & Engine
   - Research open source DOOM ports for compatibility
-    - Analyze https://github.com/id-Software/DOOM (GPL licensed)
-    - Consider GPL licensing implications
-    - Document feature parity goals
+    - Study Chocolate Doom for vanilla accuracy
+    - Analyze PrBoom+ for modern features balance
+    - Review ZDoom for advanced features
+    - Consider GPL licensing implications when code is currently MIT licensed
+      - https://www.gnu.org/licenses/license-list.en.html
+          X11 License (#X11License)
+          This is a lax permissive non-copyleft free software license, compatible with the GNU GPL. Older versions of XFree86 used the same license, and some of the current variants of XFree86 also do. Later versions of XFree86 are distributed under the XFree86 1.1 license.
+
+          Some people call this license “the MIT License,” but that term is misleading, since MIT has used many licenses for software. It is also ambiguous, since the same people also call the Expat license “the MIT License,” failing to distinguish them. We recommend not using the term “MIT License.”
+
+          The difference between the X11 license and the Expat license is that the X11 license contains an extra paragraph about using the X Consortium's name. It is not a big deal, but it is a real difference.
+
+          This is a fine license for a small program. A larger program usually ought to be copyleft; but if you are set on a lax permissive license for one, we recommend the Apache 2.0 license since it protects users from patent treachery.
+
+          ---
+
+          so roughly it feels like MIT is good enough for now
+    - now considering how to LLM my way thru
+        https://github.com/id-Software/DOOM
+        https://github.com/chocolate-doom/chocolate-doom
+        which are both minimalist, and likely NOT
+        https://github.com/ZDoom/gzdoom
+        https://github.com/TorrSamaho/zandronum
+        which are more about modern playability and modding, and adding modern features, which is out of scope, and likely not worth pursuing given this is NOT inteded to be actively played, in the same way you might play doom in a PDF, but not in earnest, unless you like tank controls
+
 
 - [ ] Developer Tools
   - Implement console for commands and cheats
