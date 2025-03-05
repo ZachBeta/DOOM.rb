@@ -47,7 +47,7 @@
       "patterns": [
         {
           "pattern": "WORKLOGS\\.md$",
-          "instructions": "Before marking any task as completed in WORKLOGS.md, ensure that: 1) All automated tests are passing (`rake test`), 2) A manual test has been performed (`rake doom`) to verify the feature works as expected, 3) The code follows the project's style guidelines, and 4) Review and update cursor rules to reflect any new patterns, practices, or lessons learned from the completed work. Only after all these steps are complete should WORKLOGS.md be updated."
+          "instructions": "Before marking any task as completed in WORKLOGS.md, follow these steps in order: 1) All automated tests must pass (`rake test`), 2) The code must follow project style guidelines, 3) Review and update cursor rules to reflect any new patterns or practices, and 4) FINAL STEP: Manually test the feature with `rake doom` to verify it works as expected in the actual game. Only after successful completion of ALL steps, with special emphasis on the final manual verification, should WORKLOGS.md be updated."
         }
       ]
     },
