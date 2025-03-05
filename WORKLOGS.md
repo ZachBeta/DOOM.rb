@@ -32,6 +32,7 @@
 
 ## Next
 - [ ] allow cmd+w to close the window for easier dev loop
+- [ ] add more tests to improve coverage
 - [ ] Implement texture mapping for walls
 - [ ] Add simple HUD elements
 - [ ] Create demo system for replaying gameplay (for testing)
