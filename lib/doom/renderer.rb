@@ -2,9 +2,9 @@ require_relative 'map'
 
 module Doom
   class Renderer
-    def initialize(window)
+    def initialize(window, map)
       @window = window
-      @map = Map.new
+      @map = map
       @width = window.width
       @height = window.height
       @wall_renderer = WallRenderer.new(window, @map)

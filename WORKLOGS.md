@@ -22,12 +22,14 @@
   - Applied Single Responsibility Principle throughout the codebase
 - [x] Updated cursor rules with project-specific guidelines for code quality and upcoming features
 - [x] Implemented self-healing cursor rules that evolve with the project
+- [x] Added collision detection with walls
+- [x] Implemented noclip mode to bypass collision detection (toggle with N key)
+- [x] Fixed collision detection bug with Vector objects
 
 ## In Progress
 - [ ] Improve logging to feed logs into cursor context while debugging - not too noisy tho, this will blow up the context window
 
 # Next
-- [ ] Add collision detection with walls
 - [ ] Implement texture mapping for walls
 - [ ] Add simple HUD elements
 - [ ] Create demo system for replaying gameplay (for testing)
@@ -35,6 +37,7 @@
 - [ ] Add HUD with player stats
 
 ## Soon
+- [ ] console
 * [ ] make a gem, don't bother publishing, just keep it local for now
 - [ ] Implement WAD file parser
 - [ ] Add enemies and weapons

@@ -1,6 +1,7 @@
 require 'gosu'
 require_relative 'renderer'
 require_relative 'player'
+require_relative 'map'
 require_relative 'logger'
 require_relative 'input_handler'
 
@@ -17,10 +18,12 @@ module Doom
       @logger = Logger.new(:debug)
       @logger.info("Initializing DOOM.rb")
       
-      @renderer = Renderer.new(self)
-      @player = Player.new
+      @map = Map.new
+      @player = Player.new(@map)
+      @renderer = Renderer.new(self, @map)
       @input_handler = InputHandler.new(@player)
       @game_clock = GameClock.new
+      @font = Gosu::Font.new(20)
       
       @logger.info("Game initialized successfully")
     end
@@ -36,15 +39,28 @@ module Doom
       @player.update(delta_time)
       
       @logger.debug("Player position: #{@player.position}, direction: #{@player.direction}")
+      @logger.debug("Noclip mode: #{@player.noclip_mode}")
     end
 
     def draw
       @renderer.render(@player)
+      draw_hud
     end
 
     def button_down(id)
       close if id == Gosu::KB_ESCAPE
       @logger.info("Game closing") if id == Gosu::KB_ESCAPE
+    end
+    
+    private
+    
+    def draw_hud
+      noclip_text = "NOCLIP: #{@player.noclip_mode ? 'ON' : 'OFF'} (Press N to toggle)"
+      noclip_color = @player.noclip_mode ? Gosu::Color::GREEN : Gosu::Color::WHITE
+      @font.draw_text(noclip_text, 10, 10, 0, 1, 1, noclip_color)
+      
+      pos_text = "POS: (#{@player.position[0].round(2)}, #{@player.position[1].round(2)})"
+      @font.draw_text(pos_text, 10, 30, 0, 1, 1, Gosu::Color::WHITE)
     end
   end
 

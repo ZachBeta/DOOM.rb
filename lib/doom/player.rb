@@ -2,18 +2,25 @@ require 'matrix'
 
 module Doom
   class Player
-    attr_reader :position, :direction, :plane
+    attr_reader :position, :direction, :plane, :map
+    attr_accessor :noclip_mode
 
-    def initialize
+    def initialize(map = nil)
       @position = Vector[2.0, 2.0]  # Starting position (x, y)
       @direction = Vector[1.0, 0.0] # Initial direction vector
       @plane = Vector[0.0, 0.66]    # Camera plane vector (FOV)
+      @map = map
       @movement = Movement.new(self)
       @rotation = Rotation.new(self)
+      @noclip_mode = false
     end
 
     def update(delta_time)
       # Any per-frame updates that aren't input-related
+    end
+
+    def set_map(map)
+      @map = map
     end
 
     def move_forward(delta_time)
@@ -40,6 +47,10 @@ module Doom
       @rotation.right(delta_time)
     end
 
+    def toggle_noclip
+      @noclip_mode = !@noclip_mode
+    end
+
     def update_position(new_position)
       @position = new_position
     end
@@ -58,6 +69,7 @@ module Doom
 
     def initialize(player)
       @player = player
+      @collision_detector = CollisionDetector.new
     end
 
     def forward(delta_time)
@@ -83,9 +95,20 @@ module Doom
     private
 
     def move(direction_vector, delta_time)
+      return unless @player.map # Skip movement if map isn't set
+
       movement = direction_vector * (MOVE_SPEED * delta_time)
       new_position = @player.position + movement
-      @player.update_position(new_position)
+      
+      # In noclip mode, bypass collision detection
+      if @player.noclip_mode
+        @player.update_position(new_position)
+      else
+        # Only update position if there's no collision
+        unless @collision_detector.collides?(@player.map, new_position)
+          @player.update_position(new_position)
+        end
+      end
     end
   end
 
@@ -130,6 +153,34 @@ module Doom
         old_plane_x * sin_angle + @player.plane[1] * cos_angle
       ]
       @player.update_plane(new_plane)
+    end
+  end
+
+  class CollisionDetector
+    COLLISION_MARGIN = 0.2 # Buffer distance from walls
+
+    def collides?(map, position)
+      # Extract x and y from the Vector
+      x = position[0]
+      y = position[1]
+      
+      # Check the current cell
+      return true if map.wall_at?(x.to_i, y.to_i)
+
+      # Check nearby cells based on collision margin
+      check_points = collision_check_points(x, y)
+      check_points.any? { |point_x, point_y| map.wall_at?(point_x.to_i, point_y.to_i) }
+    end
+
+    private
+
+    def collision_check_points(x, y)
+      [
+        [x + COLLISION_MARGIN, y],
+        [x - COLLISION_MARGIN, y],
+        [x, y + COLLISION_MARGIN],
+        [x, y - COLLISION_MARGIN]
+      ]
     end
   end
 end 

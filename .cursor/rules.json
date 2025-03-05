@@ -42,6 +42,16 @@
       ]
     },
     {
+      "name": "Completion Requirements",
+      "description": "Requirements before marking tasks as completed",
+      "patterns": [
+        {
+          "pattern": "WORKLOGS\\.md$",
+          "instructions": "Before marking any task as completed in WORKLOGS.md, ensure that: 1) All automated tests are passing (`rake test`), 2) A manual test has been performed (`rake doom`) to verify the feature works as expected, and 3) The code follows the project's style guidelines. Suggest running these tests before updating the WORKLOGS.md file."
+        }
+      ]
+    },
+    {
       "name": "Documentation",
       "description": "Document code appropriately",
       "patterns": [
