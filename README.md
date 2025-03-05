@@ -2,6 +2,9 @@
 
 A Ruby implementation of the classic DOOM game engine.
 
+https://doomwiki.org/wiki/Can_it_run_Doom%3F
+Use https://freedoom.github.io/ wads
+
 ## Overview
 
 DOOM.rb aims to recreate the core mechanics of the original DOOM game using Ruby. This project serves as both a learning exercise in game development and a demonstration of Ruby's capabilities for graphics and game programming.
