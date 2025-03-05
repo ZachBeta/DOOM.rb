@@ -10,10 +10,12 @@
 - [x] Created simple map representation
 - [x] Implemented basic raycasting renderer
 - [x] Added player movement controls
+- [x] Fixed inverted strafing controls
 
 ## Now
 - [ ] swap out rspec for minitest - the less magic and metaprogramming the better
 - [ ] controls are inverted for strafing
+- [ ] improve logging to be able to feed logs into cursor context while debugging and iterating
 - [ ] Add collision detection with walls
 - [ ] Implement texture mapping for walls
 - [ ] Add simple HUD elements

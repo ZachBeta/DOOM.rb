@@ -27,13 +27,13 @@ module Doom
 
     def strafe_left(delta_time)
       # Move perpendicular to direction
-      strafe_vector = Vector[-@direction[1], @direction[0]]
+      strafe_vector = Vector[@direction[1], -@direction[0]]
       move(strafe_vector, delta_time)
     end
 
     def strafe_right(delta_time)
       # Move perpendicular to direction (opposite of strafe_left)
-      strafe_vector = Vector[@direction[1], -@direction[0]]
+      strafe_vector = Vector[-@direction[1], @direction[0]]
       move(strafe_vector, delta_time)
     end
 
