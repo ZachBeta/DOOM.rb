@@ -2,6 +2,7 @@ require 'gosu'
 require_relative 'renderer'
 require_relative 'player'
 require_relative 'logger'
+require_relative 'input_handler'
 
 module Doom
   class Game < Gosu::Window
@@ -18,7 +19,8 @@ module Doom
       
       @renderer = Renderer.new(self)
       @player = Player.new
-      @last_time = Gosu.milliseconds
+      @input_handler = InputHandler.new(@player)
+      @game_clock = GameClock.new
       
       @logger.info("Game initialized successfully")
     end
@@ -29,11 +31,8 @@ module Doom
     end
 
     def update
-      current_time = Gosu.milliseconds
-      delta_time = (current_time - @last_time) / 1000.0
-      @last_time = current_time
-
-      handle_input(delta_time)
+      delta_time = @game_clock.tick
+      @input_handler.handle_input(self, delta_time)
       @player.update(delta_time)
       
       @logger.debug("Player position: #{@player.position}, direction: #{@player.direction}")
@@ -47,16 +46,18 @@ module Doom
       close if id == Gosu::KB_ESCAPE
       @logger.info("Game closing") if id == Gosu::KB_ESCAPE
     end
+  end
 
-    private
+  class GameClock
+    def initialize
+      @last_time = Gosu.milliseconds
+    end
 
-    def handle_input(delta_time)
-      @player.move_forward(delta_time) if Gosu.button_down?(Gosu::KB_W)
-      @player.move_backward(delta_time) if Gosu.button_down?(Gosu::KB_S)
-      @player.strafe_left(delta_time) if Gosu.button_down?(Gosu::KB_A)
-      @player.strafe_right(delta_time) if Gosu.button_down?(Gosu::KB_D)
-      @player.rotate_left(delta_time) if Gosu.button_down?(Gosu::KB_LEFT)
-      @player.rotate_right(delta_time) if Gosu.button_down?(Gosu::KB_RIGHT)
+    def tick
+      current_time = Gosu.milliseconds
+      delta_time = (current_time - @last_time) / 1000.0
+      @last_time = current_time
+      delta_time
     end
   end
 end 
