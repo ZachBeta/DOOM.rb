@@ -50,6 +50,15 @@ cd DOOM.rb
 bundle install
 ```
 
+### Installing Freedoom
+
+1. Download Freedoom from [freedoom.github.io](https://freedoom.github.io/)
+2. Extract the downloaded archive into the `levels` directory:
+```bash
+cd levels
+unzip /path/to/freedoom-0.13.0.zip
+```
+
 ### Running the Game
 
 ```bash
