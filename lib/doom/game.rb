@@ -63,25 +63,46 @@ module Doom
     private
 
     def draw_hud
+      # FPS Display
+      fps_text = "FPS: #{@game_clock.fps}"
+      @font.draw_text(fps_text, 10, 10, 0, 1, 1, Gosu::Color::YELLOW)
+
+      # Noclip Status
       noclip_text = "NOCLIP: #{@player.noclip_mode ? 'ON' : 'OFF'} (Press N to toggle)"
       noclip_color = @player.noclip_mode ? Gosu::Color::GREEN : Gosu::Color::WHITE
-      @font.draw_text(noclip_text, 10, 10, 0, 1, 1, noclip_color)
+      @font.draw_text(noclip_text, 10, 30, 0, 1, 1, noclip_color)
 
+      # Position Display
       pos_text = "POS: (#{@player.position[0].round(2)}, #{@player.position[1].round(2)})"
-      @font.draw_text(pos_text, 10, 30, 0, 1, 1, Gosu::Color::WHITE)
+      @font.draw_text(pos_text, 10, 50, 0, 1, 1, Gosu::Color::WHITE)
     end
   end
 
   class GameClock
     def initialize
       @last_time = Gosu.milliseconds
+      @frames = 0
+      @fps = 0
+      @last_fps_update = @last_time
+      @logger = Logger.new(:debug)
     end
 
     def tick
       current_time = Gosu.milliseconds
       delta_time = (current_time - @last_time) / 1000.0
       @last_time = current_time
+
+      @frames += 1
+      if current_time - @last_fps_update >= 1000
+        @fps = @frames
+        @logger.info("FPS: #{@fps}")
+        @frames = 0
+        @last_fps_update = current_time
+      end
+
       delta_time
     end
+
+    attr_reader :fps
   end
 end
