@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "rules": [
+    {
+      "name": "Ruby Style Guide",
+      "description": "Follow Sandi Metz's POODR principles for Ruby code",
+      "patterns": [
+        {
+          "pattern": "\\.rb$",
+          "instructions": "Write Ruby code following Practical Object-Oriented Design principles by Sandi Metz. Focus on single responsibility, dependency injection, and composition over inheritance."
+        }
+      ]
+    },
+    {
+      "name": "Minimal Token Usage",
+      "description": "Keep explanations concise to save tokens",
+      "patterns": [
+        {
+          "pattern": ".*",
+          "instructions": "Keep explanations and follow-up questions to a minimum to save tokens. Focus on delivering working code with just enough context."
+        }
+      ]
+    },
+    {
+      "name": "Test-Driven Development",
+      "description": "Encourage TDD practices",
+      "patterns": [
+        {
+          "pattern": "_spec\\.rb$|_test\\.rb$",
+          "instructions": "Write tests that focus on behavior rather than implementation details. Follow the Arrange-Act-Assert pattern."
+        }
+      ]
+    },
+    {
+      "name": "Documentation",
+      "description": "Document code appropriately",
+      "patterns": [
+        {
+          "pattern": "\\.rb$|\\.md$",
+          "instructions": "Document public interfaces clearly but avoid excessive comments in implementation code. Let well-named methods and variables speak for themselves."
+        }
+      ]
+    }
+  ]
+} 
