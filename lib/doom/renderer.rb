@@ -2,6 +2,7 @@
 
 require 'gosu'
 require_relative 'map'
+require_relative 'logger'
 
 module Doom
   class Renderer
@@ -214,20 +215,30 @@ module Doom
     MINIMAP_SIZE = 150
     MINIMAP_MARGIN = 10
     PLAYER_SIZE = 4
+    ARROW_SIZE = 8
     WALL_COLOR = Gosu::Color.new(255, 200, 200, 200)
     EMPTY_COLOR = Gosu::Color.new(255, 50, 50, 50)
     PLAYER_COLOR = Gosu::Color::RED
+    ARROW_COLOR = Gosu::Color::YELLOW
 
     def initialize(window, map)
       @window = window
       @map = map
       @cell_size = MINIMAP_SIZE / [@map.width, @map.height].max
+      @font = Gosu::Font.new(14)
+      @logger = Logger.instance
     end
 
     def render(player)
       draw_background
       draw_walls
       draw_player(player)
+      draw_rotation_angle(player)
+
+      @logger.verbose("Minimap rendered at (#{@window.width - MINIMAP_SIZE - MINIMAP_MARGIN}, #{@window.height - MINIMAP_SIZE - MINIMAP_MARGIN})")
+      @logger.verbose("Player position on minimap: (#{player.position[0] * @cell_size}, #{player.position[1] * @cell_size})")
+      @logger.verbose("Player rotation: #{(Math.atan2(player.direction[1],
+                                                      player.direction[0]) * 180 / Math::PI).round}°")
     end
 
     private
@@ -266,17 +277,39 @@ module Doom
       x = @window.width - MINIMAP_SIZE - MINIMAP_MARGIN + (player.position[0] * @cell_size)
       y = @window.height - MINIMAP_SIZE - MINIMAP_MARGIN + (player.position[1] * @cell_size)
 
+      # Draw player dot
       @window.draw_quad(
-        x - PLAYER_SIZE, y - PLAYER_SIZE, PLAYER_COLOR,
-        x + PLAYER_SIZE, y - PLAYER_SIZE, PLAYER_COLOR,
-        x - PLAYER_SIZE, y + PLAYER_SIZE, PLAYER_COLOR,
-        x + PLAYER_SIZE, y + PLAYER_SIZE, PLAYER_COLOR
+        x - (PLAYER_SIZE / 2), y - (PLAYER_SIZE / 2), PLAYER_COLOR,
+        x + (PLAYER_SIZE / 2), y - (PLAYER_SIZE / 2), PLAYER_COLOR,
+        x - (PLAYER_SIZE / 2), y + (PLAYER_SIZE / 2), PLAYER_COLOR,
+        x + (PLAYER_SIZE / 2), y + (PLAYER_SIZE / 2), PLAYER_COLOR
       )
 
-      # Draw player direction line
-      dir_x = x + (player.direction[0] * PLAYER_SIZE * 2)
-      dir_y = y + (player.direction[1] * PLAYER_SIZE * 2)
-      @window.draw_line(x, y, PLAYER_COLOR, dir_x, dir_y, PLAYER_COLOR)
+      # Draw direction arrow
+      arrow_x = x + (player.direction[0] * ARROW_SIZE)
+      arrow_y = y + (player.direction[1] * ARROW_SIZE)
+
+      # Arrow head points
+      angle = Math.atan2(player.direction[1], player.direction[0])
+      left_x = arrow_x - (Math.cos(angle + (Math::PI / 4)) * (ARROW_SIZE / 2))
+      left_y = arrow_y - (Math.sin(angle + (Math::PI / 4)) * (ARROW_SIZE / 2))
+      right_x = arrow_x - (Math.cos(angle - (Math::PI / 4)) * (ARROW_SIZE / 2))
+      right_y = arrow_y - (Math.sin(angle - (Math::PI / 4)) * (ARROW_SIZE / 2))
+
+      # Draw arrow line
+      @window.draw_line(x, y, ARROW_COLOR, arrow_x, arrow_y, ARROW_COLOR)
+      # Draw arrow head
+      @window.draw_line(arrow_x, arrow_y, ARROW_COLOR, left_x, left_y, ARROW_COLOR)
+      @window.draw_line(arrow_x, arrow_y, ARROW_COLOR, right_x, right_y, ARROW_COLOR)
+    end
+
+    def draw_rotation_angle(player)
+      angle = (Math.atan2(player.direction[1], player.direction[0]) * 180 / Math::PI).round
+      angle = (angle + 360) % 360
+      text = "#{angle}°"
+      x = @window.width - MINIMAP_SIZE - MINIMAP_MARGIN
+      y = @window.height - MINIMAP_SIZE - MINIMAP_MARGIN - 20
+      @font.draw_text(text, x, y, 0, 1, 1, ARROW_COLOR)
     end
   end
 end

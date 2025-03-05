@@ -17,7 +17,7 @@ module Doom
       super(SCREEN_WIDTH, SCREEN_HEIGHT)
       self.caption = TITLE
 
-      @logger = Logger.new(:debug)
+      @logger = Logger.instance
       @logger.info('Initializing DOOM.rb')
 
       @map = Map.new
@@ -84,7 +84,7 @@ module Doom
       @frames = 0
       @fps = 0
       @last_fps_update = @last_time
-      @logger = Logger.new(:debug)
+      @logger = Logger.instance
     end
 
     def tick

@@ -6,7 +6,7 @@ module Doom
   class InputHandler
     def initialize(player)
       @player = player
-      @logger = Logger.new(:debug)
+      @logger = Logger.instance
     end
 
     def handle_input(window, delta_time)

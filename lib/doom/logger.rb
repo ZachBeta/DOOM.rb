@@ -8,8 +8,9 @@ module Doom
     MAX_LOG_SIZE = 1024 * 1024 # 1MB
     LOG_SHIFTS = 5 # Keep 5 rotated files
 
-    def initialize
-      FileUtils.mkdir_p('logs')
+    def initialize(base_dir = 'logs')
+      @base_dir = base_dir
+      FileUtils.mkdir_p(@base_dir)
       setup_loggers
     end
 
@@ -33,9 +34,10 @@ module Doom
     private
 
     def setup_loggers
-      @game_log = ::Logger.new('logs/game.log', LOG_SHIFTS, MAX_LOG_SIZE)
-      @debug_log = ::Logger.new('logs/debug.log', LOG_SHIFTS, MAX_LOG_SIZE)
-      @verbose_log = ::Logger.new('logs/verbose.log', LOG_SHIFTS, MAX_LOG_SIZE)
+      FileUtils.mkdir_p(@base_dir)
+      @game_log = ::Logger.new(File.join(@base_dir, 'game.log'), LOG_SHIFTS, MAX_LOG_SIZE)
+      @debug_log = ::Logger.new(File.join(@base_dir, 'debug.log'), LOG_SHIFTS, MAX_LOG_SIZE)
+      @verbose_log = ::Logger.new(File.join(@base_dir, 'verbose.log'), LOG_SHIFTS, MAX_LOG_SIZE)
 
       setup_logger_formatting(@game_log)
       setup_logger_formatting(@debug_log)
@@ -59,10 +61,22 @@ module Doom
       fatal: 4
     }.freeze
 
-    def initialize(level = :info, output = $stdout)
+    class << self
+      def instance
+        @instance ||= new
+      end
+
+      def configure(level: :info, base_dir: 'logs', env: :development)
+        @instance = new(level, base_dir, env)
+      end
+
+      private :new
+    end
+
+    def initialize(level = :info, base_dir = 'logs', env = :development)
       @level = LEVELS.fetch(level, 1)
-      @output = output
-      @log_manager = LogManager.new
+      @env = env
+      @log_manager = LogManager.new(base_dir)
     end
 
     def verbose(message)
@@ -95,16 +109,14 @@ module Doom
       return unless should_log?(level)
 
       @log_manager.write(message, level)
-
-      # Only show non-debug/verbose messages in console
-      return unless level != :debug && level != :verbose
-
-      timestamp = Time.now.strftime('%Y-%m-%d %H:%M:%S.%L')
-      @output.puts("[#{timestamp}] [#{level.upcase}] #{message}")
     end
 
     def should_log?(level)
       LEVELS[level] >= @level
+    end
+
+    def test?
+      @env == :test
     end
   end
 end
