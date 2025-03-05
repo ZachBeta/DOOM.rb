@@ -22,16 +22,18 @@
   - Applied Single Responsibility Principle throughout the codebase
 
 ## In Progress
-- [ ] Improve logging to feed logs into cursor context while debugging
+- [ ] update cursor rules with any learnings as we go
+- [ ] Improve logging to feed logs into cursor context while debugging - not too noisy tho, this will blow up the context window
+
+# Next
 - [ ] Add collision detection with walls
 - [ ] Implement texture mapping for walls
 - [ ] Add simple HUD elements
 - [ ] Create demo system for replaying gameplay (for testing)
 - [ ] Implement minimap
 - [ ] Add HUD with player stats
-- [ ] update cursor rules with any learnings as we go
 
-## Next
+## Soon
 - [ ] Implement WAD file parser
 - [ ] Add enemies and weapons
 - [ ] Implement sound effects
