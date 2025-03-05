@@ -130,6 +130,16 @@
           "instructions": "Monitor project progress through WORKLOGS.md and README.md. When new features are completed or planned, suggest updates to cursor rules that would help with implementing those features. Ensure rules stay aligned with the current project priorities."
         }
       ]
+    },
+    {
+      "name": "Self-Documenting Code",
+      "description": "Prefer explanatory code and tests over comments",
+      "patterns": [
+        {
+          "pattern": "\\.rb$",
+          "instructions": "Write self-documenting code using clear method and variable names. Use test cases to document behavior. Only add comments for complex algorithms or when the code cannot be made more clear through refactoring. Extract complex logic into well-named methods. Use test cases to demonstrate usage and edge cases."
+        }
+      ]
     }
   ]
 } 

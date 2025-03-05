@@ -20,7 +20,7 @@
   - Refactored Map into smaller classes (Map, Grid)
   - Refactored Game class and extracted InputHandler and GameClock
   - Applied Single Responsibility Principle throughout the codebase
-- [x] Updated cursor rules with project-specific guidelines for code quality and upcoming features
+- [x] Updated cursor rules to prefer explanatory code and tests over comments
 - [x] Implemented self-healing cursor rules that evolve with the project
 - [x] Added collision detection with walls
 - [x] Implemented noclip mode to bypass collision detection (toggle with N key)
@@ -30,8 +30,7 @@
 ## In Progress
 - [ ] player movement - the player can get stuck on walls, make the collision feel more like doom by allowing the player to slide along the wall
 
-# Next
-- [ ] update cursor rules to prefer explanatory code and tests over comments
+## Next
 - [ ] allow cmd+w to close the window for easier dev loop
 - [ ] Implement texture mapping for walls
 - [ ] Add simple HUD elements
@@ -42,7 +41,7 @@
 
 ## Soon
 - [ ] console
-* [ ] make a gem, don't bother publishing, just keep it local for now
+- [ ] make a gem, don't bother publishing, just keep it local for now
 - [ ] Implement WAD file parser
 - [ ] Add enemies and weapons
 - [ ] Implement sound effects

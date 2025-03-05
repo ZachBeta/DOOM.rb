@@ -10,12 +10,15 @@ DOOM.rb aims to recreate the core mechanics of the original DOOM game using Ruby
 
 - Basic 3D rendering engine with raycasting
 - Simple map representation
-- Player movement controls
+- Player movement controls with collision detection
 - Basic window creation and rendering loop
+- Noclip mode (toggle with N key)
+- Test-driven development with real test objects
+- Clean, modular architecture following SOLID principles
 
 ## Planned Features
 
-- Collision detection with walls
+- Wall sliding collision detection
 - Texture mapping for walls
 - HUD and minimap
 - Level loading from WAD files
