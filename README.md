@@ -11,19 +11,20 @@ DOOM.rb aims to recreate the core mechanics of the original DOOM game using Ruby
 - Basic 3D rendering engine with raycasting
 - Simple map representation
 - Player movement controls with collision detection
-- Basic window creation and rendering loop
+- Wall sliding collision detection
 - Noclip mode (toggle with N key)
-- Test-driven development with real test objects
+- Minimap in bottom-right corner
 - Clean, modular architecture following SOLID principles
+- Comprehensive logging system with rotation
+- Test-driven development with real test objects
 
 ## Planned Features
 
-- Wall sliding collision detection
+- Performance monitoring and FPS display
+- Developer console for commands and cheats
 - Texture mapping for walls
-- HUD and minimap
 - Level loading from WAD files
-- Enemy AI
-- Player combat
+- Enemy AI and combat
 - Sound effects and music
 
 ## Getting Started
@@ -56,9 +57,16 @@ rake test
 ## Project Structure
 
 - `lib/` - Core game engine code
-- `test/` - Test files
+  - `lib/doom/` - Main game components
+  - `lib/doom/renderer/` - Rendering system
+  - `lib/doom/player/` - Player mechanics
+  - `lib/doom/map/` - Map and level handling
+  - `lib/doom/input/` - Input handling
+  - `lib/doom/logging/` - Logging system
+- `test/` - Test files with real test objects
 - `assets/` - Game assets (textures, sounds, etc.)
 - `levels/` - WAD files and level data
+- `.cursor/` - Project tooling and guidelines
 
 ## Contributing
 

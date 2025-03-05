@@ -140,6 +140,26 @@
           "instructions": "Write self-documenting code using clear method and variable names. Use test cases to document behavior. Only add comments for complex algorithms or when the code cannot be made more clear through refactoring. Extract complex logic into well-named methods. Use test cases to demonstrate usage and edge cases."
         }
       ]
+    },
+    {
+      "name": "Performance Monitoring",
+      "description": "Guidelines for implementing performance monitoring",
+      "patterns": [
+        {
+          "pattern": "fps.*\\.rb$|performance.*\\.rb$",
+          "instructions": "Implement performance monitoring with minimal overhead. Use efficient time calculations. Consider frame timing, frame rate smoothing, and performance metrics collection. Log performance data at appropriate intervals."
+        }
+      ]
+    },
+    {
+      "name": "Developer Console",
+      "description": "Guidelines for implementing the developer console",
+      "patterns": [
+        {
+          "pattern": "console.*\\.rb$|command.*\\.rb$",
+          "instructions": "Implement developer console using command pattern. Keep console rendering efficient. Support command history, auto-completion, and clear error handling. Make console toggleable and non-intrusive."
+        }
+      ]
     }
   ]
 } 

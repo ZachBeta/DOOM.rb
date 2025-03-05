@@ -38,16 +38,23 @@
   - Updated logging across game components
 
 ## Next
-- [ ] Testing & Quality
-  - Add more tests to improve coverage
-  - Create demo system for replaying gameplay
+- [ ] Performance & Display
+  - Show frame rate (FPS) in top left display
+  - Profile and optimize rendering loop
+  - Add performance monitoring tools
 
-- [ ] Features
-  - show frame rate FPS in top left display
+- [ ] Developer Tools
   - Implement console for commands and cheats
+  - Create demo system for replaying gameplay
+  - Add more tests to improve coverage
+
+- [ ] Graphics & Engine
   - Implement texture mapping for walls
   - Create gem structure (local only)
-  - find open source doom ports with compatible licenses, especially https://github.com/id-Software/DOOM though I believe it's GPL, so we might need to GPL this code, we can use this as a compatibility test for feature parity
+  - Research open source DOOM ports for compatibility
+    - Analyze https://github.com/id-Software/DOOM (GPL licensed)
+    - Consider GPL licensing implications
+    - Document feature parity goals
 
 ## Future
 - [ ] Content & Gameplay
