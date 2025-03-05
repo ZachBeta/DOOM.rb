@@ -41,10 +41,6 @@
   - Show frame rate (FPS) in top left display
 
 ## Next
-- [ ] Developer Tools
-  - Implement console for commands and cheats
-  - Create demo system for replaying gameplay
-
 - [ ] Graphics & Engine
   - Implement texture mapping for walls
   - Create gem structure (local only)
@@ -52,6 +48,10 @@
     - Analyze https://github.com/id-Software/DOOM (GPL licensed)
     - Consider GPL licensing implications
     - Document feature parity goals
+
+- [ ] Developer Tools
+  - Implement console for commands and cheats
+  - Create demo system for replaying gameplay
 
 ## Future
 - [ ] Content & Gameplay
