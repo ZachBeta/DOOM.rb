@@ -42,9 +42,9 @@
   - Create demo system for replaying gameplay
 
 - [ ] Features
-  - Implement texture mapping for walls
-  - Add HUD elements and minimap
+  - Add HUD elements and minimap - use a minimap on bottom of screen rather than the toggle map mode for now
   - Implement console for commands and cheats
+  - Implement texture mapping for walls
   - Create gem structure (local only)
 
 ## Future
