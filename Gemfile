@@ -14,4 +14,6 @@ gem 'simplecov', '~> 0.22.0', require: false # Test coverage reporting
 
 group :development do
   gem 'rubocop', '~> 1.60', require: false
+  gem 'rubocop-minitest', '~> 0.34.1', require: false
+  gem 'rubocop-rake', '~> 0.6.0', require: false
 end

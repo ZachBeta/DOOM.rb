@@ -1,33 +1,41 @@
+require:
+  - rubocop-minitest
+  - rubocop-rake
+
 AllCops:
   NewCops: enable
   TargetRubyVersion: 3.0
 
-Style/Documentation:
-  Enabled: false
-
-Metrics/MethodLength:
-  Max: 10
-
-Metrics/AbcSize:
-  Max: 15
-
+# Sandi Metz's Rules (https://thoughtbot.com/blog/sandi-metz-rules-for-developers)
 Metrics/ClassLength:
   Max: 100
 
-Metrics/BlockLength:
-  Max: 25
+Metrics/MethodLength:
+  Max: 5
 
-Style/StringLiterals:
-  EnforcedStyle: single_quotes
+Metrics/ParameterLists:
+  Max: 4
+
+Style/Documentation:
+  Enabled: true
 
 Layout/LineLength:
   Max: 100
 
-Style/FrozenStringLiteralComment:
-  Enabled: true
+# Project-specific overrides
+Metrics/BlockLength:
+  Exclude:
+    - 'test/**/*'
+    - 'Rakefile'
 
-Metrics/ParameterLists:
-  Max: 4
+Style/StringLiterals:
+  EnforcedStyle: single_quotes
+
+Metrics/AbcSize:
+  Max: 15
+
+Metrics/FrozenStringLiteralComment:
+  Enabled: true
 
 Style/GuardClause:
   Enabled: true 
