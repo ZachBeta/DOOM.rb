@@ -2,9 +2,16 @@ require_relative '../test_helper'
 require_relative '../../lib/doom/player'
 
 module Doom
+  class TestMap
+    def wall_at?(x, y)
+      false
+    end
+  end
+
   class PlayerTest < Minitest::Test
     def setup
-      @player = Player.new
+      @map = TestMap.new
+      @player = Player.new(@map)
     end
 
     def test_initialization

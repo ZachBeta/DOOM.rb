@@ -25,6 +25,7 @@
 - [x] Added collision detection with walls
 - [x] Implemented noclip mode to bypass collision detection (toggle with N key)
 - [x] Fixed collision detection bug with Vector objects
+- [x] Improved test design by replacing mocks with real test objects
 
 ## In Progress
 - [ ] Improve logging to feed logs into cursor context while debugging - not too noisy tho, this will blow up the context window
