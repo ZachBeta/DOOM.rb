@@ -81,6 +81,9 @@
 
 ## Current Tasks
 
+- [ ] stop outputting wad parse with puts in test env, instead log it
+- [ ] fix puts vs logs in wad parser so it stops adding noise to output in terminal window, and instead uses logs for feedback
+
 - [x] Complete TEXTURE1/TEXTURE2 parsing
   - [x] Implement texture composition from patches
   - [x] Handle texture name directory from PNAMES

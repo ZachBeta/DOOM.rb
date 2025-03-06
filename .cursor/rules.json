@@ -33,11 +33,11 @@
     },
     {
       "name": "Test-Driven Development",
-      "description": "Encourage TDD practices with real objects",
+      "description": "Encourage TDD practices with freedoom1.wad",
       "patterns": [
         {
-          "pattern": "_test\\.rb$",
-          "instructions": "Write Minitest tests that focus on behavior rather than implementation details. Follow the Arrange-Act-Assert pattern. Use real objects instead of mocks - create simple test-specific implementations that implement just the interface needed. Keep test objects in the same file as the tests that use them. Ensure tests are isolated and don't depend on each other."
+          "pattern": "test/**/*_test.rb",
+          "instructions": "Write Minitest tests that focus on behavior. Use freedoom1.wad for WAD file testing. Follow Arrange-Act-Assert pattern. Keep tests isolated."
         }
       ]
     },

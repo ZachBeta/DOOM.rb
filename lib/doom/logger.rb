@@ -15,7 +15,7 @@ module Doom
     end
 
     def write(message, level)
-      Time.now.strftime('%Y-%m-%d %H:%M:%S.%L')
+      timestamp = Time.now.strftime('%Y-%m-%d %H:%M:%S.%L')
 
       case level
       when :debug

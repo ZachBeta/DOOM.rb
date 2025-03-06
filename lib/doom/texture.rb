@@ -39,9 +39,7 @@ module Doom
 
     def parse
       num_textures = read_long
-      puts "Number of textures: #{num_textures}"
       texture_offsets = read_texture_offsets(num_textures)
-      puts "Texture offsets: #{texture_offsets.inspect}"
 
       texture_offsets.map do |offset|
         # Offset is relative to the start of the TEXTURE1 lump
@@ -63,16 +61,12 @@ module Doom
     end
 
     def parse_texture
-      name = read_string(TEXTURE_NAME_LENGTH).strip
-      puts "Parsing texture: #{name}"
+      name = read_string(TEXTURE_NAME_LENGTH).strip.upcase # WAD files store names in uppercase
       skip_bytes(4) # Skip flags (unused)
       width = read_short
-      puts "Width: #{width}"
       height = read_short
-      puts "Height: #{height}"
       skip_bytes(4) # Skip column directory (unused)
       num_patches = read_short
-      puts "Number of patches: #{num_patches}"
 
       patches = num_patches.times.map do
         parse_patch
@@ -112,7 +106,7 @@ module Doom
     end
 
     def read_string(length)
-      value = @data[@offset, length].delete("\x00")
+      value = @data[@offset, length].tr("\x00", '')
       @offset += length
       value
     end

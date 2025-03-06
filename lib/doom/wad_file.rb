@@ -18,6 +18,10 @@ module Doom
     def initialize(file_path)
       @file_path = file_path
       @lumps = {}
+      @logger = Logger.instance
+      @logger.debug("Initializing WAD file from #{file_path}")
+      @logger.debug("File exists: #{File.exist?(file_path)}")
+      @logger.debug("File size: #{File.size(file_path)} bytes")
       parse_header
       parse_directory
     end
@@ -27,7 +31,34 @@ module Doom
     end
 
     def textures
-      find_lumps_between_markers(TEXTURE_MARKERS, '_END')
+      # First try to find textures in TEXTURE1/TEXTURE2 lumps
+      texture_lumps = %w[TEXTURE1 TEXTURE2].map { |name| [name, @lumps[name]] }.to_h.compact
+      textures = {}
+
+      # Parse textures from TEXTURE1/TEXTURE2 lumps
+      texture_lumps.each do |name, lump|
+        data = lump.read
+        next unless data
+
+        TextureParser.parse(data).each do |texture|
+          textures[texture.name] = texture
+        end
+      end
+
+      # Then look for individual texture lumps
+      @lumps.each do |name, lump|
+        next if name.match?(LEVEL_MARKERS) || %w[TEXTURE1 TEXTURE2].include?(name)
+        next unless name.match?(/^[A-Z0-9]+$/)
+
+        textures[name] = Texture.new(
+          name: name,
+          width: 64, # Default size for individual textures
+          height: 128,
+          patches: []
+        )
+      end
+
+      textures
     end
 
     def flats
@@ -60,113 +91,144 @@ module Doom
       level_lumps
     end
 
+    def read_string(length, offset)
+      File.open(@file_path, 'rb') do |file|
+        file.seek(offset)
+        data = file.read(length)
+        data ? data.delete("\x00") : ''
+      end
+    end
+
     def parse_texture(name, pnames = nil)
-      lump = @lumps[name]
+      lump = @lumps[name.upcase] # WAD files store names in uppercase
       return [] unless lump
 
-      textures = TextureParser.parse(lump.read)
-      return textures unless pnames
+      data = lump.read
+      return [] if data.nil? || data.empty?
 
-      textures.map do |texture|
-        patches = texture.patches.map do |patch|
-          TexturePatch.new(
-            patch_index: patch.patch_index,
-            name: pnames[patch.patch_index],
-            x_offset: patch.x_offset,
-            y_offset: patch.y_offset
-          )
+      # If this is a TEXTURE1/TEXTURE2 lump, parse it as a texture list
+      textures = if name.match?(/^TEXTURE[12]$/i)
+                   TextureParser.parse(data)
+                 else
+                   # Otherwise treat it as a single texture
+                   [Texture.new(name: name.upcase, width: 64, height: 128, patches: [])]
+                 end
+
+      # Resolve patch names if pnames is provided
+      if pnames && textures.any?
+        textures.each do |texture|
+          texture.patches.each do |patch|
+            patch_name = pnames[patch.patch_index]
+            patch.instance_variable_set(:@name, patch_name) if patch_name
+          end
         end
-        Texture.new(
-          name: texture.name,
-          width: texture.width,
-          height: texture.height,
-          patches: patches
-        )
       end
+
+      textures
     end
 
     private
 
     def parse_header
       File.open(@file_path, 'rb') do |file|
-        @identification = file.read(4)
-        @lump_count = file.read(4).unpack1('V')
-        @directory_offset = file.read(4).unpack1('V')
-        puts "WAD Header: id=#{@identification}, lumps=#{@lump_count}, dir_offset=#{@directory_offset}"
+        header_data = file.read(12)
+        @logger.debug("Read header data (#{header_data.bytesize} bytes): #{header_data.unpack1('H*')}")
+        return unless header_data && header_data.size == 12
+
+        @identification = header_data[0, 4]
+        @lump_count = header_data[4, 4].unpack1('V')
+        @directory_offset = header_data[8, 4].unpack1('V')
+
+        @logger.debug("WAD header: type='#{@identification}', lumps=#{@lump_count}, dir_offset=#{@directory_offset}")
       end
     end
 
     def parse_directory
+      return unless @lump_count && @directory_offset
+
+      @lumps = {}
       File.open(@file_path, 'rb') do |file|
         file.seek(@directory_offset)
+        @logger.debug("Seeking to directory at offset #{@directory_offset}")
+
         @lump_count.times do |i|
-          entry = DirectoryEntry.new(file)
-          puts "Directory Entry #{i}: name=#{entry.name}, offset=#{entry.offset}, size=#{entry.size}"
-          @lumps[entry.name] = Lump.new(@file_path, entry)
+          entry_data = file.read(16)
+          break unless entry_data && entry_data.size == 16
+
+          offset = entry_data[0, 4].unpack1('V')
+          size = entry_data[4, 4].unpack1('V')
+          name = entry_data[8, 8].tr("\x00", '').strip
+
+          next if name.empty?
+
+          @logger.debug("Found lump #{i + 1}/#{@lump_count}: name='#{name}', offset=#{offset}, size=#{size}")
+
+          entry = DirectoryEntry.new(
+            name: name.upcase,
+            offset: offset,
+            size: size,
+            file_path: @file_path
+          )
+
+          if entry.valid?
+            @lumps[entry.name] = entry
+            @logger.debug("Added valid lump: #{entry.name}")
+          else
+            @logger.debug("Skipped invalid lump: #{name}")
+          end
+        rescue StandardError => e
+          @logger.warn("Failed to parse directory entry: #{e.message}")
+          next
         end
       end
+      @logger.debug("Parsed #{@lumps.size} valid lumps")
+      @logger.debug("Available lumps: #{@lumps.keys.join(', ')}")
     end
 
     def find_lumps_between_markers(start_markers, end_suffix)
-      result = {}
+      lumps = {}
       in_section = false
-      current_section = nil
 
       @lumps.each do |name, lump|
         if start_markers.include?(name)
           in_section = true
-          current_section = name.sub('_START', '')
-        elsif name == "#{current_section}#{end_suffix}"
-          in_section = false
-          current_section = nil
-        elsif in_section && lump.size.positive?
-          result[name] = lump
+          next
         end
+
+        if name.end_with?(end_suffix)
+          in_section = false
+          next
+        end
+
+        lumps[name] = lump if in_section
       end
 
-      result
+      lumps
     end
   end
 
   class DirectoryEntry
-    ENTRY_SIZE = 16
-    NAME_SIZE = 8
+    attr_reader :name, :offset, :size
 
-    attr_reader :offset, :size, :name
-
-    def initialize(file)
-      @offset = file.read(4).unpack1('V')
-      @size = file.read(4).unpack1('V')
-      @name = file.read(NAME_SIZE).delete("\x00")
-      @name.upcase! # WAD files store names in uppercase
+    def initialize(name:, offset:, size:, file_path:)
+      @name = name
+      @offset = offset
+      @size = size
+      @file_path = file_path
     end
-  end
 
-  class Lump
-    attr_reader :data
-
-    def initialize(wad_path, directory_entry)
-      @wad_path = wad_path
-      @directory_entry = directory_entry
-      @data = nil
+    def valid?
+      @name && !@name.empty? && @offset && @size && @file_path && File.exist?(@file_path)
     end
 
     def read
-      return @data if @data
+      return nil unless valid?
+      return nil if @size.zero?
 
-      File.open(@wad_path, 'rb') do |file|
-        file.seek(@directory_entry.offset)
-        @data = file.read(@directory_entry.size)
+      File.open(@file_path, 'rb') do |file|
+        file.seek(@offset)
+        file.read(@size)
       end
-      @data
-    end
-
-    def size
-      @directory_entry.size
-    end
-
-    def name
-      @directory_entry.name
     end
   end
 end
