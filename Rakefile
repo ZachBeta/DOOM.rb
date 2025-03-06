@@ -3,16 +3,38 @@
 require 'rake/testtask'
 require 'timeout'
 require 'fileutils'
+require_relative 'lib/doom/config'
 
-desc 'Run the DOOM.rb game'
-task :doom do
-  ruby 'lib/doom.rb levels/freedoom-0.13.0/freedoom1.wad'
+desc 'Run the DOOM viewer'
+task :run do
+  ruby 'lib/doom.rb', Doom::Config.wad_path
+end
+
+desc 'Run tests with coverage'
+task :coverage do
+  require 'simplecov'
+  SimpleCov.start do
+    add_filter '/test/'
+    add_filter '/vendor/'
+  end
+  Rake::Task[:test].execute
+end
+
+desc 'Run the DOOM viewer with profiling'
+task :profile do
+  require 'ruby-prof'
+  result = RubyProf.profile do
+    ruby 'lib/doom.rb', Doom::Config.wad_path
+  end
+  printer = RubyProf::FlatPrinter.new(result)
+  printer.print(STDOUT)
 end
 
 desc 'Run tests'
 Rake::TestTask.new(:test) do |t|
   FileUtils.mkdir_p('logs')
   t.libs << 'test'
+  t.libs << 'lib'
   t.test_files = FileList['test/**/*_test.rb']
   t.warning = false
   t.verbose = true
@@ -49,7 +71,7 @@ task :run_all do
   puts "\nRunning DOOM game (will be terminated after 5 seconds)..."
   begin
     Timeout.timeout(5) do
-      Rake::Task['doom'].invoke
+      Rake::Task['run'].invoke
     end
   rescue Timeout::Error
     puts 'DOOM game terminated after 5 seconds'

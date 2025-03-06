@@ -2,11 +2,13 @@ require 'test_helper'
 require 'doom/wad_file'
 require 'doom/texture'
 require 'doom/texture_composer'
+require 'minitest/autorun'
+require_relative '../../lib/doom/config'
 
 module Doom
   class TextureIntegrationTest < Minitest::Test
     def setup
-      @wad_path = File.expand_path('../../levels/freedoom-0.13.0/freedoom1.wad', __dir__)
+      @wad_path = Doom::Config.wad_path
       @wad_file = WadFile.new(@wad_path)
       @texture_composer = TextureComposer.new
     end
