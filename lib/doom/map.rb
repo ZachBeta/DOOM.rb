@@ -10,8 +10,8 @@ module Doom
       @grid = Grid.new(create_default_layout)
     end
 
-    def wall_at?(x, y)
-      @grid.wall_at?(x, y)
+    def empty?(x, y)
+      !@grid.wall_at?(x, y)
     end
 
     private
@@ -42,10 +42,14 @@ module Doom
       @height = data.size
     end
 
-    def wall_at?(x, y)
-      return true if out_of_bounds?(x, y)
+    def empty?(x, y)
+      return false if out_of_bounds?(x, y)
 
-      @data[y.to_i][x.to_i] == WALL
+      @data[y.to_i][x.to_i] == EMPTY
+    end
+
+    def wall_at?(x, y)
+      !empty?(x, y)
     end
 
     private

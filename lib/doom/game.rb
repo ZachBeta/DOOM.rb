@@ -14,7 +14,7 @@ module Doom
     SCREEN_WIDTH = 800
     SCREEN_HEIGHT = 600
     TITLE = 'DOOM.rb'
-    DEFAULT_WAD_PATH = File.expand_path('../../freedoom.wad', __dir__)
+    DEFAULT_WAD_PATH = File.expand_path('../../levels/freedoom-0.13.0/freedoom1.wad', __dir__) # use config.rb and make sure that's used everywhere
 
     def initialize(wad_path = DEFAULT_WAD_PATH)
       super(SCREEN_WIDTH, SCREEN_HEIGHT)
@@ -163,8 +163,7 @@ module Doom
 
       # Performance Stats
       render_time = @renderer.last_render_time
-      texture_time = @renderer.last_texture_time
-      perf_text = "Render: #{(render_time * 1000).round(2)}ms | Texture: #{(texture_time * 1000).round(2)}ms"
+      perf_text = "Render: #{(render_time * 1000).round(2)}ms"
       @font.draw_text(perf_text, 10, 30, 0, 1, 1, Gosu::Color::YELLOW)
 
       # Noclip Status

@@ -89,6 +89,8 @@
 
 ## Current Tasks
 
+- [ ] allow recording a game demo so we can record a player's actions and use that in testing
+
 - [ ] Performance Optimization
   - [ ] Profile rendering bottlenecks
   - [ ] Optimize texture caching system

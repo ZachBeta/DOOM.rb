@@ -176,11 +176,11 @@ module Doom
       y = position[1]
 
       # Check the current cell
-      return true if map.wall_at?(x.to_i, y.to_i)
+      return true unless map.empty?(x.to_i, y.to_i)
 
       # Check nearby cells based on collision margin
       check_points = collision_check_points(x, y)
-      check_points.any? { |point_x, point_y| map.wall_at?(point_x.to_i, point_y.to_i) }
+      check_points.any? { |point_x, point_y| !map.empty?(point_x.to_i, point_y.to_i) }
     end
 
     private

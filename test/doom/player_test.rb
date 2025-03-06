@@ -5,8 +5,8 @@ require_relative '../../lib/doom/player'
 
 module Doom
   class TestMap
-    def wall_at?(_x, _y)
-      false
+    def empty?(_x, _y)
+      true
     end
   end
 
@@ -27,7 +27,7 @@ module Doom
       @player.move_forward(0.1)
 
       # Player should have moved in the direction they're facing
-      assert @player.position[0] > initial_position[0]
+      assert_operator @player.position[0], :>, initial_position[0]
       assert_in_delta initial_position[1], @player.position[1], 0.001
     end
 
@@ -38,7 +38,7 @@ module Doom
       # Player should have moved perpendicular to their facing direction
       # With initial direction (1,0), strafing left moves in negative Y
       assert_in_delta initial_position[0], @player.position[0], 0.001
-      assert @player.position[1] < initial_position[1]
+      assert_operator @player.position[1], :<, initial_position[1]
     end
   end
 end

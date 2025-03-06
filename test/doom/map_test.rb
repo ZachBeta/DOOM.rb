@@ -16,13 +16,13 @@ module Doom
 
     def test_wall_detection
       # Corners should be walls
-      assert @map.wall_at?(0, 0)
-      assert @map.wall_at?(9, 0)
-      assert @map.wall_at?(0, 9)
-      assert @map.wall_at?(9, 9)
+      refute @map.empty?(0, 0)
+      refute @map.empty?(9, 0)
+      refute @map.empty?(0, 9)
+      refute @map.empty?(9, 9)
 
       # Center should be empty
-      refute @map.wall_at?(5, 5)
+      assert @map.empty?(5, 5)
     end
   end
 

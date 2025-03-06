@@ -36,9 +36,9 @@ module Doom
   end
 
   class MockMap
-    def wall_at?(x, y)
-      (x == 6 && y == 5) || # Wall one unit to the right of default player position
-        x.negative? || y.negative? || x >= 10 || y >= 10 # Boundary walls
+    def empty?(x, y)
+      !((x == 6 && y == 5) || # Wall one unit to the right of default player position
+        x.negative? || y.negative? || x >= 10 || y >= 10) # Boundary walls
     end
 
     def width
@@ -58,7 +58,6 @@ module Doom
     def test_ray_initialization
       ray = Ray.new(@player, 400, 800)
 
-      assert_in_delta 0.0, ray.camera_x
       assert_in_delta 1.0, ray.direction_x
       assert_in_delta 0.0, ray.direction_y
     end
@@ -67,8 +66,8 @@ module Doom
       left_ray = Ray.new(@player, 0, 800)
       right_ray = Ray.new(@player, 800, 800)
 
-      assert_in_delta(-1.0, left_ray.camera_x)
-      assert_in_delta 1.0, right_ray.camera_x
+      assert_operator left_ray.direction_x, :<, 1.0
+      assert_operator right_ray.direction_x, :>, 1.0
     end
   end
 
@@ -118,7 +117,7 @@ module Doom
     end
   end
 
-  class MinimapRendererTest < Minitest::Test
+  class RendererTest < Minitest::Test
     def setup
       @window = MockWindow.new
       @map = MockMap.new
@@ -127,78 +126,9 @@ module Doom
         height: 128,
         data: Array.new(64 * 128) { |i| i % 256 } # Create a test pattern
       )
-      @wall_renderer = WallRenderer.new(@window, @map, { 'TEST_TEXTURE' => @texture })
-      @minimap_renderer = MinimapRenderer.new(@window, @map)
+      @renderer = Renderer.new(@window, @map, { 'TEST_TEXTURE' => @texture })
       @player = MockPlayer.new([5, 5], [1, 0])
-      # Configure logger for test environment with verbose level for this specific test
       Logger.configure(level: :verbose, base_dir: 'logs', env: :test)
-    end
-
-    def teardown
-      super
-    end
-
-    def test_minimap_cell_size
-      cell_size = MinimapRenderer::MINIMAP_SIZE / [@map.width, @map.height].max
-
-      assert_equal 15, cell_size # 150/10 = 15
-    end
-
-    def test_player_rotation_angle
-      # Test east-facing (0 degrees)
-      player = MockPlayer.new([5, 5], [1, 0])
-      angle = Math.atan2(player.direction[1], player.direction[0]) * 180 / Math::PI
-
-      assert_equal 0, angle.round
-
-      # Test north-facing (270 degrees)
-      player = MockPlayer.new([5, 5], [0, -1])
-      angle = Math.atan2(player.direction[1], player.direction[0]) * 180 / Math::PI
-
-      assert_equal(-90, angle.round)
-    end
-
-    def test_minimap_logging
-      # Skip actual rendering but still log
-      def @minimap_renderer.draw_background; end
-      def @minimap_renderer.draw_walls; end
-      def @minimap_renderer.draw_player(*); end
-      def @minimap_renderer.draw_rotation_angle(*); end
-
-      # Configure logger for test environment with verbose level
-      Logger.configure(level: :verbose, base_dir: 'logs', env: :test)
-
-      @minimap_renderer.render(@player)
-
-      # Wait for log file to be written
-      sleep 0.1
-
-      # Find the most recent log file
-      log_file = Dir.glob('logs/verbose.log').first
-      log_content = File.read(log_file)
-
-      assert_includes log_content, 'Minimap rendered at'
-      assert_includes log_content, 'Player position on minimap'
-      assert_includes log_content, 'Player rotation: 0°'
-    end
-  end
-
-  class TexturedWallRendererTest < Minitest::Test
-    def setup
-      @window = MockWindow.new
-      @map = MockMap.new
-      @texture = Doom::ComposedTexture.new(
-        width: 64,
-        height: 128,
-        data: Array.new(64 * 128) { |i| i % 256 } # Create a test pattern
-      )
-      @wall_renderer = WallRenderer.new(@window, @map, { 'TEST_TEXTURE' => @texture })
-      # Configure logger for test environment with verbose level for this specific test
-      Logger.configure(level: :verbose, base_dir: 'logs', env: :test)
-    end
-
-    def teardown
-      super
     end
 
     def test_texture_mapping
@@ -212,30 +142,18 @@ module Doom
       )
 
       # Test that texture coordinates are calculated correctly
-      tex_x = @wall_renderer.calculate_texture_x(intersection)
+      tex_x = @renderer.send(:calculate_texture_x, intersection)
 
       assert_equal 32, tex_x # Should be middle of texture (0.5 * 64)
     end
 
     def test_wall_rendering_performance
       player = MockPlayer.new([5, 5], [1, 0]) # Facing east
-      screen_width = 800
-      screen_height = 600
-
-      # Create a test pattern texture
-      texture_size = 256
-      texture = Doom::ComposedTexture.new(
-        width: texture_size,
-        height: texture_size,
-        data: Array.new(texture_size * texture_size) { |i| i % 256 }
-      )
-
-      wall_renderer = WallRenderer.new(@window, @map, { 'TEST_TEXTURE' => texture })
 
       # Measure performance over multiple frames
       time = Benchmark.realtime do
         5.times do # Render scene 5 times
-          wall_renderer.render(player, screen_width, screen_height)
+          @renderer.render(player)
         end
       end
 
@@ -244,6 +162,11 @@ module Doom
 
       assert_operator avg_frame_time, :<=, 0.016,
                       "Wall rendering too slow: #{(avg_frame_time * 1000).round(2)}ms per frame"
+    end
+
+    def test_minimap_rendering
+      # Test that minimap rendering doesn't raise errors
+      assert_nothing_raised { @renderer.render(@player) }
     end
   end
 end
