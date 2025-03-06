@@ -117,7 +117,7 @@
       "patterns": [
         {
           "pattern": "wad.*\\.rb$|parser.*\\.rb$",
-          "instructions": "Follow vanilla DOOM WAD format specifications. Implement WAD file parsing using a clean, modular approach. Separate concerns between file I/O, data structure parsing, and game object creation. Use streaming approaches for large files."
+          "instructions": "Follow vanilla DOOM WAD format specifications. Use clean, modular classes with single responsibilities. Separate concerns between file I/O (WadFile), data structure parsing (DirectoryEntry), and data access (Lump). Cache data only when needed. Use streaming for large files. Keep parsing methods focused and well-named. Follow naming conventions from the DOOM source code for consistency."
         }
       ]
     },
