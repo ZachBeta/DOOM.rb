@@ -83,10 +83,18 @@
 
 ## Current Tasks
 
-- [ ] stop outputting wad parse with puts in test env, instead log it
-- [ ] fix puts vs logs in wad parser so it stops adding noise to output in terminal window, and instead uses logs for feedback
-- [ ] continue upgrading logging system and log rotation, rotate logs as a requirement for every rake task
-* [ ] make better usage of debug.log, verbose.log, game.log and doom.log
+- [x] stop outputting wad parse with puts in test env, instead log it
+- [x] fix puts vs logs in wad parser so it stops adding noise to output in terminal window, and instead uses logs for feedback
+- [x] continue upgrading logging system and log rotation, rotate logs as a requirement for every rake task
+- [x] make better usage of debug.log, verbose.log, game.log and doom.log
+
+- [ ] Performance Optimization
+  - [ ] Profile rendering bottlenecks
+  - [ ] Optimize texture caching system
+  - [ ] Improve line batching efficiency
+  - [ ] Enhance view distance culling
+  - [ ] Implement texture mipmap system
+  - [ ] Current FPS: 3-6, Target: 30+
 
 - [x] Complete TEXTURE1/TEXTURE2 parsing
   - [x] Implement texture composition from patches
