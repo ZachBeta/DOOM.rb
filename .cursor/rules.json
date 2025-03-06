@@ -170,6 +170,16 @@
           "instructions": "Follow vanilla DOOM behavior as documented in Chocolate DOOM source code. Focus on accurate recreation of original game mechanics. Document any intentional deviations from vanilla behavior."
         }
       ]
+    },
+    {
+      "name": "GPL-2.0 Compliance",
+      "description": "Ensure GPL-2.0 license compliance",
+      "patterns": [
+        {
+          "pattern": ".*",
+          "instructions": "Ensure all code changes comply with GPL-2.0 license requirements. Include appropriate copyright notices and license headers in new files. Document any third-party code usage and verify their license compatibility with GPL-2.0."
+        }
+      ]
     }
   ]
 } 

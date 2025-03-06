@@ -3,7 +3,7 @@
 A Ruby implementation of the classic DOOM game engine, focusing on vanilla accuracy inspired by Chocolate DOOM.
 
 [![Ruby Version](https://img.shields.io/badge/ruby-3.0%2B-ruby.svg)](https://www.ruby-lang.org/)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-GPL--2.0-blue.svg)](LICENSE)
 
 ## Quick Start
 
@@ -68,4 +68,6 @@ lib/doom/      # Core game components
 
 ## License
 
-[MIT License](LICENSE) 
+[GNU General Public License v2.0](LICENSE)
+
+This project is licensed under GPL-2.0 to align with the original DOOM and Chocolate DOOM codebases. 

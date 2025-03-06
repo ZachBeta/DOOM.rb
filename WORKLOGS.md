@@ -144,6 +144,6 @@
 - [ ] Review heads-up display elements
 
 ## License Notes
-- Currently MIT licensed
-- May consider aligning with Chocolate DOOM license in future
-- X11/MIT license is GPL-compatible if needed
+- Switched to GPL-2.0 license to align with DOOM and Chocolate DOOM
+- Previous MIT license has been superseded
+- All future contributions must comply with GPL-2.0
