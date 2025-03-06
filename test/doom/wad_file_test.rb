@@ -4,7 +4,7 @@ require 'doom/wad_file'
 module Doom
   class WadFileTest < Minitest::Test
     def setup
-      @wad_path = File.join(File.dirname(__FILE__), '../../levels/freedoom-0.13.0/freedoom1.wad')
+      @wad_path = File.expand_path('../../levels/freedoom-0.13.0/freedoom1.wad', __dir__)
     end
 
     def test_parses_wad_header

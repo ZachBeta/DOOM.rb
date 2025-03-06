@@ -6,7 +6,7 @@ require 'doom/texture_composer'
 module Doom
   class TextureIntegrationTest < Minitest::Test
     def setup
-      @wad_path = 'levels/freedoom-0.13.0/freedoom1.wad'
+      @wad_path = File.expand_path('../../levels/freedoom-0.13.0/freedoom1.wad', __dir__)
       @wad_file = WadFile.new(@wad_path)
       @texture_composer = TextureComposer.new
     end
