@@ -1,6 +1,8 @@
 # DOOM.rb Work Logs
 
-## Done
+## Project Status
+
+### Completed
 - [x] Project Setup
   - Created initial project structure
   - Set up README.md with project overview
@@ -35,89 +37,113 @@
 - [x] Performance & Display
   - Show frame rate (FPS) in top left display
 
-## In Progress
-- [ ] Graphics & Engine Research
-  - Study original DOOM source code
-    - https://github.com/id-Software/DOOM
-  - Analyze Chocolate DOOM for vanilla accuracy
-    - https://github.com/chocolate-doom/chocolate-doom
-  - Document feature parity goals with Chocolate DOOM
+### WAD Parser Progress (2025-03-06)
+- [x] Initial WAD Parser Implementation
+  - Basic WAD file header parsing
+  - Directory entry parsing
+  - Lump data reading
+  - Categorization of lumps (textures, flats, sprites, levels)
+  - Level data extraction
+  - Test WAD file creation and testing
+  - Successfully parsed FreeDoom WAD
 
-## Next
-- [ ] Developer Tools
-  - Implement console for commands and cheats
-  - Create demo system for replaying gameplay
+- [x] Texture System Implementation
+  - Basic texture lump identification
+  - Flat texture identification
+  - Sprite lump identification
+  - Level marker detection
+  - Level data structure extraction
+  - Test coverage for WAD parsing
+  - WAD info command line tool
+  - Parse TEXTURE1/TEXTURE2 data structures
+    - Support texture dimensions
+    - Parse patch references
 
-- [ ] Graphics & Engine Implementation
-  - Implement texture mapping for walls
-  - Create gem structure (local only)
-  - Add WAD file parser
-  - Add enemies and weapons
-  - Add sound effects and music
+## Current Tasks
 
-## Future
-- [ ] Advanced Features
-  - Implement advanced lighting
-  - Add multiplayer support
-  - Create level editor
+### Graphics & Engine Research
+- [ ] Study original DOOM source code
+  - https://github.com/id-Software/DOOM
+- [ ] Analyze Chocolate DOOM for vanilla accuracy
+  - https://github.com/chocolate-doom/chocolate-doom
+- [ ] Document feature parity goals with Chocolate DOOM
 
-- [ ] Developer Tools
-  - Add more tests to improve coverage
-  - Add performance monitoring tools
-  - Profile and optimize rendering loop
+### WAD Parser Next Steps
+- [ ] Complete TEXTURE1/TEXTURE2 parsing
+  - Implement texture composition from patches
+  - Handle texture name directory from PNAMES
+
+- [ ] Parse Level Geometry
+  - VERTEXES lump parsing
+  - LINEDEFS lump parsing
+  - SIDEDEFS lump parsing
+  - SECTORS lump parsing
+  - BSP tree (NODES/SEGS/SSECTORS) parsing
+
+- [ ] Implement Texture Animation
+  - Parse ANIMATED lump
+  - Handle wall switches (SWITCHES lump)
+  - Support animated flats
+  - Support animated walls
+
+- [ ] Sprite System
+  - Parse sprite name patterns
+  - Handle rotation frames
+  - Support different states
+  - Implement transparency
+
+- [ ] Sound System Integration
+  - Parse DMXGUS lump
+  - Handle sound effects
+  - Support music lumps
+  - Implement sound triggers
+
+## Future Plans
+
+### Developer Tools
+- [ ] Implement console for commands and cheats
+- [ ] Create demo system for replaying gameplay
+- [ ] Add more tests to improve coverage
+- [ ] Add performance monitoring tools
+- [ ] Profile and optimize rendering loop
+
+### Advanced Features
+- [ ] Implement advanced lighting
+- [ ] Add multiplayer support
+- [ ] Create level editor
+
+### Core Engine Analysis Tasks
+- [ ] Study Chocolate DOOM's main game loop implementation
+- [ ] Document core engine differences between vanilla DOOM and Chocolate DOOM
+- [ ] Analyze frame timing and game tick handling
+- [ ] Review memory management approaches
+
+### Rendering System Analysis
+- [ ] Study BSP tree implementation
+- [ ] Document vanilla DOOM's rendering pipeline
+- [ ] Analyze texture mapping system
+- [ ] Review sprite rendering system
+- [ ] Document lighting and sector effects
+
+### Game Physics Analysis
+- [ ] Study collision detection system
+- [ ] Document movement and sliding mechanics
+- [ ] Analyze stair stepping and height changes
+- [ ] Review projectile physics
+
+### Game Logic Analysis
+- [ ] Study monster AI patterns
+- [ ] Document weapon mechanics
+- [ ] Analyze damage calculation system
+- [ ] Review powerup effects
+
+### User Interface Analysis
+- [ ] Study status bar implementation
+- [ ] Document menu system
+- [ ] Analyze automap functionality
+- [ ] Review heads-up display elements
 
 ## License Notes
 - Currently MIT licensed
 - May consider aligning with Chocolate DOOM license in future
 - X11/MIT license is GPL-compatible if needed
-
-## WAD File Parser Progress
-
-### 2025-03-06: Initial WAD Parser Implementation
-- [x] Basic WAD file header parsing
-- [x] Directory entry parsing
-- [x] Lump data reading
-- [x] Categorization of lumps (textures, flats, sprites, levels)
-- [x] Level data extraction
-- [x] Test WAD file creation and testing
-- [x] Successfully parsed FreeDoom WAD
-
-### 2025-03-06: Texture System Implementation
-- [x] Basic texture lump identification
-- [x] Flat texture identification
-- [x] Sprite lump identification
-- [x] Level marker detection
-- [x] Level data structure extraction
-- [x] Test coverage for WAD parsing
-- [x] WAD info command line tool
-- [x] Parse TEXTURE1/TEXTURE2 data structures
-  - [x] Support texture dimensions
-  - [x] Parse patch references
-  - [ ] Implement texture composition from patches
-  - [ ] Handle texture name directory from PNAMES
-
-### Next Steps
-- [ ] Parse level geometry
-  - [ ] VERTEXES lump parsing
-  - [ ] LINEDEFS lump parsing
-  - [ ] SIDEDEFS lump parsing
-  - [ ] SECTORS lump parsing
-  - [ ] BSP tree (NODES/SEGS/SSECTORS) parsing
-  
-- [ ] Implement texture animation
-  - [ ] Parse ANIMATED lump
-  - [ ] Handle wall switches (SWITCHES lump)
-  - [ ] Support animated flats
-  - [ ] Support animated walls
-
-- [ ] Sprite System
-  - [ ] Parse sprite name patterns
-  - [ ] Handle rotation frames
-  - [ ] Support different states
-  - [ ] Implement transparency
-
-- [ ] Sound System Integration
-  - [ ] Parse DMXGUS lump
-  - [ ] Handle sound effects
-  - [ ] Support music lumps
-  - [ ] Implement sound triggers
