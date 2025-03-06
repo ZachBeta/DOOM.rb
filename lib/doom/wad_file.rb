@@ -27,29 +27,48 @@ module Doom
     end
 
     def lump(name)
-      @lumps[name.upcase] # WAD files store names in uppercase
+      @logger.debug("Looking up lump: #{name.upcase}")
+      result = @lumps[name.upcase] # WAD files store names in uppercase
+      @logger.debug("Lump lookup result: #{result.nil? ? 'nil' : result.name}")
+      result
     end
 
     def textures
+      @logger.debug('Loading textures...')
       # First try to find textures in TEXTURE1/TEXTURE2 lumps
       texture_lumps = %w[TEXTURE1 TEXTURE2].map { |name| [name, @lumps[name]] }.to_h.compact
+      @logger.debug("Found texture lumps: #{texture_lumps.keys.join(', ')}")
       textures = {}
+
+      # Load PNAMES first
+      pnames = if @lumps['PNAMES']
+                 data = @lumps['PNAMES'].read
+                 if data
+                   count = data[0, 4].unpack1('V')
+                   @logger.debug("Found #{count} patch names")
+                   data[4..].unpack('Z8' * count)
+                 end
+               end
 
       # Parse textures from TEXTURE1/TEXTURE2 lumps
       texture_lumps.each do |name, lump|
+        @logger.debug("Reading texture lump: #{name}")
         data = lump.read
+        @logger.debug("Texture data size: #{data&.size || 'nil'}")
         next unless data
 
-        TextureParser.parse(data).each do |texture|
+        TextureParser.parse(data, pnames).each do |texture|
+          @logger.debug("Found texture: #{texture.name} (#{texture.width}x#{texture.height})")
           textures[texture.name] = texture
         end
       end
 
       # Then look for individual texture lumps
       @lumps.each do |name, lump|
-        next if name.match?(LEVEL_MARKERS) || %w[TEXTURE1 TEXTURE2].include?(name)
+        next if name.match?(LEVEL_MARKERS) || %w[TEXTURE1 TEXTURE2 PNAMES].include?(name)
         next unless name.match?(/^[A-Z0-9]+$/)
 
+        @logger.debug("Found individual texture: #{name}")
         textures[name] = Texture.new(
           name: name,
           width: 64, # Default size for individual textures
@@ -58,6 +77,7 @@ module Doom
         )
       end
 
+      @logger.debug("Total textures found: #{textures.size}")
       textures
     end
 
@@ -100,6 +120,7 @@ module Doom
     end
 
     def parse_texture(name, pnames = nil)
+      @logger.debug("Parsing texture: #{name}")
       lump = @lumps[name.upcase] # WAD files store names in uppercase
       return [] unless lump
 
@@ -108,22 +129,23 @@ module Doom
 
       # If this is a TEXTURE1/TEXTURE2 lump, parse it as a texture list
       textures = if name.match?(/^TEXTURE[12]$/i)
-                   TextureParser.parse(data)
+                   TextureParser.parse(data, pnames)
                  else
                    # Otherwise treat it as a single texture
-                   [Texture.new(name: name.upcase, width: 64, height: 128, patches: [])]
+                   [Texture.new(
+                     name: name.upcase,
+                     width: 64,
+                     height: 128,
+                     patches: [TexturePatch.new(
+                       x_offset: 0,
+                       y_offset: 0,
+                       name: name.upcase,
+                       patch_index: 0
+                     )]
+                   )]
                  end
 
-      # Resolve patch names if pnames is provided
-      if pnames && textures.any?
-        textures.each do |texture|
-          texture.patches.each do |patch|
-            patch_name = pnames[patch.patch_index]
-            patch.instance_variable_set(:@name, patch_name) if patch_name
-          end
-        end
-      end
-
+      @logger.debug("Parsed #{textures.size} textures")
       textures
     end
 
@@ -146,6 +168,7 @@ module Doom
     def parse_directory
       return unless @lump_count && @directory_offset
 
+      @logger.debug("Starting directory parse with #{@lump_count} lumps at offset #{@directory_offset}")
       @lumps = {}
       File.open(@file_path, 'rb') do |file|
         file.seek(@directory_offset)
@@ -182,7 +205,11 @@ module Doom
         end
       end
       @logger.debug("Parsed #{@lumps.size} valid lumps")
-      @logger.debug("Available lumps: #{@lumps.keys.join(', ')}")
+      @logger.debug('Looking for required lumps: STARTAN3, E1M1, TEXTURE1, TEXTURE2')
+      @logger.debug("STARTAN3 present: #{@lumps['STARTAN3'] ? 'yes' : 'no'}")
+      @logger.debug("E1M1 present: #{@lumps['E1M1'] ? 'yes' : 'no'}")
+      @logger.debug("TEXTURE1 present: #{@lumps['TEXTURE1'] ? 'yes' : 'no'}")
+      @logger.debug("TEXTURE2 present: #{@lumps['TEXTURE2'] ? 'yes' : 'no'}")
     end
 
     def find_lumps_between_markers(start_markers, end_suffix)

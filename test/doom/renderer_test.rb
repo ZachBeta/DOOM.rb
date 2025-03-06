@@ -165,10 +165,16 @@ module Doom
       def @minimap_renderer.draw_player(*); end
       def @minimap_renderer.draw_rotation_angle(*); end
 
+      # Configure logger for test environment with verbose level
+      Logger.configure(level: :verbose, base_dir: 'logs', env: :test)
+
       @minimap_renderer.render(@player)
 
-      # Find the most recent verbose log file
-      log_file = Dir.glob('logs/verbose_*.log').max_by { |f| File.mtime(f) }
+      # Wait for log file to be written
+      sleep 0.1
+
+      # Find the most recent log file
+      log_file = Dir.glob('logs/verbose.log').first
       log_content = File.read(log_file)
 
       assert_includes log_content, 'Minimap rendered at'

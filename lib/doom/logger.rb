@@ -35,13 +35,9 @@ module Doom
 
     def setup_loggers
       FileUtils.mkdir_p(@base_dir)
-      timestamp = Time.now.strftime('%Y%m%d_%H%M%S')
-      @game_log = ::Logger.new(File.join(@base_dir, "game_#{timestamp}.log"), LOG_SHIFTS,
-                               MAX_LOG_SIZE)
-      @debug_log = ::Logger.new(File.join(@base_dir, "debug_#{timestamp}.log"), LOG_SHIFTS,
-                                MAX_LOG_SIZE)
-      @verbose_log = ::Logger.new(File.join(@base_dir, "verbose_#{timestamp}.log"), LOG_SHIFTS,
-                                  MAX_LOG_SIZE)
+      @game_log = ::Logger.new(File.join(@base_dir, 'game.log'), LOG_SHIFTS, MAX_LOG_SIZE)
+      @debug_log = ::Logger.new(File.join(@base_dir, 'debug.log'), LOG_SHIFTS, MAX_LOG_SIZE)
+      @verbose_log = ::Logger.new(File.join(@base_dir, 'verbose.log'), LOG_SHIFTS, MAX_LOG_SIZE)
 
       setup_logger_formatting(@game_log)
       setup_logger_formatting(@debug_log)

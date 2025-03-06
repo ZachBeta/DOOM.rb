@@ -28,18 +28,23 @@ module Doom
     TEXTURE_DEF_SIZE = 22
     PATCH_DEF_SIZE = 10
 
-    def self.parse(data)
-      new(data).parse
+    def self.parse(data, pnames = nil)
+      new(data, pnames).parse
     end
 
-    def initialize(data)
+    def initialize(data, pnames = nil)
       @data = data
+      @pnames = pnames
       @offset = 0
+      @logger = Logger.instance
     end
 
     def parse
+      @logger.debug("Parsing texture data of size: #{@data&.size || 'nil'}")
       num_textures = read_long
+      @logger.debug("Number of textures: #{num_textures}")
       texture_offsets = read_texture_offsets(num_textures)
+      @logger.debug("Texture offsets: #{texture_offsets.inspect}")
 
       texture_offsets.map do |offset|
         # Offset is relative to the start of the TEXTURE1 lump
@@ -62,14 +67,19 @@ module Doom
 
     def parse_texture
       name = read_string(TEXTURE_NAME_LENGTH).strip.upcase # WAD files store names in uppercase
+      @logger.debug("Parsing texture: #{name}")
       skip_bytes(4) # Skip flags (unused)
       width = read_short
       height = read_short
+      @logger.debug("Texture dimensions: #{width}x#{height}")
       skip_bytes(4) # Skip column directory (unused)
       num_patches = read_short
+      @logger.debug("Number of patches: #{num_patches}")
 
-      patches = num_patches.times.map do
-        parse_patch
+      patches = num_patches.times.map do |i|
+        patch = parse_patch
+        @logger.debug("Patch #{i + 1}: index=#{patch.patch_index}, offset=(#{patch.x_offset},#{patch.y_offset})")
+        patch
       end
 
       Texture.new(
@@ -86,10 +96,14 @@ module Doom
       patch_number = read_short
       skip_bytes(4) # Skip stepdir and colormap (unused)
 
+      patch_name = @pnames ? @pnames[patch_number] : nil
+      @logger.debug("Patch name: #{patch_name || 'unknown'} (index #{patch_number})")
+
       TexturePatch.new(
         patch_index: patch_number,
         x_offset: x_offset,
-        y_offset: y_offset
+        y_offset: y_offset,
+        name: patch_name
       )
     end
 

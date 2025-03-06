@@ -37,7 +37,7 @@
       "patterns": [
         {
           "pattern": "test/**/*_test.rb",
-          "instructions": "Write Minitest tests that focus on behavior. Use freedoom1.wad for WAD file testing. Follow Arrange-Act-Assert pattern. Keep tests isolated."
+          "instructions": "Write Minitest tests that focus on behavior. Use freedoom1.wad from the project root directory for WAD file testing. Follow Arrange-Act-Assert pattern. Keep tests isolated."
         }
       ]
     },

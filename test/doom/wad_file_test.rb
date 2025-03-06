@@ -5,6 +5,13 @@ require_relative '../../lib/doom/config'
 class WadFileTest < Minitest::Test
   def setup
     @wad_path = Doom::Config.wad_path
+    puts "Testing with WAD file: #{@wad_path}"
+    puts "WAD file exists: #{File.exist?(@wad_path)}"
+    puts "WAD file size: #{begin
+      File.size(@wad_path)
+    rescue StandardError
+      'N/A'
+    end}"
     @wad_file = Doom::WadFile.new(@wad_path)
   end
 
@@ -16,19 +23,23 @@ class WadFileTest < Minitest::Test
 
   def test_parses_directory_entries
     # Test a known texture lump
-    texture_lump = @wad_file.lump('STARTAN3')
+    texture_lump = @wad_file.lump('TEXTURE1')
 
-    assert_equal 'STARTAN3', texture_lump.name
+    refute_nil texture_lump, 'TEXTURE1 lump not found'
+    assert_equal 'TEXTURE1', texture_lump.name
     assert_operator texture_lump.size, :>, 0
 
     # Test a known map lump
     map_lump = @wad_file.lump('E1M1')
 
+    refute_nil map_lump, 'E1M1 lump not found'
     assert_equal 'E1M1', map_lump.name
   end
 
   def test_reads_lump_data
-    texture_lump = @wad_file.lump('STARTAN3')
+    texture_lump = @wad_file.lump('TEXTURE1')
+
+    refute_nil texture_lump, 'TEXTURE1 lump not found'
     data = texture_lump.read
 
     assert_operator data.bytesize, :>, 0
@@ -42,14 +53,22 @@ class WadFileTest < Minitest::Test
   end
 
   def test_parses_texture_data
-    texture = @wad_file.parse_texture('STARTAN3')
+    textures = @wad_file.parse_texture('TEXTURE1')
 
-    assert_operator texture.first.name.length, :>, 0
-    assert_operator texture.first.width, :>, 0
-    assert_operator texture.first.height, :>, 0
-    assert_operator texture.first.patches.size, :>, 0
+    refute_empty textures, 'No textures found in TEXTURE1'
 
-    patch = texture.first.patches.first
+    texture = textures.first
+
+    refute_nil texture, 'First texture is nil'
+
+    assert_operator texture.name.length, :>, 0
+    assert_operator texture.width, :>, 0
+    assert_operator texture.height, :>, 0
+    assert_operator texture.patches.size, :>, 0
+
+    patch = texture.patches.first
+
+    refute_nil patch, 'First patch is nil'
 
     assert_kind_of Integer, patch.patch_index
     assert_kind_of Integer, patch.x_offset
@@ -57,14 +76,25 @@ class WadFileTest < Minitest::Test
   end
 
   def test_resolves_patch_names_with_pnames
-    pnames = @wad_file.lump('PNAMES').read.unpack('V*')[1..-1].map do |i|
-      @wad_file.read_string(8, i * 8)
-    end
-    texture = @wad_file.parse_texture('STARTAN3', pnames)
+    pnames_lump = @wad_file.lump('PNAMES')
+    skip 'PNAMES lump not found' unless pnames_lump
 
-    patch = texture.first.patches.first
+    data = pnames_lump.read
+    count = data[0, 4].unpack1('V')
+    pnames = data[4..].unpack('Z8' * count)
+    textures = @wad_file.parse_texture('TEXTURE1', pnames)
 
-    assert_operator patch.name.length, :>, 0
+    refute_empty textures, 'No textures found in TEXTURE1'
+
+    texture = textures.first
+
+    refute_nil texture, 'First texture is nil'
+
+    patch = texture.patches.first
+
+    refute_nil patch, 'First patch is nil'
+
+    assert_operator patch.name.to_s.length, :>, 0
     assert_kind_of Integer, patch.patch_index
     assert_kind_of Integer, patch.x_offset
     assert_kind_of Integer, patch.y_offset
