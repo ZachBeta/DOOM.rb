@@ -85,6 +85,7 @@
   - [ ] Integrate texture system with renderer
   - [ ] Add texture caching for performance
   - [ ] Support texture scaling and alignment
+  - [ ] Acceptance test: using freedoom textures when running `rake doom`
 
 - [ ] Parse Level Geometry
   - VERTEXES lump parsing
