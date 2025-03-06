@@ -30,11 +30,13 @@ rake doom
 - Minimap and FPS display
 - WAD file parsing and inspection
 - Test-driven development
+- Texture system with TEXTURE1/TEXTURE2 support
+- Basic texture rendering and caching
 
 ### In Progress 🚧
 - Vanilla DOOM feature parity
 - Original DOOM source code study
-- Texture system implementation
+- Advanced texture features (filtering, mip-mapping)
 
 ### Planned 🎯
 - Full WAD file loading

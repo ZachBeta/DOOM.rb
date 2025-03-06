@@ -81,45 +81,13 @@
 
 ## Current Tasks
 
-- [ ] move `bin/run_all_rake_tasks` into default rake task
-
-### Texture Rendering Next Steps
-- [ ] Improve texture rendering quality
-- [ ] Optimize rendering performance further
-- [ ] Add proper texture filtering
-- [ ] Implement texture mip-mapping
-- [ ] Profile rendering performance
-- [ ] Investigate hardware acceleration options
-- [ ] Improve texture sampling efficiency
-- [ ] Add proper perspective correction
-- [ ] Implement texture atlas system
-
-### Research Topics
-- Doom engine texture mapping techniques
-- Gosu performance optimization strategies
-- Ruby game optimization patterns
-- Graphics rendering optimization approaches
-
-### Graphics & Engine Research
-- [ ] Study original DOOM source code
-  - https://github.com/id-Software/DOOM
-- [ ] Analyze Chocolate DOOM for vanilla accuracy
-  - https://github.com/chocolate-doom/chocolate-doom
-- [ ] Document feature parity goals with Chocolate DOOM
-  * https://github.com/chocolate-doom/chocolate-doom/blob/master/PHILOSOPHY.md
-  * tho less purist, more just making sure it runs on a unixy system
-- [ ] Freedoom manual as a feature list
-  - https://freedoom.github.io/freedoom-manual-en.pdf 
-
-
-### WAD Parser Next Steps
-- [ ] Complete TEXTURE1/TEXTURE2 parsing
+- [x] Complete TEXTURE1/TEXTURE2 parsing
   - [x] Implement texture composition from patches
   - [x] Handle texture name directory from PNAMES
-  - [ ] Integrate texture system with renderer
-  - [ ] Add texture caching for performance
-  - [ ] Support texture scaling and alignment
-  - [ ] Acceptance test: using freedoom textures when running `rake doom`
+  - [x] Integrate texture system with renderer
+  - [x] Add texture caching for performance
+  - [x] Support texture scaling and alignment
+  - [x] Acceptance test: using freedoom textures when running `rake doom`
 
 - [ ] Parse Level Geometry
   - VERTEXES lump parsing
