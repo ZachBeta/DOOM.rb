@@ -67,6 +67,10 @@
 - [ ] Analyze Chocolate DOOM for vanilla accuracy
   - https://github.com/chocolate-doom/chocolate-doom
 - [ ] Document feature parity goals with Chocolate DOOM
+  * https://github.com/chocolate-doom/chocolate-doom/blob/master/PHILOSOPHY.md
+- [ ] Freedoom manual as a feature list
+  - https://freedoom.github.io/freedoom-manual-en.pdf 
+
 
 ### WAD Parser Next Steps
 - [ ] Complete TEXTURE1/TEXTURE2 parsing
