@@ -76,6 +76,7 @@
 - [ ] Complete TEXTURE1/TEXTURE2 parsing
   - Implement texture composition from patches
   - Handle texture name directory from PNAMES
+  - try using freedoom textures when rendering
 
 - [ ] Parse Level Geometry
   - VERTEXES lump parsing
