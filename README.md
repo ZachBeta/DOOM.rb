@@ -2,6 +2,8 @@
 
 A Ruby implementation of the classic DOOM game engine, focusing on vanilla accuracy inspired by Chocolate DOOM.
 
+This is an experiment in gamedev, llm driven dev process, ripping and tearing in ruby
+
 [![Ruby Version](https://img.shields.io/badge/ruby-3.0%2B-ruby.svg)](https://www.ruby-lang.org/)
 [![License](https://img.shields.io/badge/license-GPL--2.0-blue.svg)](LICENSE)
 
