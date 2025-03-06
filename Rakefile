@@ -5,6 +5,38 @@ require 'timeout'
 require 'fileutils'
 require_relative 'lib/doom/config'
 
+desc 'Rotate logs - move current logs to history with timestamps'
+task :rotate_logs do
+  puts 'Rotating logs...'
+  timestamp = Time.now.strftime('%Y%m%d_%H%M%S')
+  base_logs = %w[doom.log debug.log verbose.log game.log]
+
+  # Move all log files to history
+  Dir.glob('logs/*.log{,.[0-9]*}').each do |log_file|
+    next if File.directory?(log_file)
+
+    basename = File.basename(log_file)
+
+    if basename =~ /\.log\.\d+$/
+      new_name = "logs/history/#{File.basename(basename,
+                                               '.log.*')}_#{timestamp}#{File.extname(basename)}"
+    else
+      new_name = "logs/history/#{File.basename(basename, '.log')}_#{timestamp}.log"
+    end
+
+    FileUtils.mv(log_file, new_name)
+    puts "Moved #{basename} to #{new_name}"
+  end
+
+  # Create fresh empty base log files
+  base_logs.each do |log|
+    FileUtils.touch("logs/#{log}")
+    puts "Created fresh #{log}"
+  end
+
+  puts 'Log rotation complete'
+end
+
 desc 'Run the DOOM viewer'
 task :run do
   ruby 'lib/doom.rb', Doom::Config.wad_path

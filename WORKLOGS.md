@@ -33,6 +33,8 @@
   - Implemented log levels for better cursor context
   - Added log rotation to prevent large files
   - Updated logging across game components
+  - Created logs/history directory for rotated logs
+  - Added rake task for log rotation (`rake rotate_logs`)
   
 - [x] Performance & Display
   - Show frame rate (FPS) in top left display
