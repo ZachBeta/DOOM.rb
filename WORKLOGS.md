@@ -101,6 +101,7 @@
 ## Future Plans
 
 ### Developer Tools
+- [ ] improve logging so tests can be run quietly, or with more verbose logging to assist in LLM powered dev workflow
 - [ ] Implement console for commands and cheats
 - [ ] Create demo system for replaying gameplay
 - [ ] Add more tests to improve coverage
