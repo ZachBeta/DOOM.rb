@@ -126,4 +126,9 @@ task :run_all do
   puts "\nAll tasks completed!"
 end
 
+desc 'Run the DOOM viewer (alias for run)'
+task :doom do
+  Rake::Task[:run].invoke
+end
+
 task default: :run_all
