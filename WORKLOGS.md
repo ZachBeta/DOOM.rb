@@ -35,26 +35,26 @@
   - Updated logging across game components
   - Created logs/history directory for rotated logs
   - Added rake task for log rotation (`rake rotate_logs`)
+  - Fixed puts vs logs in wad parser
+  - Stopped outputting wad parse with puts in test env
+  - Made better usage of debug.log, verbose.log, game.log and doom.log
   
 - [x] Performance & Display
   - Show frame rate (FPS) in top left display
 
-### Texture Rendering Progress (2025-03-06)
-- [x] Initial Texture Rendering
+- [x] Texture Rendering Progress (2025-03-06)
   - Basic texture loading and display
   - Initial texture coordinate calculation
   - Simple wall texture mapping
+  - First Pass Optimizations
+    - Added color caching to reduce Gosu::Color object creation
+    - Implemented line batching for more efficient rendering
+    - Added view distance culling
+    - Fixed texture coordinate calculation
+    - Added height clamping for better performance
+    - Improved wall shading with distance-based fog
 
-- [x] First Pass Optimizations
-  - Added color caching to reduce Gosu::Color object creation
-  - Implemented line batching for more efficient rendering
-  - Added view distance culling
-  - Fixed texture coordinate calculation
-  - Added height clamping for better performance
-  - Improved wall shading with distance-based fog
-
-### WAD Parser Progress (2025-03-06)
-- [x] Initial WAD Parser Implementation
+- [x] WAD Parser Progress (2025-03-06)
   - Basic WAD file header parsing
   - Directory entry parsing
   - Lump data reading
@@ -80,13 +80,14 @@
     - wad:info rake task
     - wad:textures rake task
     - Texture composition testing
+  - Implemented texture composition from patches
+  - Handled texture name directory from PNAMES
+  - Integrated texture system with renderer
+  - Added texture caching for performance
+  - Support texture scaling and alignment
+  - Acceptance test: using freedoom textures when running `rake doom`
 
 ## Current Tasks
-
-- [x] stop outputting wad parse with puts in test env, instead log it
-- [x] fix puts vs logs in wad parser so it stops adding noise to output in terminal window, and instead uses logs for feedback
-- [x] continue upgrading logging system and log rotation, rotate logs as a requirement for every rake task
-- [x] make better usage of debug.log, verbose.log, game.log and doom.log
 
 - [ ] Performance Optimization
   - [ ] Profile rendering bottlenecks
@@ -95,14 +96,6 @@
   - [ ] Enhance view distance culling
   - [ ] Implement texture mipmap system
   - [ ] Current FPS: 3-6, Target: 30+
-
-- [x] Complete TEXTURE1/TEXTURE2 parsing
-  - [x] Implement texture composition from patches
-  - [x] Handle texture name directory from PNAMES
-  - [x] Integrate texture system with renderer
-  - [x] Add texture caching for performance
-  - [x] Support texture scaling and alignment
-  - [x] Acceptance test: using freedoom textures when running `rake doom`
 
 - [ ] Parse Level Geometry
   - VERTEXES lump parsing
