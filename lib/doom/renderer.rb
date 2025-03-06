@@ -86,7 +86,7 @@ module Doom
       west: Gosu::Color.new(255, 255, 255, 0)    # Yellow
     }.freeze
     MAX_DISTANCE = 20.0 # Add distance limit for performance
-    MAX_BATCH_SIZE = 5000 # Increased from 1000 to 5000
+    MAX_BATCH_SIZE = 20_000 # Increased batch size for better performance
 
     def initialize(window, map, textures = {})
       @window = window
@@ -97,6 +97,18 @@ module Doom
       @fog_color_cache = {}
       @line_batch = []
       @z_buffer = Array.new(window.width)
+      @fog_factors = Array.new(MAX_DISTANCE.ceil + 1) do |i|
+        1.0 - (i.to_f / MAX_DISTANCE).clamp(0.0, 0.8)
+      end
+
+      # Pre-calculate texture offsets for all mipmap levels
+      return unless @default_texture
+
+      @tex_offsets = {}
+      @tex_offsets[0] = Array.new(@default_texture.height) { |y| y * @default_texture.width }
+      @default_texture.mipmaps.each_with_index do |mipmap, level|
+        @tex_offsets[level + 1] = Array.new(mipmap[:height]) { |y| y * mipmap[:width] }
+      end
     end
 
     def render(player, width, height)
@@ -191,30 +203,31 @@ module Doom
       tex_pos = (draw_start - (height / 2) + (line_height / 2)) * tex_step / line_height
 
       # Select appropriate mipmap level based on distance
-      mipmap_level = select_mipmap_level(perp_wall_dist)
-      texture_data = if mipmap_level == 0 || !@default_texture.mipmaps || @default_texture.mipmaps.empty?
+      mipmap_level = Math.log2(perp_wall_dist).floor.clamp(0, @default_texture.mipmaps.size - 1)
+      texture_data = if mipmap_level <= 0 || !@default_texture.mipmaps || @default_texture.mipmaps.empty?
                        {
                          width: @default_texture.width,
                          height: @default_texture.height,
                          data: @default_texture.data
                        }
                      else
-                       @default_texture.mipmaps[mipmap_level - 1]
+                       @default_texture.mipmaps[mipmap_level]
                      end
 
       # Pre-calculate texture dimensions and perspective values
       tex_width = texture_data[:width]
       tex_height = texture_data[:height]
       tex_data = texture_data[:data]
-      perspective_factor = 1.0 / perp_wall_dist
-      fog_factor = 1.0 - (perp_wall_dist / MAX_DISTANCE).clamp(0.0, 0.8)
+      fog_factor = @fog_factors[perp_wall_dist.to_i]
+      tex_offsets = @tex_offsets[mipmap_level]
 
       # Scale texture coordinates for mipmap level
-      tex_x = (tex_x * tex_width) / @default_texture.width
+      tex_x = ((tex_x * tex_width) / @default_texture.width).to_i
 
       # Pre-calculate step values
-      tex_step_scaled = tex_step * perspective_factor
-      tex_height_scaled = tex_height / @default_texture.height
+      tex_step_scaled = (tex_step * tex_height / @default_texture.height).to_i
+      tex_step_fixed = (tex_step * (1 << 16)).to_i
+      tex_pos_fixed = (tex_pos * (1 << 16)).to_i
 
       # Draw the slice with batched colors
       prev_color = nil
@@ -222,11 +235,12 @@ module Doom
       current_y = draw_start
 
       (draw_start...draw_end).each do |y|
-        # Calculate texture Y coordinate with perspective correction
-        tex_y = ((tex_pos * tex_step_scaled * tex_height_scaled)).to_i % tex_height
+        # Calculate texture Y coordinate using fixed-point arithmetic
+        tex_y = ((tex_pos_fixed >> 16) * tex_height / @default_texture.height) % tex_height
+        tex_index = tex_offsets[tex_y] + tex_x
 
         # Get color from texture with fog effect
-        color_index = tex_data[(tex_y * tex_width) + tex_x]
+        color_index = tex_data[tex_index]
         base_color = get_cached_color(color_index)
         color = apply_fog(base_color, fog_factor)
 
@@ -238,18 +252,11 @@ module Doom
         end
 
         current_y = y + 1
-        tex_pos += tex_step
+        tex_pos_fixed += tex_step_fixed
       end
 
       # Draw final segment
       add_to_batch(x, prev_y, x, current_y, prev_color) if prev_color
-    end
-
-    def select_mipmap_level(distance)
-      return 0 if distance <= 1.0
-
-      level = Math.log2(distance).floor
-      [level, @default_texture.mipmaps.size].min
     end
 
     def apply_fog(color, fog_factor)
@@ -280,6 +287,8 @@ module Doom
     end
 
     def get_cached_color(color_index)
+      return Gosu::Color::BLACK unless color_index.is_a?(Integer)
+
       @color_cache[color_index] ||= begin
         r = ((color_index & 0xE0) >> 5) * 32
         g = ((color_index & 0x1C) >> 2) * 32

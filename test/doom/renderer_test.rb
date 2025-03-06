@@ -5,6 +5,7 @@ require 'doom/renderer'
 require 'stringio'
 require 'doom/logger'
 require 'fileutils'
+require 'benchmark'
 
 module Doom
   class MockFont
@@ -208,6 +209,35 @@ module Doom
       tex_x = @wall_renderer.calculate_texture_x(intersection)
 
       assert_equal 32, tex_x # Should be middle of texture (0.5 * 64)
+    end
+
+    def test_wall_rendering_performance
+      player = MockPlayer.new([5, 5], [1, 0]) # Facing east
+      screen_width = 800
+      screen_height = 600
+
+      # Create a test pattern texture
+      texture_size = 256
+      texture = Doom::ComposedTexture.new(
+        width: texture_size,
+        height: texture_size,
+        data: Array.new(texture_size * texture_size) { |i| i % 256 }
+      )
+
+      wall_renderer = WallRenderer.new(@window, @map, { 'TEST_TEXTURE' => texture })
+
+      # Measure performance over multiple frames
+      time = Benchmark.realtime do
+        5.times do # Render scene 5 times
+          wall_renderer.render(player, screen_width, screen_height)
+        end
+      end
+
+      # Average time per frame should be under 16ms (60 FPS)
+      avg_frame_time = time / 5.0
+
+      assert_operator avg_frame_time, :<=, 0.016,
+                      "Wall rendering too slow: #{(avg_frame_time * 1000).round(2)}ms per frame"
     end
   end
 end
