@@ -77,6 +77,7 @@ module Doom
       west: Gosu::Color.new(255, 255, 255, 0)    # Yellow
     }.freeze
     MAX_DISTANCE = 20.0 # Add distance limit for performance
+    MAX_BATCH_SIZE = 5000 # Increased from 1000 to 5000
 
     def initialize(window, map, textures = {})
       @window = window
@@ -84,8 +85,8 @@ module Doom
       @textures = textures
       @default_texture = @textures.values.first
       @color_cache = {}
+      @fog_color_cache = {}
       @line_batch = []
-      @max_batch_size = 1000
       @z_buffer = Array.new(window.width)
     end
 
@@ -156,7 +157,7 @@ module Doom
     def draw_textured_slice(x, draw_start, draw_end, tex_x, line_height, perp_wall_dist)
       return if draw_start >= draw_end
 
-      # Calculate texture step with perspective correction
+      # Pre-calculate constants for the loop
       height = draw_end - draw_start
       tex_step = (@default_texture.height.to_f / line_height)
       tex_pos = (draw_start - (height / 2) + (line_height / 2)) * tex_step / line_height
@@ -178,23 +179,27 @@ module Doom
       tex_height = texture_data[:height]
       tex_data = texture_data[:data]
       perspective_factor = 1.0 / perp_wall_dist
+      fog_factor = 1.0 - (perp_wall_dist / MAX_DISTANCE).clamp(0.0, 0.8)
 
       # Scale texture coordinates for mipmap level
       tex_x = (tex_x * tex_width) / @default_texture.width
 
-      # Draw the slice with perspective correction
+      # Pre-calculate step values
+      tex_step_scaled = tex_step * perspective_factor
+      tex_height_scaled = tex_height / @default_texture.height
+
+      # Draw the slice with batched colors
       prev_color = nil
       prev_y = draw_start
       current_y = draw_start
 
       (draw_start...draw_end).each do |y|
         # Calculate texture Y coordinate with perspective correction
-        tex_y = ((tex_pos * perspective_factor * tex_height) / @default_texture.height).to_i % tex_height
+        tex_y = ((tex_pos * tex_step_scaled * tex_height_scaled)).to_i % tex_height
 
         # Get color from texture with fog effect
         color_index = tex_data[(tex_y * tex_width) + tex_x]
         base_color = get_cached_color(color_index)
-        fog_factor = 1.0 - (perp_wall_dist / MAX_DISTANCE).clamp(0.0, 0.8)
         color = apply_fog(base_color, fog_factor)
 
         # Batch similar colors
@@ -220,10 +225,13 @@ module Doom
     end
 
     def apply_fog(color, fog_factor)
-      r = (color.red * fog_factor).to_i
-      g = (color.green * fog_factor).to_i
-      b = (color.blue * fog_factor).to_i
-      Gosu::Color.new(color.alpha, r, g, b)
+      cache_key = "#{color.object_id}_#{(fog_factor * 100).to_i}"
+      @fog_color_cache[cache_key] ||= begin
+        r = (color.red * fog_factor).to_i
+        g = (color.green * fog_factor).to_i
+        b = (color.blue * fog_factor).to_i
+        Gosu::Color.new(color.alpha, r, g, b)
+      end
     end
 
     def draw_colored_slice(x, draw_start, draw_end, intersection)
@@ -233,7 +241,7 @@ module Doom
 
     def add_to_batch(x1, y1, x2, y2, color)
       @line_batch << [x1, y1, x2, y2, color]
-      flush_line_batch if @line_batch.size >= @max_batch_size
+      flush_line_batch if @line_batch.size >= MAX_BATCH_SIZE
     end
 
     def flush_line_batch
@@ -243,11 +251,11 @@ module Doom
       @line_batch.clear
     end
 
-    def get_cached_color(index)
-      @color_cache[index] ||= begin
-        r = ((index & 0xE0) >> 5) * 32
-        g = ((index & 0x1C) >> 2) * 32
-        b = (index & 0x03) * 64
+    def get_cached_color(color_index)
+      @color_cache[color_index] ||= begin
+        r = ((color_index & 0xE0) >> 5) * 32
+        g = ((color_index & 0x1C) >> 2) * 32
+        b = (color_index & 0x03) * 64
         Gosu::Color.new(255, r, g, b)
       end
     end
