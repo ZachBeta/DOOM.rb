@@ -49,8 +49,9 @@ module Doom
     end
 
     def setup_logger_formatting(logger)
+      git_sha = `git rev-parse --short HEAD`.strip
       logger.formatter = proc do |severity, datetime, _progname, msg|
-        "[#{datetime.strftime('%Y-%m-%d %H:%M:%S.%L')}] [#{severity}] #{msg}\n"
+        "[#{datetime.strftime('%Y-%m-%d %H:%M:%S.%L')}] [#{severity}] [#{git_sha}] #{msg}\n"
       end
     end
   end
