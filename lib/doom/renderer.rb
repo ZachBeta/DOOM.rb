@@ -3,9 +3,10 @@
 require 'gosu'
 require_relative 'map'
 require_relative 'logger'
+require_relative 'opengl_renderer'
 
 module Doom
-  class Renderer
+  class BaseRenderer
     attr_reader :last_render_time, :last_texture_time
 
     def initialize(window, map, textures = {})
@@ -13,11 +14,41 @@ module Doom
       @map = map
       @width = window.width
       @height = window.height
+      @last_render_time = 0
+      @last_texture_time = 0
+    end
+
+    def render(player)
+      raise NotImplementedError, "#{self.class} must implement render"
+    end
+  end
+
+  class Renderer
+    def initialize(window, map, textures = {})
+      @rendering_strategy = if use_opengl?
+                              OpenGLRenderer.new(window, map, textures)
+                            else
+                              GosuRenderer.new(window, map, textures)
+                            end
+    end
+
+    def render(player)
+      @rendering_strategy.render(player)
+    end
+
+    private
+
+    def use_opengl?
+      ENV['DOOM_RENDERER'] != 'gosu' # Default to OpenGL unless explicitly set to 'gosu'
+    end
+  end
+
+  class GosuRenderer < BaseRenderer
+    def initialize(window, map, textures = {})
+      super
       @wall_renderer = WallRenderer.new(window, @map, textures)
       @background_renderer = BackgroundRenderer.new(window)
       @minimap_renderer = MinimapRenderer.new(window, @map)
-      @last_render_time = 0
-      @last_texture_time = 0
     end
 
     def render(player)
@@ -39,6 +70,49 @@ module Doom
                     "Texture: #{(@last_texture_time * 1000).round(2)}ms, " \
                     "Background: #{((texture_start - start_time) * 1000).round(2)}ms, " \
                     "Minimap: #{((end_time - texture_end) * 1000).round(2)}ms")
+    end
+  end
+
+  class OpenGLRenderer < BaseRenderer
+    def initialize(window, map, textures = {})
+      super
+      setup_opengl
+      setup_textures(textures)
+    end
+
+    def render(player)
+      start_time = Time.now
+
+      gl_render_background
+      gl_render_walls(player)
+      gl_render_minimap(player)
+
+      end_time = Time.now
+      @last_render_time = end_time - start_time
+    end
+
+    private
+
+    def setup_opengl
+      @logger ||= Logger.instance
+      @logger.info('Setting up OpenGL renderer')
+      # OpenGL setup will go here
+    end
+
+    def setup_textures(textures)
+      # Texture setup will go here
+    end
+
+    def gl_render_background
+      # OpenGL background rendering
+    end
+
+    def gl_render_walls(player)
+      # OpenGL wall rendering
+    end
+
+    def gl_render_minimap(player)
+      # OpenGL minimap rendering
     end
   end
 
@@ -120,11 +194,28 @@ module Doom
       texture_time = 0
       batch_time = 0
 
-      width.times do |x|
+      # Pre-calculate ray directions for each column
+      ray_directions = width.times.map do |x|
+        ray = Ray.new(player, x, width)
+        [ray.direction_x, ray.direction_y]
+      end
+
+      # Pre-calculate wall intersections
+      intersections = ray_directions.map.with_index do |(ray_dir_x, ray_dir_y), x|
         ray = Ray.new(player, x, width)
         intersection = ray_cast(ray, player)
-        next unless intersection && intersection.distance < MAX_DISTANCE
+        if intersection && intersection.distance < MAX_DISTANCE
+          intersection.instance_variable_set(:@x, x)
+          intersection
+        end
+      end.compact
 
+      # Sort intersections by distance for better batching
+      intersections.sort_by!(&:distance)
+
+      # Process intersections in batches
+      intersections.each do |intersection|
+        x = intersection.x
         @z_buffer[x] = intersection.distance
 
         tex_start = Time.now
@@ -203,7 +294,8 @@ module Doom
       tex_pos = (draw_start - (height / 2) + (line_height / 2)) * tex_step / line_height
 
       # Select appropriate mipmap level based on distance
-      mipmap_level = Math.log2(perp_wall_dist).floor.clamp(0, @default_texture.mipmaps.size - 1)
+      max_mipmap_level = @default_texture.mipmaps ? [@default_texture.mipmaps.size - 1, 0].max : 0
+      mipmap_level = Math.log2(perp_wall_dist).floor.clamp(0, max_mipmap_level)
       texture_data = if mipmap_level <= 0 || !@default_texture.mipmaps || @default_texture.mipmaps.empty?
                        {
                          width: @default_texture.width,
@@ -234,25 +326,30 @@ module Doom
       prev_y = draw_start
       current_y = draw_start
 
-      (draw_start...draw_end).each do |y|
-        # Calculate texture Y coordinate using fixed-point arithmetic
-        tex_y = ((tex_pos_fixed >> 16) * tex_height / @default_texture.height) % tex_height
-        tex_index = tex_offsets[tex_y] + tex_x
+      # Pre-calculate texture Y coordinates for the entire slice
+      tex_y_coords = Array.new(draw_end - draw_start) do |i|
+        ((tex_pos_fixed + (i * tex_step_fixed)) >> 16) * tex_height / @default_texture.height % tex_height
+      end
 
-        # Get color from texture with fog effect
+      # Pre-calculate texture indices
+      tex_indices = tex_y_coords.map { |tex_y| tex_offsets[tex_y] + tex_x }
+
+      # Pre-calculate colors with fog effect
+      colors = tex_indices.map do |tex_index|
         color_index = tex_data[tex_index]
         base_color = get_cached_color(color_index)
-        color = apply_fog(base_color, fog_factor)
+        apply_fog(base_color, fog_factor)
+      end
 
-        # Batch similar colors
+      # Batch similar colors
+      colors.each_with_index do |color, i|
+        y = draw_start + i
         if color != prev_color && current_y > prev_y
           add_to_batch(x, prev_y, x, current_y, prev_color) if prev_color
           prev_y = current_y
           prev_color = color
         end
-
         current_y = y + 1
-        tex_pos_fixed += tex_step_fixed
       end
 
       # Draw final segment
@@ -396,17 +493,18 @@ module Doom
         map_x: @map_x,
         map_y: @map_y,
         step_x: @step_x,
-        step_y: @step_y
+        step_y: @step_y,
+        x: @map_x
       )
     end
   end
 
   class WallIntersection
     attr_reader :distance, :side, :ray_dir_x, :ray_dir_y, :wall_x, :wall_y, :player_x, :player_y,
-                :map_x, :map_y, :step_x, :step_y
+                :map_x, :map_y, :step_x, :step_y, :x
 
     def initialize(distance:, side:, ray_dir_x:, ray_dir_y:, wall_x: 0.0, wall_y: 0.0,
-                   player_x: 0.0, player_y: 0.0, map_x: 0, map_y: 0, step_x: 0, step_y: 0)
+                   player_x: 0.0, player_y: 0.0, map_x: 0, map_y: 0, step_x: 0, step_y: 0, x: nil)
       @distance = distance
       @side = side
       @ray_dir_x = ray_dir_x
@@ -419,6 +517,7 @@ module Doom
       @map_y = map_y
       @step_x = step_x
       @step_y = step_y
+      @x = x
     end
   end
 

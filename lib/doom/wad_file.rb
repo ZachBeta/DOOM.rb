@@ -257,5 +257,23 @@ module Doom
         file.read(@size)
       end
     end
+
+    def width
+      return nil unless valid?
+
+      data = read
+      return nil unless data && data.size >= 2
+
+      data[0, 2].unpack1('v')
+    end
+
+    def height
+      return nil unless valid?
+
+      data = read
+      return nil unless data && data.size >= 4
+
+      data[2, 2].unpack1('v')
+    end
   end
 end
