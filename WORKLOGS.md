@@ -58,6 +58,12 @@
   - Parse TEXTURE1/TEXTURE2 data structures
     - Support texture dimensions
     - Parse patch references
+    - Implement texture composition from patches
+    - Add texture name resolution from PNAMES
+  - Added texture inspection tools
+    - wad:info rake task
+    - wad:textures rake task
+    - Texture composition testing
 
 ## Current Tasks
 
@@ -75,8 +81,10 @@
 ### WAD Parser Next Steps
 - [ ] Complete TEXTURE1/TEXTURE2 parsing
   - [x] Implement texture composition from patches
-  - [ ] Handle texture name directory from PNAMES
-  - [ ] Try using freedoom textures when rendering
+  - [x] Handle texture name directory from PNAMES
+  - [ ] Integrate texture system with renderer
+  - [ ] Add texture caching for performance
+  - [ ] Support texture scaling and alignment
 
 - [ ] Parse Level Geometry
   - VERTEXES lump parsing
