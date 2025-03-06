@@ -11,7 +11,7 @@ end
 
 desc 'Run tests'
 Rake::TestTask.new(:test) do |t|
-  FileUtils.mkdir_p('test/logs')
+  FileUtils.mkdir_p('logs')
   t.libs << 'test'
   t.test_files = FileList['test/**/*_test.rb']
   t.warning = false

@@ -131,7 +131,7 @@ module Doom
       @minimap_renderer = MinimapRenderer.new(@window, @map)
       @player = MockPlayer.new([5, 5], [1, 0])
       # Configure logger for test environment with verbose level for this specific test
-      Logger.configure(level: :verbose, base_dir: 'test/logs', env: :test)
+      Logger.configure(level: :verbose, base_dir: 'logs', env: :test)
     end
 
     def teardown
@@ -168,7 +168,7 @@ module Doom
       @minimap_renderer.render(@player)
 
       # Find the most recent verbose log file
-      log_file = Dir.glob('test/logs/verbose_*.log').max_by { |f| File.mtime(f) }
+      log_file = Dir.glob('logs/verbose_*.log').max_by { |f| File.mtime(f) }
       log_content = File.read(log_file)
 
       assert_includes log_content, 'Minimap rendered at'
@@ -188,7 +188,7 @@ module Doom
       )
       @wall_renderer = WallRenderer.new(@window, @map, { 'TEST_TEXTURE' => @texture })
       # Configure logger for test environment with verbose level for this specific test
-      Logger.configure(level: :verbose, base_dir: 'test/logs', env: :test)
+      Logger.configure(level: :verbose, base_dir: 'logs', env: :test)
     end
 
     def teardown

@@ -15,9 +15,8 @@ end
 
 module TestHelper
   def setup_test_logs
-    FileUtils.rm_rf('test/logs')
-    FileUtils.mkdir_p('test/logs')
-    Doom::Logger.configure(level: :verbose, base_dir: 'test/logs', env: :test)
+    FileUtils.mkdir_p('logs')
+    Doom::Logger.configure(level: :verbose, base_dir: 'logs', env: :test)
   end
 end
 
@@ -26,7 +25,7 @@ class Minitest::Test
 end
 
 # Configure logger for test environment
-Doom::Logger.configure(level: :info, base_dir: 'test/logs', env: :test)
+Doom::Logger.configure(level: :info, base_dir: 'logs', env: :test)
 
 # Don't require the entire doom.rb file as it starts the game
 # Instead, require only the specific files needed for testing
