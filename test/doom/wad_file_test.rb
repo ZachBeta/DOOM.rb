@@ -18,7 +18,7 @@ module Doom
 
       assert_equal 'IWAD', wad_file.identification
       assert_equal 11, wad_file.lump_count
-      assert_equal 69, wad_file.directory_offset
+      assert_equal 111, wad_file.directory_offset
     end
 
     def test_parses_directory_entries
@@ -54,6 +54,22 @@ module Doom
       assert_equal 2, textures.size
       assert_includes textures.keys, 'TEXTURE1'
       assert_includes textures.keys, 'TEXTURE2'
+    end
+
+    def test_parses_texture1_data
+      wad_file = WadFile.new(@test_wad_path)
+      texture = wad_file.parse_texture('TEXTURE1')
+
+      assert_equal 'STARTAN3', texture.first.name
+      assert_equal 128, texture.first.width
+      assert_equal 128, texture.first.height
+      assert_equal 2, texture.first.patches.size
+
+      patch = texture.first.patches.first
+
+      assert_equal 'WALL03_3', patch.name
+      assert_equal 0, patch.x_offset
+      assert_equal 0, patch.y_offset
     end
 
     def test_finds_flats
@@ -103,7 +119,7 @@ module Doom
 
       # Write texture section
       add_lump(data, directory, 'P_START', '')
-      add_lump(data, directory, 'TEXTURE1', 'TEX1DATA')
+      add_texture1_lump(data, directory)
       add_lump(data, directory, 'TEXTURE2', 'TEX2DATA')
       add_lump(data, directory, 'P_END', '')
 
@@ -129,6 +145,40 @@ module Doom
 
       # Write to file
       File.binwrite(@test_wad_path, data.string)
+    end
+
+    def add_texture1_lump(data, directory)
+      texture_data = StringIO.new
+
+      # Number of textures (1 texture)
+      texture_data.write([1].pack('V'))
+
+      # Offset to the texture definition (8 bytes from start)
+      texture_data.write([8].pack('V'))
+
+      # STARTAN3 texture definition
+      texture_data.write('STARTAN3'.ljust(8, "\x00")) # name
+      texture_data.write([0].pack('V'))               # flags (unused)
+      texture_data.write([128].pack('v'))             # width
+      texture_data.write([128].pack('v'))             # height
+      texture_data.write([0].pack('V'))               # column directory (unused)
+      texture_data.write([2].pack('v'))               # patch count
+
+      # First patch
+      texture_data.write([0].pack('v'))               # x offset
+      texture_data.write([0].pack('v'))               # y offset
+      texture_data.write([0].pack('v'))               # patch number
+      texture_data.write([0].pack('v'))               # stepdir (unused)
+      texture_data.write([0].pack('v'))               # colormap (unused)
+
+      # Second patch
+      texture_data.write([64].pack('v'))              # x offset
+      texture_data.write([0].pack('v'))               # y offset
+      texture_data.write([1].pack('v'))               # patch number
+      texture_data.write([0].pack('v'))               # stepdir (unused)
+      texture_data.write([0].pack('v'))               # colormap (unused)
+
+      add_lump(data, directory, 'TEXTURE1', texture_data.string)
     end
 
     def add_lump(data, directory, name, content)

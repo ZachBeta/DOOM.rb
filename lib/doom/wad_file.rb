@@ -1,3 +1,6 @@
+require_relative 'logger'
+require_relative 'texture'
+
 module Doom
   class WadFile
     IWAD_TYPE = 'IWAD'
@@ -55,6 +58,13 @@ module Doom
       end
 
       level_lumps
+    end
+
+    def parse_texture(name)
+      lump = @lumps[name]
+      return [] unless lump
+
+      TextureParser.parse(lump.read)
     end
 
     private
