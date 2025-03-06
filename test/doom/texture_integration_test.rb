@@ -6,19 +6,19 @@ require 'doom/texture_composer'
 module Doom
   class TextureIntegrationTest < Minitest::Test
     def setup
-      @test_wad_path = File.join(File.dirname(__FILE__), '../fixtures/test.wad')
-      @wad_file = WadFile.new(@test_wad_path)
+      @wad_path = 'levels/freedoom-0.13.0/freedoom1.wad'
+      @wad_file = WadFile.new(@wad_path)
       @texture_composer = TextureComposer.new
     end
 
     def test_texture_composition_with_single_patch
       texture = Texture.new(
-        name: 'TEST1',
+        name: 'STARTAN3',
         width: 64,
         height: 128,
         patches: [
           TexturePatch.new(
-            name: 'PATCH1',
+            name: 'WALL03_3',
             patch_index: 0,
             x_offset: 0,
             y_offset: 0
@@ -27,13 +27,13 @@ module Doom
       )
 
       patch = Patch.new(
-        name: 'PATCH1',
+        name: 'WALL03_3',
         width: 64,
         height: 128,
         data: Array.new(64 * 128, 1)
       )
 
-      composed = @texture_composer.compose(texture, { 'PATCH1' => patch })
+      composed = @texture_composer.compose(texture, { 'WALL03_3' => patch })
 
       assert_equal 64, composed.width
       assert_equal 128, composed.height
@@ -42,18 +42,18 @@ module Doom
 
     def test_texture_composition_with_multiple_patches
       texture = Texture.new(
-        name: 'TEST2',
+        name: 'STARTAN3',
         width: 64,
         height: 64,
         patches: [
           TexturePatch.new(
-            name: 'PATCH1',
+            name: 'WALL03_3',
             patch_index: 0,
             x_offset: 0,
             y_offset: 0
           ),
           TexturePatch.new(
-            name: 'PATCH2',
+            name: 'WALL03_4',
             patch_index: 1,
             x_offset: 32,
             y_offset: 0
@@ -62,20 +62,20 @@ module Doom
       )
 
       patch1 = Patch.new(
-        name: 'PATCH1',
+        name: 'WALL03_3',
         width: 32,
         height: 64,
         data: Array.new(32 * 64, 1)
       )
 
       patch2 = Patch.new(
-        name: 'PATCH2',
+        name: 'WALL03_4',
         width: 32,
         height: 64,
         data: Array.new(32 * 64, 2)
       )
 
-      composed = @texture_composer.compose(texture, { 'PATCH1' => patch1, 'PATCH2' => patch2 })
+      composed = @texture_composer.compose(texture, { 'WALL03_3' => patch1, 'WALL03_4' => patch2 })
 
       expected_data = []
       64.times do |y|
@@ -90,18 +90,18 @@ module Doom
 
     def test_texture_composition_with_overlapping_patches
       texture = Texture.new(
-        name: 'TEST3',
+        name: 'STARTAN3',
         width: 64,
         height: 64,
         patches: [
           TexturePatch.new(
-            name: 'BACKGROUND',
+            name: 'WALL03_3',
             patch_index: 0,
             x_offset: 0,
             y_offset: 0
           ),
           TexturePatch.new(
-            name: 'OVERLAY',
+            name: 'WALL03_4',
             patch_index: 1,
             x_offset: 16,
             y_offset: 16
@@ -110,21 +110,21 @@ module Doom
       )
 
       background = Patch.new(
-        name: 'BACKGROUND',
+        name: 'WALL03_3',
         width: 64,
         height: 64,
         data: Array.new(64 * 64, 1)
       )
 
       overlay = Patch.new(
-        name: 'OVERLAY',
+        name: 'WALL03_4',
         width: 32,
         height: 32,
         data: Array.new(32 * 32, 2)
       )
 
       composed = @texture_composer.compose(texture,
-                                           { 'BACKGROUND' => background, 'OVERLAY' => overlay })
+                                           { 'WALL03_3' => background, 'WALL03_4' => overlay })
 
       assert_equal 64, composed.width
       assert_equal 64, composed.height

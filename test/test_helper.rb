@@ -5,11 +5,24 @@ require 'minitest/pride'
 require 'matrix'
 require 'simplecov'
 require 'doom/logger'
+require 'fileutils'
 
 SimpleCov.start do
   add_filter '/test/'
   track_files 'lib/**/*.rb'
   enable_coverage :branch
+end
+
+module TestHelper
+  def setup_test_logs
+    FileUtils.rm_rf('test/logs')
+    FileUtils.mkdir_p('test/logs')
+    Doom::Logger.configure(level: :verbose, base_dir: 'test/logs', env: :test)
+  end
+end
+
+class Minitest::Test
+  include TestHelper
 end
 
 # Configure logger for test environment

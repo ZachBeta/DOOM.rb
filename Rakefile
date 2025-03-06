@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require 'rake/testtask'
+require 'timeout'
+require 'fileutils'
 
 desc 'Run the DOOM.rb game'
 task :doom do
@@ -9,6 +11,7 @@ end
 
 desc 'Run tests'
 Rake::TestTask.new(:test) do |t|
+  FileUtils.mkdir_p('test/logs')
   t.libs << 'test'
   t.test_files = FileList['test/**/*_test.rb']
   t.warning = false
@@ -31,4 +34,28 @@ namespace :wad do
   end
 end
 
-task default: :doom
+task :run_all do
+  freedoom_wad = 'levels/freedoom-0.13.0/freedoom1.wad'
+
+  puts "\nRunning tests..."
+  Rake::Task['test'].invoke
+
+  puts "\nRunning WAD info task with Freedoom WAD..."
+  Rake::Task['wad:info'].invoke(freedoom_wad)
+
+  puts "\nRunning WAD textures task with Freedoom WAD..."
+  Rake::Task['wad:textures'].invoke(freedoom_wad)
+
+  puts "\nRunning DOOM game (will be terminated after 5 seconds)..."
+  begin
+    Timeout.timeout(5) do
+      Rake::Task['doom'].invoke
+    end
+  rescue Timeout::Error
+    puts 'DOOM game terminated after 5 seconds'
+  end
+
+  puts "\nAll tasks completed!"
+end
+
+task default: :run_all

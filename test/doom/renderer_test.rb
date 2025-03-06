@@ -119,16 +119,22 @@ module Doom
 
   class MinimapRendererTest < Minitest::Test
     def setup
-      setup_test_logs
       @window = MockWindow.new
       @map = MockMap.new
-      @player = MockPlayer.new([5, 5], [1, 0]) # Facing east
-      @minimap = MinimapRenderer.new(@window, @map)
+      @texture = Doom::ComposedTexture.new(
+        width: 64,
+        height: 128,
+        data: Array.new(64 * 128) { |i| i % 256 } # Create a test pattern
+      )
+      @wall_renderer = WallRenderer.new(@window, @map, { 'TEST_TEXTURE' => @texture })
+      @minimap_renderer = MinimapRenderer.new(@window, @map)
+      @player = MockPlayer.new([5, 5], [1, 0])
+      # Configure logger for test environment with verbose level for this specific test
+      Logger.configure(level: :verbose, base_dir: 'test/logs', env: :test)
     end
 
     def teardown
       super
-      FileUtils.rm_rf('test/logs')
     end
 
     def test_minimap_cell_size
@@ -153,33 +159,25 @@ module Doom
 
     def test_minimap_logging
       # Skip actual rendering but still log
-      def @minimap.draw_background; end
-      def @minimap.draw_walls; end
-      def @minimap.draw_player(*); end
-      def @minimap.draw_rotation_angle(*); end
+      def @minimap_renderer.draw_background; end
+      def @minimap_renderer.draw_walls; end
+      def @minimap_renderer.draw_player(*); end
+      def @minimap_renderer.draw_rotation_angle(*); end
 
-      @minimap.render(@player)
+      @minimap_renderer.render(@player)
 
-      log_content = File.read('test/logs/verbose.log')
+      # Find the most recent verbose log file
+      log_file = Dir.glob('test/logs/verbose_*.log').max_by { |f| File.mtime(f) }
+      log_content = File.read(log_file)
 
       assert_includes log_content, 'Minimap rendered at'
       assert_includes log_content, 'Player position on minimap'
       assert_includes log_content, 'Player rotation: 0°'
     end
-
-    private
-
-    def setup_test_logs
-      FileUtils.rm_rf('test/logs')
-      FileUtils.mkdir_p('test/logs')
-      # Configure logger for test environment with verbose level for this specific test
-      Logger.configure(level: :verbose, base_dir: 'test/logs', env: :test)
-    end
   end
 
   class TexturedWallRendererTest < Minitest::Test
     def setup
-      setup_test_logs
       @window = MockWindow.new
       @map = MockMap.new
       @texture = Doom::ComposedTexture.new(
@@ -188,11 +186,12 @@ module Doom
         data: Array.new(64 * 128) { |i| i % 256 } # Create a test pattern
       )
       @wall_renderer = WallRenderer.new(@window, @map, { 'TEST_TEXTURE' => @texture })
+      # Configure logger for test environment with verbose level for this specific test
+      Logger.configure(level: :verbose, base_dir: 'test/logs', env: :test)
     end
 
     def teardown
       super
-      FileUtils.rm_rf('test/logs')
     end
 
     def test_texture_mapping

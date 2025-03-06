@@ -133,8 +133,10 @@ module Doom
     def calculate_texture_x(intersection)
       return 0 unless @default_texture
 
-      # Calculate exact hit point with higher precision
-      wall_x = if intersection.side.zero?
+      # Use provided wall_x if available, otherwise calculate it
+      wall_x = if intersection.wall_x
+                 intersection.wall_x
+               elsif intersection.side.zero?
                  intersection.player_y + (intersection.distance * intersection.ray_dir_y)
                else
                  intersection.player_x + (intersection.distance * intersection.ray_dir_x)
