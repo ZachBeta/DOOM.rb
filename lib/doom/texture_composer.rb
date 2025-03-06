@@ -21,11 +21,12 @@ module Doom
   end
 
   class TextureComposer
-    def compose(texture, patches)
+    def compose(texture, patches, pnames = nil)
       data = Array.new(texture.width * texture.height, 0)
 
       texture.patches.each do |patch|
-        source_patch = patches[patch.name]
+        patch_name = pnames ? pnames[patch.patch_index] : patch.name
+        source_patch = patches[patch_name]
         compose_patch(data, source_patch, patch.x_offset, patch.y_offset, texture.width)
       end
 

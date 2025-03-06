@@ -44,6 +44,32 @@ module Doom
       assert_equal 2, composed.data[127]
     end
 
+    def test_handles_pnames_lookup
+      pnames = %w[WALL03_3 WALL03_4 WALL03_5]
+      patch1 = create_patch(
+        name: 'WALL03_3',
+        width: 64,
+        height: 128,
+        data: Array.new(64 * 128, 1)
+      )
+
+      texture = Texture.new(
+        name: 'STARTAN3',
+        width: 64,
+        height: 128,
+        patches: [
+          TexturePatch.new(patch_index: 0, x_offset: 0, y_offset: 0)
+        ]
+      )
+
+      composer = TextureComposer.new
+      composed = composer.compose(texture, { 'WALL03_3' => patch1 }, pnames)
+
+      assert_equal 64, composed.width
+      assert_equal 128, composed.height
+      assert_equal 1, composed.data[0]
+    end
+
     private
 
     def create_patch(name:, width:, height:, data:)

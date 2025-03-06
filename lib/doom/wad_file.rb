@@ -60,11 +60,29 @@ module Doom
       level_lumps
     end
 
-    def parse_texture(name)
+    def parse_texture(name, pnames = nil)
       lump = @lumps[name]
       return [] unless lump
 
-      TextureParser.parse(lump.read)
+      textures = TextureParser.parse(lump.read)
+      return textures unless pnames
+
+      textures.map do |texture|
+        patches = texture.patches.map do |patch|
+          TexturePatch.new(
+            patch_index: patch.patch_index,
+            name: pnames[patch.patch_index],
+            x_offset: patch.x_offset,
+            y_offset: patch.y_offset
+          )
+        end
+        Texture.new(
+          name: texture.name,
+          width: texture.width,
+          height: texture.height,
+          patches: patches
+        )
+      end
     end
 
     private

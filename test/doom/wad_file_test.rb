@@ -67,7 +67,19 @@ module Doom
 
       patch = texture.first.patches.first
 
+      assert_equal 0, patch.patch_index
+      assert_equal 0, patch.x_offset
+      assert_equal 0, patch.y_offset
+    end
+
+    def test_resolves_patch_names_with_pnames
+      wad_file = WadFile.new(@test_wad_path)
+      texture = wad_file.parse_texture('TEXTURE1', %w[WALL03_3 WALL03_4])
+
+      patch = texture.first.patches.first
+
       assert_equal 'WALL03_3', patch.name
+      assert_equal 0, patch.patch_index
       assert_equal 0, patch.x_offset
       assert_equal 0, patch.y_offset
     end

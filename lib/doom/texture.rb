@@ -11,10 +11,11 @@ module Doom
   end
 
   class TexturePatch
-    attr_reader :name, :x_offset, :y_offset
+    attr_reader :name, :patch_index, :x_offset, :y_offset
 
-    def initialize(name:, x_offset:, y_offset:)
+    def initialize(x_offset:, y_offset:, name: nil, patch_index: nil)
       @name = name
+      @patch_index = patch_index
       @x_offset = x_offset
       @y_offset = y_offset
     end
@@ -91,10 +92,8 @@ module Doom
       patch_number = read_short
       skip_bytes(4) # Skip stepdir and colormap (unused)
 
-      # For now, we'll use a placeholder name based on the patch number
-      # In a real implementation, we'd need to look up the actual patch name
       TexturePatch.new(
-        name: patch_number == 0 ? 'WALL03_3' : 'WALL03_4',
+        patch_index: patch_number,
         x_offset: x_offset,
         y_offset: y_offset
       )
