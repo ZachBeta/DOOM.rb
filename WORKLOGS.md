@@ -74,6 +74,7 @@
   - https://github.com/chocolate-doom/chocolate-doom
 - [ ] Document feature parity goals with Chocolate DOOM
   * https://github.com/chocolate-doom/chocolate-doom/blob/master/PHILOSOPHY.md
+  * tho less purist, more just making sure it runs on a unixy system
 - [ ] Freedoom manual as a feature list
   - https://freedoom.github.io/freedoom-manual-en.pdf 
 
