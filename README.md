@@ -26,14 +26,16 @@ rake doom
 - Player movement with collision detection
 - Noclip mode (N key)
 - Minimap and FPS display
+- WAD file parsing and inspection
 - Test-driven development
 
 ### In Progress 🚧
 - Vanilla DOOM feature parity
 - Original DOOM source code study
+- Texture system implementation
 
 ### Planned 🎯
-- WAD file loading
+- Full WAD file loading
 - Texture mapping
 - Enemies and weapons
 - Sound and music
@@ -42,7 +44,12 @@ rake doom
 ## Development
 
 ```bash
-rake test  # Run tests
+# Run tests
+rake test
+
+# WAD file inspection tools
+rake wad:info[path/to/wad]      # Display WAD file information
+rake wad:textures[path/to/wad]  # Display texture information
 ```
 
 ### Project Structure
@@ -53,6 +60,7 @@ lib/doom/      # Core game components
 ├── player/    # Player mechanics
 ├── map/       # Level handling
 ├── input/     # Input handling
+├── wad/       # WAD file parsing
 └── logging/   # Logging system
 ```
 
