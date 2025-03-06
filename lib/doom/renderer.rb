@@ -26,10 +26,19 @@ module Doom
 
       texture_start = Time.now
       @wall_renderer.render(player, @width, @height)
-      @last_texture_time = Time.now - texture_start
+      texture_end = Time.now
+      @last_texture_time = texture_end - texture_start
 
       @minimap_renderer.render(player)
-      @last_render_time = Time.now - start_time
+      end_time = Time.now
+      @last_render_time = end_time - start_time
+
+      # Log detailed timing information
+      @logger ||= Logger.instance
+      @logger.debug("Frame timing - Total: #{(@last_render_time * 1000).round(2)}ms, " \
+                    "Texture: #{(@last_texture_time * 1000).round(2)}ms, " \
+                    "Background: #{((texture_start - start_time) * 1000).round(2)}ms, " \
+                    "Minimap: #{((end_time - texture_end) * 1000).round(2)}ms")
     end
   end
 
@@ -93,15 +102,32 @@ module Doom
     def render(player, width, height)
       @line_batch.clear
       @z_buffer.fill(Float::INFINITY)
+
+      @logger ||= Logger.instance
+      ray_start = Time.now
+      texture_time = 0
+      batch_time = 0
+
       width.times do |x|
         ray = Ray.new(player, x, width)
         intersection = ray_cast(ray, player)
-        if intersection && intersection.distance < MAX_DISTANCE
-          @z_buffer[x] = intersection.distance
-          draw_wall_slice(x, intersection, height, player)
-        end
+        next unless intersection && intersection.distance < MAX_DISTANCE
+
+        @z_buffer[x] = intersection.distance
+
+        tex_start = Time.now
+        draw_wall_slice(x, intersection, height, player)
+        texture_time += Time.now - tex_start
       end
+
+      batch_start = Time.now
       flush_line_batch
+      batch_time = Time.now - batch_start
+
+      ray_time = Time.now - ray_start - texture_time - batch_time
+      @logger.debug("Wall render timing - Rays: #{(ray_time * 1000).round(2)}ms, " \
+                    "Textures: #{(texture_time * 1000).round(2)}ms, " \
+                    "Batch: #{(batch_time * 1000).round(2)}ms")
     end
 
     def calculate_texture_x(intersection)
