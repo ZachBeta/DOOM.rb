@@ -4,7 +4,7 @@ require 'rake/testtask'
 
 desc 'Run the DOOM.rb game'
 task :doom do
-  ruby 'lib/doom.rb'
+  ruby 'lib/doom.rb levels/freedoom-0.13.0/freedoom1.wad'
 end
 
 desc 'Run tests'

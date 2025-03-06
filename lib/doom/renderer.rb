@@ -6,12 +6,12 @@ require_relative 'logger'
 
 module Doom
   class Renderer
-    def initialize(window, map)
+    def initialize(window, map, textures = {})
       @window = window
       @map = map
       @width = window.width
       @height = window.height
-      @wall_renderer = WallRenderer.new(window, @map)
+      @wall_renderer = WallRenderer.new(window, @map, textures)
       @background_renderer = BackgroundRenderer.new(window)
       @minimap_renderer = MinimapRenderer.new(window, @map)
     end
@@ -66,18 +66,52 @@ module Doom
       east: Gosu::Color.new(255, 0, 0, 255),     # Blue
       west: Gosu::Color.new(255, 255, 255, 0)    # Yellow
     }.freeze
+    MAX_DISTANCE = 20.0 # Add distance limit for performance
 
-    def initialize(window, map)
+    def initialize(window, map, textures = {})
       @window = window
       @map = map
+      @textures = textures
+      @default_texture = @textures.values.first
+      @color_cache = {}
+      @line_batch = []
+      @max_batch_size = 1000 # Increased batch size
+      @screen_buffer = Array.new(window.width * window.height)
     end
 
     def render(player, width, height)
+      @line_batch.clear
       width.times do |x|
         ray = Ray.new(player, x, width)
         intersection = ray_cast(ray, player)
-        draw_wall_slice(x, intersection, height)
+        if intersection && intersection.distance < MAX_DISTANCE
+          draw_wall_slice(x, intersection, height,
+                          player)
+        end
       end
+      flush_line_batch
+    end
+
+    def calculate_texture_x(intersection)
+      return 0 unless @default_texture
+
+      # Calculate exact hit point
+      wall_x = if intersection.side.zero?
+                 intersection.player_y + (intersection.distance * intersection.ray_dir_y)
+               else
+                 intersection.player_x + (intersection.distance * intersection.ray_dir_x)
+               end
+
+      # Get fractional part
+      wall_x -= wall_x.floor
+
+      # Flip texture coordinate based on wall side and ray direction
+      wall_x = 1.0 - wall_x if (intersection.side.zero? && intersection.ray_dir_x > 0) ||
+                               (!intersection.side.zero? && intersection.ray_dir_y < 0)
+
+      # Scale to texture width and ensure within bounds
+      tex_x = (wall_x * @default_texture.width).to_i
+      tex_x.clamp(0, @default_texture.width - 1)
     end
 
     private
@@ -86,20 +120,87 @@ module Doom
       RayCaster.new(@map, player, ray).cast
     end
 
-    def draw_wall_slice(x, intersection, height)
-      return unless intersection
-
+    def draw_wall_slice(x, intersection, height, player)
+      # Calculate line height based on distance
       line_height = (height / intersection.distance).to_i
+      line_height = [line_height, height * 3].min # Limit maximum line height
 
+      # Calculate drawing bounds
       draw_start = [(-line_height / 2) + (height / 2), 0].max
       draw_end = [(line_height / 2) + (height / 2), height - 1].min
 
-      color = determine_wall_color(intersection)
+      if @default_texture
+        tex_x = calculate_texture_x(intersection)
+        draw_textured_slice(x, draw_start, draw_end, tex_x, line_height)
+      else
+        draw_colored_slice(x, draw_start, draw_end, intersection)
+      end
+    end
 
-      @window.draw_line(
-        x, draw_start, color,
-        x, draw_end, color
-      )
+    def draw_textured_slice(x, draw_start, draw_end, tex_x, line_height)
+      return if draw_start >= draw_end
+
+      # Calculate texture step and starting position
+      height = draw_end - draw_start
+      tex_step = (@default_texture.height.to_f / line_height)
+      tex_pos = (draw_start - (height / 2) + (line_height / 2)) * tex_step / line_height
+
+      # Pre-calculate texture width for faster lookup
+      tex_width = @default_texture.width
+      tex_height = @default_texture.height
+
+      # Draw the slice
+      prev_color = nil
+      prev_y = draw_start
+      current_y = draw_start
+
+      (draw_start...draw_end).each do |y|
+        # Calculate texture Y coordinate
+        tex_y = tex_pos.to_i % tex_height
+
+        # Get color from texture
+        color_index = @default_texture.data[(tex_y * tex_width) + tex_x]
+        color = get_cached_color(color_index)
+
+        # Batch similar colors
+        if color != prev_color && current_y > prev_y
+          add_to_batch(x, prev_y, x, current_y, prev_color) if prev_color
+          prev_y = current_y
+          prev_color = color
+        end
+
+        current_y = y + 1
+        tex_pos += tex_step
+      end
+
+      # Draw final segment
+      add_to_batch(x, prev_y, x, current_y, prev_color) if prev_color
+    end
+
+    def draw_colored_slice(x, draw_start, draw_end, intersection)
+      color = determine_wall_color(intersection)
+      add_to_batch(x, draw_start, x, draw_end, color)
+    end
+
+    def add_to_batch(x1, y1, x2, y2, color)
+      @line_batch << [x1, y1, x2, y2, color]
+      flush_line_batch if @line_batch.size >= @max_batch_size
+    end
+
+    def flush_line_batch
+      @line_batch.each do |x1, y1, x2, y2, color|
+        @window.draw_line(x1, y1, color, x2, y2, color)
+      end
+      @line_batch.clear
+    end
+
+    def get_cached_color(index)
+      @color_cache[index] ||= begin
+        r = ((index & 0xE0) >> 5) * 32
+        g = ((index & 0x1C) >> 2) * 32
+        b = (index & 0x03) * 64
+        Gosu::Color.new(255, r, g, b)
+      end
     end
 
     def determine_wall_color(intersection)
@@ -109,13 +210,11 @@ module Doom
                 intersection.ray_dir_y.positive? ? WALL_COLORS[:south] : WALL_COLORS[:north]
               end
 
-      # Make color darker for y-sides
-      if intersection.side == 1
-        color = color.dup
-        color.alpha = 200
-      end
+      # Darken based on distance and side
+      alpha = (255 * (1.0 - (intersection.distance / MAX_DISTANCE))).to_i.clamp(100, 255)
+      alpha = (alpha * 0.8).to_i if intersection.side == 1
 
-      color
+      Gosu::Color.new(alpha, color.red, color.green, color.blue)
     end
   end
 
@@ -195,19 +294,28 @@ module Doom
         distance: perp_wall_dist,
         side: @side,
         ray_dir_x: @ray.direction_x,
-        ray_dir_y: @ray.direction_y
+        ray_dir_y: @ray.direction_y,
+        wall_x: @map_x.to_f + ((1 - @step_x) / 2),
+        wall_y: @map_y.to_f + ((1 - @step_y) / 2),
+        player_x: @player.position[0],
+        player_y: @player.position[1]
       )
     end
   end
 
   class WallIntersection
-    attr_reader :distance, :side, :ray_dir_x, :ray_dir_y
+    attr_reader :distance, :side, :ray_dir_x, :ray_dir_y, :wall_x, :wall_y, :player_x, :player_y
 
-    def initialize(distance:, side:, ray_dir_x:, ray_dir_y:)
+    def initialize(distance:, side:, ray_dir_x:, ray_dir_y:, wall_x: 0.0, wall_y: 0.0,
+                   player_x: 0.0, player_y: 0.0)
       @distance = distance
       @side = side
       @ray_dir_x = ray_dir_x
       @ray_dir_y = ray_dir_y
+      @wall_x = wall_x
+      @wall_y = wall_y
+      @player_x = player_x
+      @player_y = player_y
     end
   end
 

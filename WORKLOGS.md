@@ -37,6 +37,20 @@
 - [x] Performance & Display
   - Show frame rate (FPS) in top left display
 
+### Texture Rendering Progress (2025-03-06)
+- [x] Initial Texture Rendering
+  - Basic texture loading and display
+  - Initial texture coordinate calculation
+  - Simple wall texture mapping
+
+- [x] First Pass Optimizations
+  - Added color caching to reduce Gosu::Color object creation
+  - Implemented line batching for more efficient rendering
+  - Added view distance culling
+  - Fixed texture coordinate calculation
+  - Added height clamping for better performance
+  - Improved wall shading with distance-based fog
+
 ### WAD Parser Progress (2025-03-06)
 - [x] Initial WAD Parser Implementation
   - Basic WAD file header parsing
@@ -66,6 +80,23 @@
     - Texture composition testing
 
 ## Current Tasks
+
+### Texture Rendering Next Steps
+- [ ] Improve texture rendering quality
+- [ ] Optimize rendering performance further
+- [ ] Add proper texture filtering
+- [ ] Implement texture mip-mapping
+- [ ] Profile rendering performance
+- [ ] Investigate hardware acceleration options
+- [ ] Improve texture sampling efficiency
+- [ ] Add proper perspective correction
+- [ ] Implement texture atlas system
+
+### Research Topics
+- Doom engine texture mapping techniques
+- Gosu performance optimization strategies
+- Ruby game optimization patterns
+- Graphics rendering optimization approaches
 
 ### Graphics & Engine Research
 - [ ] Study original DOOM source code

@@ -176,4 +176,39 @@ module Doom
       Logger.configure(level: :verbose, base_dir: 'test/logs', env: :test)
     end
   end
+
+  class TexturedWallRendererTest < Minitest::Test
+    def setup
+      setup_test_logs
+      @window = MockWindow.new
+      @map = MockMap.new
+      @texture = Doom::ComposedTexture.new(
+        width: 64,
+        height: 128,
+        data: Array.new(64 * 128) { |i| i % 256 } # Create a test pattern
+      )
+      @wall_renderer = WallRenderer.new(@window, @map, { 'TEST_TEXTURE' => @texture })
+    end
+
+    def teardown
+      super
+      FileUtils.rm_rf('test/logs')
+    end
+
+    def test_texture_mapping
+      player = MockPlayer.new([5, 5], [1, 0]) # Facing east
+      intersection = WallIntersection.new(
+        distance: 1.0,
+        side: 0,
+        ray_dir_x: 1.0,
+        ray_dir_y: 0.0,
+        wall_x: 0.5 # Hit position on wall (0.0 to 1.0)
+      )
+
+      # Test that texture coordinates are calculated correctly
+      tex_x = @wall_renderer.calculate_texture_x(intersection)
+
+      assert_equal 32, tex_x # Should be middle of texture (0.5 * 64)
+    end
+  end
 end
