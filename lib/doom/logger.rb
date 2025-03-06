@@ -19,13 +19,15 @@ module Doom
         @debug_log.send(level, message)
       when :verbose
         @verbose_log.debug(message)
-      else
+      when :info, :warn, :error, :fatal
         @game_log.send(level, message)
+        # Also write to doom.log for important events
+        @doom_log.send(level, message)
       end
     end
 
     def close
-      [@game_log, @debug_log, @verbose_log].each(&:close)
+      [@game_log, @debug_log, @verbose_log, @doom_log].each(&:close)
     end
 
     private
@@ -35,10 +37,11 @@ module Doom
       @game_log = ::Logger.new(File.join(@base_dir, 'game.log'), 0)
       @debug_log = ::Logger.new(File.join(@base_dir, 'debug.log'), 0)
       @verbose_log = ::Logger.new(File.join(@base_dir, 'verbose.log'), 0)
+      @doom_log = ::Logger.new(File.join(@base_dir, 'doom.log'), 0)
 
-      setup_logger_formatting(@game_log)
-      setup_logger_formatting(@debug_log)
-      setup_logger_formatting(@verbose_log)
+      [@game_log, @debug_log, @verbose_log, @doom_log].each do |logger|
+        setup_logger_formatting(logger)
+      end
     end
 
     def setup_logger_formatting(logger)
@@ -75,6 +78,7 @@ module Doom
       @level = LEVELS.fetch(level, 1)
       @env = env
       @log_manager = LogManager.new(base_dir)
+      @suppress_output = env == :test
     end
 
     def verbose(message)
@@ -106,16 +110,16 @@ module Doom
     def log(message, level)
       return unless should_log?(level)
 
-      # Always log in test environment
       @log_manager.write(message, level)
+
+      # Only print to stdout in development, not in test
+      return if @suppress_output
+
+      puts "[#{level.upcase}] #{message}" if LEVELS[level] >= LEVELS[:info]
     end
 
     def should_log?(level)
       LEVELS[level] >= @level
-    end
-
-    def test?
-      @env == :test
     end
   end
 end

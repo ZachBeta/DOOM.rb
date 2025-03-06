@@ -12,18 +12,18 @@ def print_texture_info(wad_path)
 
   logger.info("\nTexture Lumps:")
   textures = wad.textures
-  textures.each do |name, lump|
-    logger.info("  #{name}: #{lump.size} bytes")
+  textures.each do |name, texture|
+    logger.debug("  #{name}: #{texture.width}x#{texture.height}")
   end
 
   logger.info("\nTexture1 Contents:")
   texture1 = wad.parse_texture('TEXTURE1')
   texture1.each do |texture|
     logger.info("\nTexture: #{texture.name}")
-    logger.info("  Size: #{texture.width}x#{texture.height}")
-    logger.info("  Patches: #{texture.patches.size}")
+    logger.debug("  Size: #{texture.width}x#{texture.height}")
+    logger.debug("  Patches: #{texture.patches.size}")
     texture.patches.each do |patch|
-      logger.info("    - #{patch.name} at (#{patch.x_offset}, #{patch.y_offset})")
+      logger.debug("    - #{patch.name || 'unnamed'} at (#{patch.x_offset}, #{patch.y_offset})")
     end
   end
 end

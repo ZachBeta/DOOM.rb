@@ -19,6 +19,7 @@ module TestHelper
     FileUtils.mkdir_p('logs/history')
     cleanup_old_logs
     # Configure logger for test environment with debug logging enabled
+    # but suppress terminal output
     Doom::Logger.configure(
       level: :debug,
       base_dir: 'logs',
@@ -29,7 +30,7 @@ module TestHelper
   private
 
   def cleanup_old_logs
-    %w[debug verbose game].each do |type|
+    %w[debug verbose game doom].each do |type|
       pattern = "logs/#{type}*.log"
       files = Dir.glob(pattern).sort_by { |f| File.mtime(f) }.reverse
       files[5..].each { |f| File.delete(f) } if files.size > 5
@@ -55,6 +56,7 @@ class Minitest::Test
 end
 
 # Configure logger for test environment with debug logging enabled
+# but suppress terminal output
 Doom::Logger.configure(
   level: :debug,
   base_dir: 'logs',

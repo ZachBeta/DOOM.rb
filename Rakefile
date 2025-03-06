@@ -13,6 +13,9 @@ task :rotate_logs do
   timestamp = Time.now.strftime('%Y%m%d_%H%M%S')
   base_logs = %w[doom.log debug.log verbose.log game.log]
 
+  # Create logs and history directories if they don't exist
+  FileUtils.mkdir_p('logs/history')
+
   # Move all log files to history
   Dir.glob('logs/*.log{,.[0-9]*}').each do |log_file|
     next if File.directory?(log_file)
@@ -26,8 +29,10 @@ task :rotate_logs do
       new_name = "logs/history/#{File.basename(basename, '.log')}_#{timestamp}.log"
     end
 
-    FileUtils.mv(log_file, new_name)
-    logger.debug("Moved #{basename} to #{new_name}")
+    if File.exist?(log_file)
+      FileUtils.mv(log_file, new_name)
+      logger.debug("Moved #{basename} to #{new_name}")
+    end
   end
 
   # Create fresh empty base log files
@@ -39,13 +44,20 @@ task :rotate_logs do
   logger.info('Log rotation complete')
 end
 
+# Make all tasks depend on log rotation
+Rake::Task.tasks.each do |task|
+  next if task.name == 'rotate_logs'
+
+  task.enhance([:rotate_logs])
+end
+
 desc 'Run the DOOM viewer'
-task run: :rotate_logs do
+task :run do
   ruby 'lib/doom.rb', Doom::Config.wad_path
 end
 
 desc 'Run tests with coverage'
-task coverage: :rotate_logs do
+task :coverage do
   require 'simplecov'
   SimpleCov.start do
     add_filter '/test/'
@@ -55,7 +67,7 @@ task coverage: :rotate_logs do
 end
 
 desc 'Run the DOOM viewer with profiling'
-task profile: :rotate_logs do
+task :profile do
   require 'ruby-prof'
   result = RubyProf.profile do
     ruby 'lib/doom.rb', Doom::Config.wad_path
@@ -73,8 +85,6 @@ Rake::TestTask.new(:test) do |t|
   t.warning = false
   t.verbose = true
 end
-
-task test: :rotate_logs
 
 namespace :wad do
   desc 'Display WAD file information'

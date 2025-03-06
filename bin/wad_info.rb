@@ -17,23 +17,23 @@ def print_wad_info(wad_path)
     logger.info("  #{level}:")
     level_data = wad.level_data(level)
     level_data.each do |name, lump|
-      logger.info("    #{name}: #{lump.size} bytes")
+      logger.debug("    #{name}: #{lump.size} bytes")
     end
   end
 
   logger.info("\nTextures:")
-  wad.textures.each do |name, lump|
-    logger.info("  #{name}: #{lump.size} bytes")
+  wad.textures.each do |name, texture|
+    logger.debug("  #{name}: #{texture.width}x#{texture.height}")
   end
 
   logger.info("\nFlats:")
   wad.flats.each do |name, lump|
-    logger.info("  #{name}: #{lump.size} bytes")
+    logger.debug("  #{name}: #{lump.size} bytes")
   end
 
   logger.info("\nSprites:")
   wad.sprites.each do |name, lump|
-    logger.info("  #{name}: #{lump.size} bytes")
+    logger.debug("  #{name}: #{lump.size} bytes")
   end
 
   logger.info("\nOther Lumps:")
@@ -45,7 +45,7 @@ def print_wad_info(wad_path)
       wad.sprites.key?(name)
   end
   other_lumps.each do |name, lump|
-    logger.info("  #{name}: #{lump.size} bytes")
+    logger.debug("  #{name}: #{lump.size} bytes")
   end
 end
 

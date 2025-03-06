@@ -86,6 +86,7 @@
 - [ ] stop outputting wad parse with puts in test env, instead log it
 - [ ] fix puts vs logs in wad parser so it stops adding noise to output in terminal window, and instead uses logs for feedback
 - [ ] continue upgrading logging system and log rotation, rotate logs as a requirement for every rake task
+* [ ] make better usage of debug.log, verbose.log, game.log and doom.log
 
 - [x] Complete TEXTURE1/TEXTURE2 parsing
   - [x] Implement texture composition from patches
