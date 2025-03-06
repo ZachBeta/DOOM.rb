@@ -161,14 +161,20 @@ module Doom
       fps_text = "FPS: #{@game_clock.fps}"
       @font.draw_text(fps_text, 10, 10, 0, 1, 1, Gosu::Color::YELLOW)
 
+      # Performance Stats
+      render_time = @renderer.last_render_time
+      texture_time = @renderer.last_texture_time
+      perf_text = "Render: #{(render_time * 1000).round(2)}ms | Texture: #{(texture_time * 1000).round(2)}ms"
+      @font.draw_text(perf_text, 10, 30, 0, 1, 1, Gosu::Color::YELLOW)
+
       # Noclip Status
       noclip_text = "NOCLIP: #{@player.noclip_mode ? 'ON' : 'OFF'} (Press N to toggle)"
       noclip_color = @player.noclip_mode ? Gosu::Color::GREEN : Gosu::Color::WHITE
-      @font.draw_text(noclip_text, 10, 30, 0, 1, 1, noclip_color)
+      @font.draw_text(noclip_text, 10, 50, 0, 1, 1, noclip_color)
 
       # Position Display
       pos_text = "POS: (#{@player.position[0].round(2)}, #{@player.position[1].round(2)})"
-      @font.draw_text(pos_text, 10, 50, 0, 1, 1, Gosu::Color::WHITE)
+      @font.draw_text(pos_text, 10, 70, 0, 1, 1, Gosu::Color::WHITE)
     end
   end
 

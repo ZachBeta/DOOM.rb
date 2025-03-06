@@ -6,6 +6,8 @@ require_relative 'logger'
 
 module Doom
   class Renderer
+    attr_reader :last_render_time, :last_texture_time
+
     def initialize(window, map, textures = {})
       @window = window
       @map = map
@@ -14,12 +16,20 @@ module Doom
       @wall_renderer = WallRenderer.new(window, @map, textures)
       @background_renderer = BackgroundRenderer.new(window)
       @minimap_renderer = MinimapRenderer.new(window, @map)
+      @last_render_time = 0
+      @last_texture_time = 0
     end
 
     def render(player)
+      start_time = Time.now
       @background_renderer.render
+
+      texture_start = Time.now
       @wall_renderer.render(player, @width, @height)
+      @last_texture_time = Time.now - texture_start
+
       @minimap_renderer.render(player)
+      @last_render_time = Time.now - start_time
     end
   end
 
@@ -75,18 +85,19 @@ module Doom
       @default_texture = @textures.values.first
       @color_cache = {}
       @line_batch = []
-      @max_batch_size = 1000 # Increased batch size
-      @screen_buffer = Array.new(window.width * window.height)
+      @max_batch_size = 1000
+      @z_buffer = Array.new(window.width)
     end
 
     def render(player, width, height)
       @line_batch.clear
+      @z_buffer.fill(Float::INFINITY)
       width.times do |x|
         ray = Ray.new(player, x, width)
         intersection = ray_cast(ray, player)
         if intersection && intersection.distance < MAX_DISTANCE
-          draw_wall_slice(x, intersection, height,
-                          player)
+          @z_buffer[x] = intersection.distance
+          draw_wall_slice(x, intersection, height, player)
         end
       end
       flush_line_batch
@@ -95,21 +106,21 @@ module Doom
     def calculate_texture_x(intersection)
       return 0 unless @default_texture
 
-      # Calculate exact hit point
+      # Calculate exact hit point with higher precision
       wall_x = if intersection.side.zero?
                  intersection.player_y + (intersection.distance * intersection.ray_dir_y)
                else
                  intersection.player_x + (intersection.distance * intersection.ray_dir_x)
                end
 
-      # Get fractional part
+      # Get fractional part with better precision
       wall_x -= wall_x.floor
 
       # Flip texture coordinate based on wall side and ray direction
       wall_x = 1.0 - wall_x if (intersection.side.zero? && intersection.ray_dir_x > 0) ||
                                (!intersection.side.zero? && intersection.ray_dir_y < 0)
 
-      # Scale to texture width and ensure within bounds
+      # Scale to texture width with perspective correction
       tex_x = (wall_x * @default_texture.width).to_i
       tex_x.clamp(0, @default_texture.width - 1)
     end
@@ -121,46 +132,70 @@ module Doom
     end
 
     def draw_wall_slice(x, intersection, height, player)
-      # Calculate line height based on distance
-      line_height = (height / intersection.distance).to_i
-      line_height = [line_height, height * 3].min # Limit maximum line height
+      # Calculate line height with perspective correction
+      perp_wall_dist = if intersection.side.zero?
+                         (intersection.map_x - player.position[0] + ((1 - intersection.step_x) / 2)) / intersection.ray_dir_x
+                       else
+                         (intersection.map_y - player.position[1] + ((1 - intersection.step_y) / 2)) / intersection.ray_dir_y
+                       end
+      line_height = (height / perp_wall_dist).to_i
+      line_height = [line_height, height * 3].min
 
-      # Calculate drawing bounds
+      # Calculate drawing bounds with perspective correction
       draw_start = [(-line_height / 2) + (height / 2), 0].max
       draw_end = [(line_height / 2) + (height / 2), height - 1].min
 
       if @default_texture
         tex_x = calculate_texture_x(intersection)
-        draw_textured_slice(x, draw_start, draw_end, tex_x, line_height)
+        draw_textured_slice(x, draw_start, draw_end, tex_x, line_height, perp_wall_dist)
       else
         draw_colored_slice(x, draw_start, draw_end, intersection)
       end
     end
 
-    def draw_textured_slice(x, draw_start, draw_end, tex_x, line_height)
+    def draw_textured_slice(x, draw_start, draw_end, tex_x, line_height, perp_wall_dist)
       return if draw_start >= draw_end
 
-      # Calculate texture step and starting position
+      # Calculate texture step with perspective correction
       height = draw_end - draw_start
       tex_step = (@default_texture.height.to_f / line_height)
       tex_pos = (draw_start - (height / 2) + (line_height / 2)) * tex_step / line_height
 
-      # Pre-calculate texture width for faster lookup
-      tex_width = @default_texture.width
-      tex_height = @default_texture.height
+      # Select appropriate mipmap level based on distance
+      mipmap_level = select_mipmap_level(perp_wall_dist)
+      texture_data = if mipmap_level == 0 || !@default_texture.mipmaps || @default_texture.mipmaps.empty?
+                       {
+                         width: @default_texture.width,
+                         height: @default_texture.height,
+                         data: @default_texture.data
+                       }
+                     else
+                       @default_texture.mipmaps[mipmap_level - 1]
+                     end
 
-      # Draw the slice
+      # Pre-calculate texture dimensions and perspective values
+      tex_width = texture_data[:width]
+      tex_height = texture_data[:height]
+      tex_data = texture_data[:data]
+      perspective_factor = 1.0 / perp_wall_dist
+
+      # Scale texture coordinates for mipmap level
+      tex_x = (tex_x * tex_width) / @default_texture.width
+
+      # Draw the slice with perspective correction
       prev_color = nil
       prev_y = draw_start
       current_y = draw_start
 
       (draw_start...draw_end).each do |y|
-        # Calculate texture Y coordinate
-        tex_y = tex_pos.to_i % tex_height
+        # Calculate texture Y coordinate with perspective correction
+        tex_y = ((tex_pos * perspective_factor * tex_height) / @default_texture.height).to_i % tex_height
 
-        # Get color from texture
-        color_index = @default_texture.data[(tex_y * tex_width) + tex_x]
-        color = get_cached_color(color_index)
+        # Get color from texture with fog effect
+        color_index = tex_data[(tex_y * tex_width) + tex_x]
+        base_color = get_cached_color(color_index)
+        fog_factor = 1.0 - (perp_wall_dist / MAX_DISTANCE).clamp(0.0, 0.8)
+        color = apply_fog(base_color, fog_factor)
 
         # Batch similar colors
         if color != prev_color && current_y > prev_y
@@ -175,6 +210,20 @@ module Doom
 
       # Draw final segment
       add_to_batch(x, prev_y, x, current_y, prev_color) if prev_color
+    end
+
+    def select_mipmap_level(distance)
+      return 0 if distance <= 1.0
+
+      level = Math.log2(distance).floor
+      [level, @default_texture.mipmaps.size].min
+    end
+
+    def apply_fog(color, fog_factor)
+      r = (color.red * fog_factor).to_i
+      g = (color.green * fog_factor).to_i
+      b = (color.blue * fog_factor).to_i
+      Gosu::Color.new(color.alpha, r, g, b)
     end
 
     def draw_colored_slice(x, draw_start, draw_end, intersection)
@@ -298,16 +347,21 @@ module Doom
         wall_x: @map_x.to_f + ((1 - @step_x) / 2),
         wall_y: @map_y.to_f + ((1 - @step_y) / 2),
         player_x: @player.position[0],
-        player_y: @player.position[1]
+        player_y: @player.position[1],
+        map_x: @map_x,
+        map_y: @map_y,
+        step_x: @step_x,
+        step_y: @step_y
       )
     end
   end
 
   class WallIntersection
-    attr_reader :distance, :side, :ray_dir_x, :ray_dir_y, :wall_x, :wall_y, :player_x, :player_y
+    attr_reader :distance, :side, :ray_dir_x, :ray_dir_y, :wall_x, :wall_y, :player_x, :player_y,
+                :map_x, :map_y, :step_x, :step_y
 
     def initialize(distance:, side:, ray_dir_x:, ray_dir_y:, wall_x: 0.0, wall_y: 0.0,
-                   player_x: 0.0, player_y: 0.0)
+                   player_x: 0.0, player_y: 0.0, map_x: 0, map_y: 0, step_x: 0, step_y: 0)
       @distance = distance
       @side = side
       @ray_dir_x = ray_dir_x
@@ -316,6 +370,10 @@ module Doom
       @wall_y = wall_y
       @player_x = player_x
       @player_y = player_y
+      @map_x = map_x
+      @map_y = map_y
+      @step_x = step_x
+      @step_y = step_y
     end
   end
 

@@ -81,6 +81,8 @@
 
 ## Current Tasks
 
+- [ ] move `bin/run_all_rake_tasks` into default rake task
+
 ### Texture Rendering Next Steps
 - [ ] Improve texture rendering quality
 - [ ] Optimize rendering performance further
