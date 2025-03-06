@@ -1,17 +1,19 @@
 require 'minitest/autorun'
 require_relative '../../lib/doom/wad_file'
 require_relative '../../lib/doom/config'
+require_relative '../../lib/doom/logger'
 
 class WadFileTest < Minitest::Test
   def setup
     @wad_path = Doom::Config.wad_path
-    puts "Testing with WAD file: #{@wad_path}"
-    puts "WAD file exists: #{File.exist?(@wad_path)}"
-    puts "WAD file size: #{begin
+    @logger = Doom::Logger.instance
+    @logger.debug("Testing with WAD file: #{@wad_path}")
+    @logger.debug("WAD file exists: #{File.exist?(@wad_path)}")
+    @logger.debug("WAD file size: #{begin
       File.size(@wad_path)
     rescue StandardError
       'N/A'
-    end}"
+    end}")
     @wad_file = Doom::WadFile.new(@wad_path)
   end
 

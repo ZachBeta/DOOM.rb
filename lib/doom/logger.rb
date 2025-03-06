@@ -5,9 +5,6 @@ require 'logger'
 
 module Doom
   class LogManager
-    MAX_LOG_SIZE = 1024 * 1024 # 1MB
-    LOG_SHIFTS = 5 # Keep 5 rotated files
-
     def initialize(base_dir = 'logs')
       @base_dir = base_dir
       FileUtils.mkdir_p(@base_dir)
@@ -35,9 +32,9 @@ module Doom
 
     def setup_loggers
       FileUtils.mkdir_p(@base_dir)
-      @game_log = ::Logger.new(File.join(@base_dir, 'game.log'), LOG_SHIFTS, MAX_LOG_SIZE)
-      @debug_log = ::Logger.new(File.join(@base_dir, 'debug.log'), LOG_SHIFTS, MAX_LOG_SIZE)
-      @verbose_log = ::Logger.new(File.join(@base_dir, 'verbose.log'), LOG_SHIFTS, MAX_LOG_SIZE)
+      @game_log = ::Logger.new(File.join(@base_dir, 'game.log'), 0)
+      @debug_log = ::Logger.new(File.join(@base_dir, 'debug.log'), 0)
+      @verbose_log = ::Logger.new(File.join(@base_dir, 'verbose.log'), 0)
 
       setup_logger_formatting(@game_log)
       setup_logger_formatting(@debug_log)
@@ -109,6 +106,7 @@ module Doom
     def log(message, level)
       return unless should_log?(level)
 
+      # Always log in test environment
       @log_manager.write(message, level)
     end
 

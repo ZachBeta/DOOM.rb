@@ -446,10 +446,10 @@ module Doom
       draw_player(player)
       draw_rotation_angle(player)
 
-      @logger.debug("Minimap rendered at (#{@window.width - MINIMAP_SIZE - MINIMAP_MARGIN}, #{@window.height - MINIMAP_SIZE - MINIMAP_MARGIN})")
-      @logger.debug("Player position on minimap: (#{player.position[0] * @cell_size}, #{player.position[1] * @cell_size})")
-      @logger.debug("Player rotation: #{(Math.atan2(player.direction[1],
-                                                    player.direction[0]) * 180 / Math::PI).round}°")
+      @logger.verbose("Minimap rendered at (#{@window.width - MINIMAP_SIZE - MINIMAP_MARGIN}, #{@window.height - MINIMAP_SIZE - MINIMAP_MARGIN})")
+      @logger.verbose("Player position on minimap: (#{player.position[0] * @cell_size}, #{player.position[1] * @cell_size})")
+      @logger.verbose("Player rotation: #{(Math.atan2(player.direction[1],
+                                                      player.direction[0]) * 180 / Math::PI).round}°")
     end
 
     private

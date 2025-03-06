@@ -2,39 +2,41 @@
 # frozen_string_literal: true
 
 require_relative '../lib/doom/wad_file'
+require_relative '../lib/doom/logger'
 
 def print_wad_info(wad_path)
+  logger = Doom::Logger.instance
   wad = Doom::WadFile.new(wad_path)
-  puts "WAD File: #{wad_path}"
-  puts "Type: #{wad.identification}"
-  puts "Number of lumps: #{wad.lump_count}"
-  puts "Directory offset: #{wad.directory_offset}"
+  logger.info("WAD File: #{wad_path}")
+  logger.info("Type: #{wad.identification}")
+  logger.info("Number of lumps: #{wad.lump_count}")
+  logger.info("Directory offset: #{wad.directory_offset}")
 
-  puts "\nLevels:"
+  logger.info("\nLevels:")
   wad.levels.each do |level|
-    puts "  #{level}:"
+    logger.info("  #{level}:")
     level_data = wad.level_data(level)
     level_data.each do |name, lump|
-      puts "    #{name}: #{lump.size} bytes"
+      logger.info("    #{name}: #{lump.size} bytes")
     end
   end
 
-  puts "\nTextures:"
+  logger.info("\nTextures:")
   wad.textures.each do |name, lump|
-    puts "  #{name}: #{lump.size} bytes"
+    logger.info("  #{name}: #{lump.size} bytes")
   end
 
-  puts "\nFlats:"
+  logger.info("\nFlats:")
   wad.flats.each do |name, lump|
-    puts "  #{name}: #{lump.size} bytes"
+    logger.info("  #{name}: #{lump.size} bytes")
   end
 
-  puts "\nSprites:"
+  logger.info("\nSprites:")
   wad.sprites.each do |name, lump|
-    puts "  #{name}: #{lump.size} bytes"
+    logger.info("  #{name}: #{lump.size} bytes")
   end
 
-  puts "\nOther Lumps:"
+  logger.info("\nOther Lumps:")
   other_lumps = wad.lumps.reject do |name, _|
     name.match?(Doom::WadFile::LEVEL_MARKERS) ||
       wad.level_data(name) ||
@@ -43,12 +45,13 @@ def print_wad_info(wad_path)
       wad.sprites.key?(name)
   end
   other_lumps.each do |name, lump|
-    puts "  #{name}: #{lump.size} bytes"
+    logger.info("  #{name}: #{lump.size} bytes")
   end
 end
 
 if ARGV.empty?
-  puts "Usage: #{$PROGRAM_NAME} <wad_file>"
+  logger = Doom::Logger.instance
+  logger.error("Usage: #{$PROGRAM_NAME} <wad_file>")
   exit 1
 end
 

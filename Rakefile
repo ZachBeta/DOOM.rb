@@ -4,10 +4,12 @@ require 'rake/testtask'
 require 'timeout'
 require 'fileutils'
 require_relative 'lib/doom/config'
+require_relative 'lib/doom/logger'
 
 desc 'Rotate logs - move current logs to history with timestamps'
 task :rotate_logs do
-  puts 'Rotating logs...'
+  logger = Doom::Logger.instance
+  logger.info('Rotating logs...')
   timestamp = Time.now.strftime('%Y%m%d_%H%M%S')
   base_logs = %w[doom.log debug.log verbose.log game.log]
 
@@ -25,25 +27,25 @@ task :rotate_logs do
     end
 
     FileUtils.mv(log_file, new_name)
-    puts "Moved #{basename} to #{new_name}"
+    logger.debug("Moved #{basename} to #{new_name}")
   end
 
   # Create fresh empty base log files
   base_logs.each do |log|
     FileUtils.touch("logs/#{log}")
-    puts "Created fresh #{log}"
+    logger.debug("Created fresh #{log}")
   end
 
-  puts 'Log rotation complete'
+  logger.info('Log rotation complete')
 end
 
 desc 'Run the DOOM viewer'
-task :run do
+task run: :rotate_logs do
   ruby 'lib/doom.rb', Doom::Config.wad_path
 end
 
 desc 'Run tests with coverage'
-task :coverage do
+task coverage: :rotate_logs do
   require 'simplecov'
   SimpleCov.start do
     add_filter '/test/'
@@ -53,7 +55,7 @@ task :coverage do
 end
 
 desc 'Run the DOOM viewer with profiling'
-task :profile do
+task profile: :rotate_logs do
   require 'ruby-prof'
   result = RubyProf.profile do
     ruby 'lib/doom.rb', Doom::Config.wad_path
@@ -71,6 +73,8 @@ Rake::TestTask.new(:test) do |t|
   t.warning = false
   t.verbose = true
 end
+
+task test: :rotate_logs
 
 namespace :wad do
   desc 'Display WAD file information'

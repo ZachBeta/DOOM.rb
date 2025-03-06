@@ -2,32 +2,35 @@
 # frozen_string_literal: true
 
 require_relative '../lib/doom/wad_file'
+require_relative '../lib/doom/logger'
 
 def print_texture_info(wad_path)
+  logger = Doom::Logger.instance
   wad = Doom::WadFile.new(wad_path)
-  puts "WAD File: #{wad_path}"
-  puts "Type: #{wad.identification}"
+  logger.info("WAD File: #{wad_path}")
+  logger.info("Type: #{wad.identification}")
 
-  puts "\nTexture Lumps:"
+  logger.info("\nTexture Lumps:")
   textures = wad.textures
   textures.each do |name, lump|
-    puts "  #{name}: #{lump.size} bytes"
+    logger.info("  #{name}: #{lump.size} bytes")
   end
 
-  puts "\nTexture1 Contents:"
+  logger.info("\nTexture1 Contents:")
   texture1 = wad.parse_texture('TEXTURE1')
   texture1.each do |texture|
-    puts "\nTexture: #{texture.name}"
-    puts "  Size: #{texture.width}x#{texture.height}"
-    puts "  Patches: #{texture.patches.size}"
+    logger.info("\nTexture: #{texture.name}")
+    logger.info("  Size: #{texture.width}x#{texture.height}")
+    logger.info("  Patches: #{texture.patches.size}")
     texture.patches.each do |patch|
-      puts "    - #{patch.name} at (#{patch.x_offset}, #{patch.y_offset})"
+      logger.info("    - #{patch.name} at (#{patch.x_offset}, #{patch.y_offset})")
     end
   end
 end
 
 if ARGV.empty?
-  puts "Usage: #{$PROGRAM_NAME} <wad_file>"
+  logger = Doom::Logger.instance
+  logger.error("Usage: #{$PROGRAM_NAME} <wad_file>")
   exit 1
 end
 
