@@ -122,12 +122,12 @@ module Doom
     def setup
       @window = MockWindow.new
       @map = MockMap.new
-      @texture = Doom::ComposedTexture.new(
+      @texture = ComposedTexture.new(
         width: 64,
         height: 128,
         data: Array.new(64 * 128) { |i| i % 256 } # Create a test pattern
       )
-      @wall_renderer = WallRenderer.new(@window, @map, { 'TEST_TEXTURE' => @texture })
+      @wall_renderer = WallRenderer.new(@window, @map, { 'STARTAN3' => @texture })
       @minimap_renderer = MinimapRenderer.new(@window, @map)
       @player = MockPlayer.new([5, 5], [1, 0])
       # Configure logger for test environment with verbose level for this specific test
@@ -161,7 +161,7 @@ module Doom
     def test_minimap_logging
       # Skip actual rendering but still log
       def @minimap_renderer.draw_background; end
-      def @minimap_renderer.draw_walls; end
+      def @minimap_renderer.draw_walls(*); end
       def @minimap_renderer.draw_player(*); end
       def @minimap_renderer.draw_rotation_angle(*); end
 
@@ -187,12 +187,12 @@ module Doom
     def setup
       @window = MockWindow.new
       @map = MockMap.new
-      @texture = Doom::ComposedTexture.new(
+      @texture = ComposedTexture.new(
         width: 64,
         height: 128,
         data: Array.new(64 * 128) { |i| i % 256 } # Create a test pattern
       )
-      @wall_renderer = WallRenderer.new(@window, @map, { 'TEST_TEXTURE' => @texture })
+      @wall_renderer = WallRenderer.new(@window, @map, { 'STARTAN3' => @texture })
       # Configure logger for test environment with verbose level for this specific test
       Logger.configure(level: :verbose, base_dir: 'logs', env: :test)
     end
@@ -224,13 +224,13 @@ module Doom
 
       # Create a test pattern texture
       texture_size = 256
-      texture = Doom::ComposedTexture.new(
+      texture = ComposedTexture.new(
         width: texture_size,
         height: texture_size,
         data: Array.new(texture_size * texture_size) { |i| i % 256 }
       )
 
-      wall_renderer = WallRenderer.new(@window, @map, { 'TEST_TEXTURE' => texture })
+      wall_renderer = WallRenderer.new(@window, @map, { 'STARTAN3' => texture })
 
       # Measure performance over multiple frames
       time = Benchmark.realtime do

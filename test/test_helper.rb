@@ -122,16 +122,31 @@ module Doom
     def draw_quad(*); end
     def draw_line(*); end
     def draw_triangle(*); end
+    def draw_text(*); end
     def gl = yield
   end
 
   class MockPlayer
-    attr_reader :position, :direction, :angle
+    attr_accessor :position, :direction, :plane, :map, :noclip_mode
 
-    def initialize(position = [5, 5], direction = [1, 0])
-      @position = position
-      @direction = direction
-      @angle = Math.atan2(direction[1], direction[0])
+    def initialize(map = nil)
+      @position = Vector[2.0, 2.0]
+      @direction = Vector[1.0, 0.0]
+      @plane = Vector[0.0, 0.66]
+      @map = map
+      @noclip_mode = false
+    end
+
+    def update_position(new_position)
+      @position = new_position
+    end
+
+    def update_direction(new_direction)
+      @direction = new_direction
+    end
+
+    def update_plane(new_plane)
+      @plane = new_plane
     end
   end
 

@@ -90,7 +90,7 @@
 ## Current Tasks
 
 - [ ] Performance Optimization
-  - [ ] Profile rendering bottlenecks
+  - [ ] Profile rendering bottlenecks and profile all ruby code too to see if the bottle necks are on the ruby side of things
   - [ ] Optimize texture caching system
   - [ ] Improve line batching efficiency
   - [ ] Enhance view distance culling
