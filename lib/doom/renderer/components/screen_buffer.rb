@@ -70,6 +70,7 @@ module Doom
 
           # Bind texture
           glBindTexture(GL_TEXTURE_2D, @texture_id)
+          glEnable(GL_TEXTURE_2D)
 
           # Update texture data
           glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, @viewport.width, @viewport.height,
@@ -110,13 +111,23 @@ module Doom
           texture_id = [0].pack('L')
           glGenTextures(1, texture_id)
           texture_id = texture_id.unpack1('L')
+
+          # Bind the texture
           glBindTexture(GL_TEXTURE_2D, texture_id)
+
+          # Set texture parameters
           glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
           glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
           glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
           glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
+
+          # Allocate texture storage
           glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, @viewport.width, @viewport.height,
                        0, GL_RGBA, GL_UNSIGNED_BYTE, nil)
+
+          # Unbind texture
+          glBindTexture(GL_TEXTURE_2D, 0)
+
           texture_id
         end
 

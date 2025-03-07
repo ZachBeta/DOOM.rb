@@ -83,6 +83,11 @@ module Doom
     def create_window(width, height, title)
       @logger.debug("Creating window: #{width}x#{height} - #{title}")
       @window = Glfw::Window.new(width, height, title)
+      @window.make_context_current
+
+      # Wait for the context to be ready
+      sleep(0.1)
+
       @window
     end
 
@@ -110,7 +115,7 @@ module Doom
     def get_key(key)
       return nil unless @window
 
-      @window.get_key(key)
+      @window.key(key) == PRESS
     end
 
     def should_close?
@@ -136,6 +141,15 @@ module Doom
 
       @window.destroy
       @window = nil
+    end
+
+    def setup_glfw
+      @logger.debug('Setting up GLFW')
+      @glfw.init
+      @glfw.default_window_hints
+      @glfw.window_hint(GlfwWrapper::CONTEXT_VERSION_MAJOR, 2)
+      @glfw.window_hint(GlfwWrapper::CONTEXT_VERSION_MINOR, 1)
+      @glfw.window_hint(GlfwWrapper::VISIBLE, GlfwWrapper::FALSE) if ENV['RACK_ENV'] == 'test'
     end
   end
 end

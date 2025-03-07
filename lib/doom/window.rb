@@ -120,21 +120,21 @@ module Doom
       check_gl_errors('Viewport setup')
       @logger.debug("Viewport set to #{@width}x#{@height}")
 
-      glEnable(GL_DEPTH_TEST)
-      check_gl_errors('Depth test enable')
-      @logger.debug('Depth testing enabled')
-
+      # Set up basic OpenGL state
+      glEnable(GL_TEXTURE_2D)
       glEnable(GL_BLEND)
-      check_gl_errors('Blend enable')
-      @logger.debug('Blending enabled')
-
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-      check_gl_errors('Blend function setup')
-      @logger.debug('Blend function set')
-
       glClearColor(0.0, 0.0, 0.0, 1.0)
-      check_gl_errors('Clear color setup')
-      @logger.debug('Clear color set to black')
+      check_gl_errors('Basic OpenGL state setup')
+      @logger.debug('Basic OpenGL state set up')
+
+      # Set up texture parameters
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
+      check_gl_errors('Texture parameter setup')
+      @logger.debug('Texture parameters set up')
     end
 
     def cleanup_glfw

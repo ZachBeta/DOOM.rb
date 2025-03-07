@@ -11,13 +11,15 @@ module Doom
   module Renderer
     module Core
       class OpenGLRenderer < BaseRenderer
+        include OpenGL
+
         def initialize(window, map, textures)
           super
           @last_render_time = 0
           @last_texture_time = 0
-          @ray_caster = RayCaster.new(map, nil) # Will be set in render
-          @viewport = Viewport.new
-          @screen_buffer = ScreenBuffer.new(@viewport)
+          @ray_caster = Components::RayCaster.new(map, nil) # Will be set in render
+          @viewport = Components::Viewport.new
+          @screen_buffer = Components::ScreenBuffer.new(@viewport)
           @metrics = {
             ray_casting_time: 0,
             wall_drawing_time: 0,
@@ -53,6 +55,7 @@ module Doom
           glEnable(GL_BLEND)
           glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
           glClearColor(0.0, 0.0, 0.0, 1.0)
+          glClear(GL_COLOR_BUFFER_BIT)
 
           # Clear the screen
           @screen_buffer.clear
