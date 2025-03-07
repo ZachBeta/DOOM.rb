@@ -7,6 +7,7 @@ module Doom
     def initialize(player)
       @player = player
       @logger = Logger.instance
+      @last_n_state = false
     end
 
     def handle_input(window, delta_time)
@@ -19,19 +20,19 @@ module Doom
 
     def handle_movement(window, delta_time)
       movement = []
-      if window.button_down?(Glfw::KEY_W)
+      if window.button_down?(Glfw3::KEY_W)
         @player.move_forward(delta_time)
         movement << 'forward'
       end
-      if window.button_down?(Glfw::KEY_S)
+      if window.button_down?(Glfw3::KEY_S)
         @player.move_backward(delta_time)
         movement << 'backward'
       end
-      if window.button_down?(Glfw::KEY_A)
+      if window.button_down?(Glfw3::KEY_A)
         @player.strafe_left(delta_time)
         movement << 'left'
       end
-      if window.button_down?(Glfw::KEY_D)
+      if window.button_down?(Glfw3::KEY_D)
         @player.strafe_right(delta_time)
         movement << 'right'
       end
@@ -41,11 +42,11 @@ module Doom
 
     def handle_rotation(window, delta_time)
       rotation = []
-      if window.button_down?(GLFW::KEY_LEFT)
+      if window.button_down?(Glfw3::KEY_LEFT)
         @player.rotate_left(delta_time)
         rotation << 'left'
       end
-      if window.button_down?(GLFW::KEY_RIGHT)
+      if window.button_down?(Glfw3::KEY_RIGHT)
         @player.rotate_right(delta_time)
         rotation << 'right'
       end
@@ -54,9 +55,7 @@ module Doom
     end
 
     def handle_special_keys(window)
-      # We need to track key presses to avoid toggling multiple times per press
-      @last_n_state ||= false
-      n_pressed = window.button_down?(GLFW::KEY_N)
+      n_pressed = window.button_down?(Glfw3::KEY_N)
 
       if n_pressed && !@last_n_state
         @player.toggle_noclip

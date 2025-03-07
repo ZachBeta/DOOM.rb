@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+require 'glfw3'
 require_relative 'doom/game'
 require_relative 'doom/logger'
 

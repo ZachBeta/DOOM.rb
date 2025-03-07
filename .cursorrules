@@ -1,3 +1,7 @@
+when writing ruby, write code in the style of Sandi Metz and her Practical Object Oriented Design (POODR) book
+
+when writing any code, keep the explanations and followup questions to a minimum to save tokens 
+
 {
   "version": 1,
   "rules": [
@@ -182,4 +186,4 @@
       ]
     }
   ]
-} 
+}

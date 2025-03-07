@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require 'glfw3'
 require 'opengl'
 require 'matrix'
 require_relative 'logger'
@@ -14,7 +13,7 @@ module Doom
     HEIGHT = 600
     TITLE = 'DOOM.rb'
 
-    def initialize(width, height, title)
+    def initialize(width = WIDTH, height = HEIGHT, title = TITLE)
       @width = width
       @height = height
       @title = title
@@ -30,7 +29,7 @@ module Doom
 
     def run
       @logger.info('Starting main render loop')
-      until window_should_close?
+      until should_close?
         render
         poll_events
         swap_buffers
@@ -51,7 +50,7 @@ module Doom
     end
 
     def should_close?
-      @window&.should_close?
+      @glfw.should_close?
     end
 
     def update
@@ -60,7 +59,7 @@ module Doom
     end
 
     def swap_buffers
-      @window&.swap_buffers
+      @glfw.swap_buffers
       @logger.debug('Swapped buffers')
     end
 
@@ -73,9 +72,7 @@ module Doom
     attr_reader :width, :height
 
     def button_down?(key)
-      return false unless @window
-
-      state = @window.get_key(key)
+      state = @glfw.get_key(key)
       @logger.debug("Key #{key} state: #{state}")
       state == Glfw3::PRESS
     end
@@ -102,10 +99,8 @@ module Doom
 
     def create_window
       @logger.debug('Creating GLFW window')
-      @window = @glfw.create_window(@width, @height, @title)
-      raise 'Failed to create GLFW window' if @window.nil?
-
-      @window.make_context_current
+      @glfw.create_window(@width, @height, @title)
+      @glfw.make_context_current
     end
 
     def setup_opengl
@@ -113,7 +108,6 @@ module Doom
       OpenGL.load_lib
       @logger.debug('OpenGL library loaded')
 
-      # Only try to get OpenGL info after context is current
       begin
         @logger.debug("OpenGL version: #{glGetString(GL_VERSION)}")
         @logger.debug("OpenGL vendor: #{glGetString(GL_VENDOR)}")
@@ -145,8 +139,7 @@ module Doom
 
     def cleanup_glfw
       @logger.debug('Cleaning up GLFW resources')
-      @window.destroy unless @window.nil?
-      @glfw.terminate
+      @glfw.destroy_window
     end
 
     def render
@@ -160,12 +153,6 @@ module Doom
     def poll_events
       @logger.debug('Polling GLFW events')
       @glfw.poll_events
-    end
-
-    def window_should_close?
-      should_close = @window&.should_close?
-      @logger.debug("Window should close: #{should_close}")
-      should_close
     end
   end
 end
