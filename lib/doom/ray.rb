@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'matrix'
-
 module Doom
   class Ray
     attr_reader :direction_x, :direction_y

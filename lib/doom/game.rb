@@ -26,7 +26,7 @@ module Doom
       load_wad(wad_path)
       @map = Map.new
       @player = Player.new(@map)
-      @renderer = Renderer.new(self, @map, @textures)
+      @renderer = OpenGLRenderer.new(self, @map, @textures)
       @input_handler = InputHandler.new(@player)
       @game_clock = GameClock.new
       @font = Gosu::Font.new(20)

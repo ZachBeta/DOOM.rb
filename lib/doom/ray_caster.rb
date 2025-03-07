@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-require 'doom/ray'
-require 'doom/wall_intersection'
-require 'doom/viewport'
+require_relative 'ray'
+require_relative 'wall_intersection'
+require_relative 'viewport'
 
 module Doom
   class RayCaster
