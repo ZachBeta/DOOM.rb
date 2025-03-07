@@ -7,7 +7,7 @@ require_relative 'map'
 require_relative 'logger'
 require_relative 'input_handler'
 require_relative 'wad_file'
-require_relative 'texture_composer'
+require_relative 'renderer/utils/texture_composer'
 
 module Doom
   class Game
@@ -21,7 +21,7 @@ module Doom
       load_wad(wad_path)
       @map = Map.new
       @player = Player.new(@map)
-      @renderer = OpenGLRenderer.new(@window, @map, @textures)
+      @renderer = Renderer::Core::OpenGLRenderer.new(@window, @map, @textures)
       @input_handler = InputHandler.new(@player)
       @game_clock = GameClock.new
 
@@ -74,7 +74,7 @@ module Doom
     def load_wad(wad_path)
       @logger.info("Loading WAD file: #{wad_path}")
       @wad_file = WadFile.new(wad_path)
-      @textures = TextureComposer.new
+      @textures = Renderer::Utils::TextureComposer.new
       @logger.info('WAD file loaded successfully')
     end
   end

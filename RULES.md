@@ -15,6 +15,7 @@
 - Keep classes small and focused with clear public interfaces
 - Write self-documenting code using clear method and variable names
 - Only add comments for complex algorithms or when code cannot be made clearer through refactoring
+- Use require more intelligently
 
 ### Game Architecture
 - Maintain separation of concerns between game components

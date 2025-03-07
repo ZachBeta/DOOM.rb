@@ -1,12 +1,16 @@
 # frozen_string_literal: true
 
 require 'test_helper'
-require 'doom/opengl_renderer'
+require 'doom/renderer/core/opengl_renderer'
+require 'doom/renderer/core/base_renderer'
+require 'doom/renderer/components/viewport'
+require 'doom/renderer/components/screen_buffer'
+require 'doom/renderer/components/ray_caster'
 require 'doom/map'
 require 'doom/player'
 require 'doom/wad_file'
-require 'doom/texture_composer'
-require 'doom/textures'
+require 'doom/renderer/utils/texture_composer'
+require 'doom/renderer/utils/texture'
 
 module Doom
   class OpenGLRendererTest < Minitest::Test
@@ -14,7 +18,7 @@ module Doom
       @window = TestWindow.new
       @map = Map.new
       @textures = Textures.new
-      @renderer = OpenGLRenderer.new(@window, @map, @textures)
+      @renderer = Renderer::Core::OpenGLRenderer.new(@window, @map, @textures)
       @player = Player.new(Vector[1, 1], 0)
     end
 
@@ -23,10 +27,12 @@ module Doom
     end
 
     def test_initialization
-      assert_instance_of OpenGLRenderer, @renderer
-      assert_instance_of Viewport, @renderer.instance_variable_get(:@viewport)
-      assert_instance_of ScreenBuffer, @renderer.instance_variable_get(:@screen_buffer)
-      assert_instance_of RayCaster, @renderer.instance_variable_get(:@ray_caster)
+      assert_instance_of Renderer::Core::OpenGLRenderer, @renderer
+      assert_instance_of Renderer::Components::Viewport, @renderer.instance_variable_get(:@viewport)
+      assert_instance_of Renderer::Components::ScreenBuffer,
+                         @renderer.instance_variable_get(:@screen_buffer)
+      assert_instance_of Renderer::Components::RayCaster,
+                         @renderer.instance_variable_get(:@ray_caster)
       assert_equal 0, @renderer.metrics[:ray_casting_time]
       assert_equal 0, @renderer.metrics[:wall_drawing_time]
       assert_equal 0, @renderer.metrics[:buffer_flip_time]

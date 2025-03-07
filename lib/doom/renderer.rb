@@ -1,14 +1,23 @@
 # frozen_string_literal: true
 
-require_relative 'ray'
-require_relative 'wall_intersection'
-require_relative 'ray_caster'
-require_relative 'wall_renderer'
-require_relative 'minimap_renderer'
-require_relative 'base_renderer'
-require_relative 'opengl_renderer'
+require 'doom/renderer/core/base_renderer'
+require 'doom/renderer/core/opengl_renderer'
+require 'doom/renderer/components/viewport'
+require 'doom/renderer/components/screen_buffer'
+require 'doom/renderer/components/ray_caster'
+require 'doom/renderer/components/ray'
+require 'doom/renderer/components/wall_intersection'
+require 'doom/renderer/components/wall_renderer'
+require 'doom/renderer/utils/texture'
+require 'doom/renderer/utils/texture_composer'
 
 module Doom
-  # Alias for BaseRenderer for backward compatibility
-  Renderer = BaseRenderer
+  module Renderer
+    # Main entry point for the renderer module
+    class << self
+      def create_renderer(window, map, textures)
+        OpenGLRenderer.new(window, map, textures)
+      end
+    end
+  end
 end

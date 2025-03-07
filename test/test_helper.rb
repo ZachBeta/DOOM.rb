@@ -7,9 +7,9 @@ require 'simplecov'
 require 'doom/logger'
 require 'doom/config'
 require 'fileutils'
-require 'glfw3'
 require 'opengl'
 require 'doom/player'
+require 'doom/glfw'
 require_relative '../lib/doom'
 
 SimpleCov.start do
@@ -33,13 +33,13 @@ module TestHelper
   end
 
   def setup_opengl
-    @glfw = Doom::Glfw.instance
+    @glfw = Doom::GlfwWrapper.instance
     @glfw.init
     @glfw.default_window_hints
-    @glfw.window_hint(Glfw3::CONTEXT_VERSION_MAJOR, 3)
-    @glfw.window_hint(Glfw3::CONTEXT_VERSION_MINOR, 3)
-    @glfw.window_hint(Glfw3::OPENGL_PROFILE, Glfw3::OPENGL_CORE_PROFILE)
-    @glfw.window_hint(Glfw3::VISIBLE, Glfw3::FALSE)
+    @glfw.window_hint(Doom::GlfwWrapper::CONTEXT_VERSION_MAJOR, 3)
+    @glfw.window_hint(Doom::GlfwWrapper::CONTEXT_VERSION_MINOR, 3)
+    @glfw.window_hint(Doom::GlfwWrapper::OPENGL_PROFILE, Doom::GlfwWrapper::OPENGL_CORE_PROFILE)
+    @glfw.window_hint(Doom::GlfwWrapper::VISIBLE, Doom::GlfwWrapper::FALSE)
     @window = @glfw.create_window(800, 600, 'Test Window')
     @window.make_context_current
     OpenGL.load_lib

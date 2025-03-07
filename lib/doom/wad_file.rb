@@ -1,5 +1,8 @@
+# frozen_string_literal: true
+
 require_relative 'logger'
-require_relative 'texture'
+require_relative 'renderer/utils/texture'
+require_relative 'renderer/utils/texture_composer'
 
 module Doom
   class WadFile

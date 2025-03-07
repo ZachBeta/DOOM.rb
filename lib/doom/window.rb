@@ -18,7 +18,7 @@ module Doom
       @height = height
       @title = title
       @logger = Logger.instance
-      @glfw = Glfw.instance
+      @glfw = GlfwWrapper.instance
       @logger.info("Initializing window: #{width}x#{height} - #{title}")
       setup_glfw
       create_window
@@ -74,7 +74,7 @@ module Doom
     def button_down?(key)
       state = @glfw.get_key(key)
       @logger.debug("Key #{key} state: #{state}")
-      state == Glfw3::PRESS
+      state == GlfwWrapper::PRESS
     end
 
     private
@@ -91,10 +91,10 @@ module Doom
       @logger.debug('Setting up GLFW')
       @glfw.init
       @glfw.default_window_hints
-      @glfw.window_hint(Glfw3::CONTEXT_VERSION_MAJOR, 3)
-      @glfw.window_hint(Glfw3::CONTEXT_VERSION_MINOR, 3)
-      @glfw.window_hint(Glfw3::OPENGL_PROFILE, Glfw3::OPENGL_CORE_PROFILE)
-      @glfw.window_hint(Glfw3::VISIBLE, Glfw3::FALSE) if ENV['RACK_ENV'] == 'test'
+      @glfw.window_hint(GlfwWrapper::CONTEXT_VERSION_MAJOR, 3)
+      @glfw.window_hint(GlfwWrapper::CONTEXT_VERSION_MINOR, 3)
+      @glfw.window_hint(GlfwWrapper::OPENGL_PROFILE, GlfwWrapper::OPENGL_CORE_PROFILE)
+      @glfw.window_hint(GlfwWrapper::VISIBLE, GlfwWrapper::FALSE) if ENV['RACK_ENV'] == 'test'
     end
 
     def create_window

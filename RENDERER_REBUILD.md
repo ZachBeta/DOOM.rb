@@ -6,10 +6,45 @@ Rebuilding the renderer from scratch, inspired by Chocolate DOOM's architecture.
 `levels/freedoom-0.13.0/freedoom1.wad`
 `.gems/ruby/3.3.0/gems/glfw3-0.3.3`
 
+## Done
+
+- [x] set up worklog for this focused effort
+- [x] Set up base interfaces
+  - [x] Define Renderer interface
+  - [x] Define Viewport interface
+  - [x] Define TextureManager interface
+  - [x] Define BufferManager interface
+- [x] Implement dependency injection
+  - [x] Add DI container
+  - [x] Configure component wiring
+- [x] Add profiling infrastructure
+  - [x] Implement metrics collection
+  - [x] Add performance hooks
+  - [x] Set up logging
+- [x] Set up GLFW window
+  - [x] Initialize GLFW context
+  - [x] Create 800x600 window
+  - [x] Add window event handling
+- [x] Implement OpenGL context
+  - [x] Set up OpenGL bindings
+  - [x] Configure basic OpenGL state
+- [x] Implement fixed 800x600 resolution
+  - [x] Create Viewport class with width/height constants
+  - [x] Add basic screen buffer management
+- [x] Add centerx/centery calculations
+  - [x] Calculate viewport center points
+  - [x] Add tests for center calculations
+- [x] Implement basic screen buffer
+  - [x] Add double buffering
+  - [x] Add basic pixel drawing
+- [x] Add state management
+  - [x] Track viewport state
+  - [x] Add state validation
+
 ## Current Focus
-- Fixed 800x600 resolution
-- Single-pass rendering pipeline
-- Core rendering components first
+- Ray casting implementation
+- Wall rendering optimization
+- Texture mapping system
 
 ## Architecture Principles
 - Clear separation of concerns
@@ -21,7 +56,7 @@ Rebuilding the renderer from scratch, inspired by Chocolate DOOM's architecture.
 
 ## Implementation Plan
 
-### Phase 0: Core Architecture [IN PROGRESS]
+### Phase 0: Core Architecture [COMPLETED]
 - [ ] Set up base interfaces
   - [ ] Define Renderer interface
   - [ ] Define Viewport interface
@@ -35,7 +70,7 @@ Rebuilding the renderer from scratch, inspired by Chocolate DOOM's architecture.
   - [ ] Add performance hooks
   - [ ] Set up logging
 
-### Phase 1: Window Management [NEXT]
+### Phase 1: Window Management [COMPLETED]
 - [ ] Set up GLFW window
   - [ ] Initialize GLFW context
   - [ ] Create 800x600 window
@@ -50,7 +85,7 @@ Rebuilding the renderer from scratch, inspired by Chocolate DOOM's architecture.
 
 ### Phase 2: Core Components
 
-#### Viewport [NEXT]
+#### Viewport [COMPLETED]
 - [ ] Implement fixed 800x600 resolution
   - [ ] Create Viewport class with width/height constants
   - [ ] Add basic screen buffer management
@@ -64,13 +99,13 @@ Rebuilding the renderer from scratch, inspired by Chocolate DOOM's architecture.
   - [ ] Track viewport state
   - [ ] Add state validation
 
-#### RayCaster [NEXT]
-- [ ] Implement DDA algorithm
-  - [ ] Add ray casting with fixed FOV
-  - [ ] Add wall intersection detection
-- [ ] Add distance calculations
-  - [ ] Calculate wall distances
-  - [ ] Add perspective correction
+#### RayCaster [IN PROGRESS]
+- [x] Implement DDA algorithm
+  - [x] Add ray casting with fixed FOV
+  - [x] Add wall intersection detection
+- [x] Add distance calculations
+  - [x] Calculate wall distances
+  - [x] Add perspective correction
 - [ ] Add texture coordinate calculation
   - [ ] Calculate U coordinates
   - [ ] Add texture mapping support
@@ -78,7 +113,7 @@ Rebuilding the renderer from scratch, inspired by Chocolate DOOM's architecture.
   - [ ] Cache ray results
   - [ ] Implement cache invalidation
 
-#### TextureMapper [AFTER RAYCASTER]
+#### TextureMapper [NEXT]
 - [ ] Add texture loading
   - [ ] Load textures from WAD
   - [ ] Add texture caching
@@ -91,10 +126,10 @@ Rebuilding the renderer from scratch, inspired by Chocolate DOOM's architecture.
 
 ### Phase 3: Rendering Pipeline
 
-#### WallRenderer
-- [ ] Add wall rendering
-  - [ ] Implement height calculations
-  - [ ] Add texture mapping
+#### WallRenderer [IN PROGRESS]
+- [x] Add wall rendering
+  - [x] Implement height calculations
+  - [x] Add basic texture mapping
 - [ ] Add clipping
   - [ ] Implement clip arrays
   - [ ] Add wall clipping
@@ -102,7 +137,7 @@ Rebuilding the renderer from scratch, inspired by Chocolate DOOM's architecture.
   - [ ] Implement wall merging
   - [ ] Add culling
 
-#### FloorCeilingRenderer
+#### FloorCeilingRenderer [PENDING]
 - [ ] Add floor/ceiling rendering
   - [ ] Implement perspective correction
   - [ ] Add texture mapping
@@ -112,16 +147,16 @@ Rebuilding the renderer from scratch, inspired by Chocolate DOOM's architecture.
 
 ### Phase 4: Integration
 
-#### SoftwareRenderer
-- [ ] Coordinate rendering pipeline
-  - [ ] Implement render loop
-  - [ ] Add frame timing
+#### SoftwareRenderer [IN PROGRESS]
+- [x] Coordinate rendering pipeline
+  - [x] Implement render loop
+  - [x] Add frame timing
 - [ ] Add sprite rendering
   - [ ] Implement sprite sorting
   - [ ] Add sprite drawing
-- [ ] Add performance monitoring
-  - [ ] Track frame times
-  - [ ] Monitor memory usage
+- [x] Add performance monitoring
+  - [x] Track frame times
+  - [x] Monitor memory usage
 
 ## Test Data
 Using freedoom1.wad for testing:

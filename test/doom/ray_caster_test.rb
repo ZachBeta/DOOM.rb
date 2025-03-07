@@ -1,5 +1,9 @@
+# frozen_string_literal: true
+
 require 'test_helper'
-require 'doom/ray_caster'
+require 'doom/renderer/components/ray_caster'
+require 'doom/renderer/components/ray'
+require 'doom/renderer/components/wall_intersection'
 require 'doom/map'
 require 'doom/player'
 
@@ -8,7 +12,7 @@ module Doom
     def setup
       @map = Map.new
       @player = Player.new
-      @ray_caster = RayCaster.new(@map, @player)
+      @ray_caster = Renderer::Components::RayCaster.new(@map, @player)
     end
 
     def test_casts_rays_at_correct_angles_based_on_fov
@@ -23,7 +27,7 @@ module Doom
       # Cast a ray that should hit the wall
       intersection = @ray_caster.cast_ray(0)
 
-      assert_instance_of WallIntersection, intersection
+      assert_instance_of Renderer::Components::WallIntersection, intersection
       assert_predicate intersection.distance, :finite?
       assert_in_delta 7.0, intersection.distance, 0.1
     end
