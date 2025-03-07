@@ -1,16 +1,26 @@
 # frozen_string_literal: true
 
-require 'gosu'
+require 'opengl'
 
 module Doom
   class ScreenBuffer
+    include OpenGL
+
     def initialize(viewport)
       @viewport = viewport
       @front_buffer = create_buffer
       @back_buffer = create_buffer
       @palette = create_default_palette
+      @texture_id = create_texture
       @logger = Logger.instance
-      @logger.info("Screen buffer initialized with size #{@viewport.scaled_width}x#{@viewport.scaled_height}")
+      @logger.info("Screen buffer initialized with size #{@viewport.width}x#{@viewport.height}")
+    end
+
+    def cleanup
+      return unless @texture_id
+
+      glDeleteTextures(1, [@texture_id].pack('L'))
+      @texture_id = nil
     end
 
     def clear
@@ -19,20 +29,20 @@ module Doom
     end
 
     def draw_pixel(x, y, color_index)
-      return if x < 0 || x >= @viewport.scaled_width || y < 0 || y >= @viewport.scaled_height
+      return if x < 0 || x >= @viewport.width || y < 0 || y >= @viewport.height
 
-      @back_buffer[x + (y * @viewport.scaled_width)] = color_index
+      @back_buffer[x + (y * @viewport.width)] = color_index
     end
 
     def draw_vertical_line(x, y1, y2, color_index)
-      return if x < 0 || x >= @viewport.scaled_width
+      return if x < 0 || x >= @viewport.width
 
       y1 = [y1, 0].max
-      y2 = [y2, @viewport.scaled_height - 1].min
-      return if y1 > y2 || y1 < 0 || y2 >= @viewport.scaled_height
+      y2 = [y2, @viewport.height - 1].min
+      return if y1 > y2 || y1 < 0 || y2 >= @viewport.height
 
       y1.upto(y2) do |y|
-        @back_buffer[x + (y * @viewport.scaled_width)] = color_index
+        @back_buffer[x + (y * @viewport.width)] = color_index
       end
     end
 
@@ -41,22 +51,28 @@ module Doom
       @logger.debug('Buffer flipped')
     end
 
-    def render_to_window(window)
-      return if ENV['RACK_ENV'] == 'test'
-
+    def render_to_window
       start_time = Time.now
-      @viewport.scaled_width.times do |x|
-        @viewport.scaled_height.times do |y|
-          color_index = @front_buffer[x + (y * @viewport.scaled_width)]
-          color = get_color(color_index)
-          window.draw_quad(
-            x, y, color,
-            x + 1, y, color,
-            x + 1, y + 1, color,
-            x, y + 1, color
-          )
-        end
-      end
+
+      # Bind texture
+      glBindTexture(GL_TEXTURE_2D, @texture_id)
+
+      # Update texture data
+      glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, @viewport.width, @viewport.height,
+                      GL_RGBA, GL_UNSIGNED_BYTE, @front_buffer.pack('C*'))
+
+      # Draw fullscreen quad with texture
+      glBegin(GL_QUADS)
+      glTexCoord2f(0.0, 0.0)
+      glVertex2f(-1.0, -1.0)
+      glTexCoord2f(1.0, 0.0)
+      glVertex2f(1.0, -1.0)
+      glTexCoord2f(1.0, 1.0)
+      glVertex2f(1.0, 1.0)
+      glTexCoord2f(0.0, 1.0)
+      glVertex2f(-1.0, 1.0)
+      glEnd
+
       render_time = Time.now - start_time
       @logger.debug("Buffer rendered to window in #{(render_time * 1000).round(2)}ms")
     end
@@ -64,7 +80,7 @@ module Doom
     private
 
     def create_buffer
-      Array.new(@viewport.scaled_width * @viewport.scaled_height, 0)
+      Array.new(@viewport.width * @viewport.height * 4, 0)
     end
 
     def create_default_palette
@@ -72,12 +88,26 @@ module Doom
       Array.new(256) do |i|
         # Map 0-255 to 0-255 for grayscale
         intensity = i
-        Gosu::Color.rgb(intensity, intensity, intensity)
+        [intensity, intensity, intensity, 255]
       end
     end
 
+    def create_texture
+      texture_id = [0].pack('L')
+      glGenTextures(1, texture_id)
+      texture_id = texture_id.unpack1('L')
+      glBindTexture(GL_TEXTURE_2D, texture_id)
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, @viewport.width, @viewport.height,
+                   0, GL_RGBA, GL_UNSIGNED_BYTE, nil)
+      texture_id
+    end
+
     def get_color(color_index)
-      @palette[color_index] || Gosu::Color::BLACK
+      @palette[color_index] || [0, 0, 0, 255]
     end
   end
 end

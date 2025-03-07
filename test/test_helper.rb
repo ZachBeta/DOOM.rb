@@ -5,13 +5,12 @@ require 'minitest/pride'
 require 'matrix'
 require 'simplecov'
 require 'doom/logger'
-require 'doom/wad_file'
-require 'doom/texture'
-require 'doom/texture_composer'
 require 'doom/config'
 require 'fileutils'
-require 'gosu'
+require 'glfw3'
+require 'opengl'
 require 'doom/player'
+require_relative '../lib/doom'
 
 SimpleCov.start do
   add_filter '/test/'
@@ -33,44 +32,26 @@ module TestHelper
     )
   end
 
-  def load_test_textures
-    wad_path = Doom::Config.wad_path
-    wad_file = Doom::WadFile.new(wad_path)
-    composer = Doom::TextureComposer.new
-    textures = wad_file.textures
-    pnames = wad_file.lump('PNAMES')&.read
-    patches = {}
-
-    if pnames
-      count = pnames[0, 4].unpack1('V')
-      patch_names = pnames[4..].unpack('Z8' * count)
-
-      patch_names.each do |name|
-        logger = Doom::Logger.instance
-        logger.debug("Loading patch: #{name}")
-        lump = wad_file.lump(name)
-        logger.debug("Lump found: #{lump.inspect}")
-        next unless lump
-
-        logger.debug("Lump class: #{lump.class}")
-        logger.debug("Lump methods: #{lump.methods - Object.methods}")
-        patches[name] = Doom::Patch.new(
-          name: name,
-          width: lump.width,
-          height: lump.height,
-          data: lump.read
-        )
-      end
+  def setup_opengl
+    Glfw.init
+    Glfw::Window.default_window_hints do
+      context_version_major 2
+      context_version_minor 1
+      opengl_profile :core
     end
+    @window = Glfw::Window.new(800, 600, 'Test Window')
+    @window.make_context_current
+    OpenGL.load_lib
+  end
 
-    # Load a subset of textures for testing
-    test_textures = {}
-    %w[STARTAN3 COMPBLUE COMPUTE1].each do |name|
-      next unless textures[name]
+  def teardown_opengl
+    @window.destroy if @window
+    Glfw.terminate
+  end
 
-      test_textures[name] = composer.compose(textures[name], patches)
-    end
-    test_textures
+  def assert_vector_equal(expected, actual, msg = nil)
+    assert_equal expected[0], actual[0], msg
+    assert_equal expected[1], actual[1], msg
   end
 
   private
@@ -89,9 +70,11 @@ class Minitest::Test
 
   def setup
     setup_test_logs
+    setup_opengl
   end
 
   def teardown
+    teardown_opengl
     # Ensure logs are rotated after each test if they exist
     return unless Dir.exist?('logs') && !Dir.glob('logs/*.log').empty?
 
@@ -109,31 +92,8 @@ Doom::Logger.configure(
   env: :test
 )
 
+# FIXME: remove all gosu code
 module Doom
-  class TestWindow < Gosu::Window
-    def initialize(width = 800, height = 600)
-      super(width, height, false)
-      @width = width
-      @height = height
-    end
-
-    def needs_cursor?
-      false
-    end
-
-    def button_down(id)
-      close if id == Gosu::KB_ESCAPE
-    end
-
-    def update
-      # No-op for testing
-    end
-
-    def draw
-      # No-op for testing
-    end
-  end
-
   class Map
     def wall_at?(x, y)
       (x == 6 && y == 5) || # Wall one unit to the right of default player position
@@ -145,14 +105,13 @@ module Doom
     def empty?(x, y) = !wall_at?(x, y)
   end
 
-  class ComposedTexture
-    attr_reader :width, :height, :data, :mipmaps
+  class Textures
+    def initialize
+      @textures = {}
+    end
 
-    def initialize(width:, height:, data:)
-      @width = width
-      @height = height
-      @data = data
-      @mipmaps = []
+    def get(name)
+      @textures[name]
     end
   end
 end

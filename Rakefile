@@ -103,7 +103,7 @@ namespace :wad do
 end
 
 task :run_all do
-  freedoom_wad = 'levels/freedoom-0.13.0/freedoom1.wad'
+  freedoom_wad = 'data/wad/freedoom1.wad'
 
   puts "\nRunning tests..."
   Rake::Task['test'].invoke

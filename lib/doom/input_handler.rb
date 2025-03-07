@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'gosu'
+require 'glfw3'
 
 module Doom
   class InputHandler
@@ -19,19 +19,19 @@ module Doom
 
     def handle_movement(window, delta_time)
       movement = []
-      if window.button_down?(Gosu::KB_W)
+      if window.button_down?(GLFW::KEY_W)
         @player.move_forward(delta_time)
         movement << 'forward'
       end
-      if window.button_down?(Gosu::KB_S)
+      if window.button_down?(GLFW::KEY_S)
         @player.move_backward(delta_time)
         movement << 'backward'
       end
-      if window.button_down?(Gosu::KB_A)
+      if window.button_down?(GLFW::KEY_A)
         @player.strafe_left(delta_time)
         movement << 'left'
       end
-      if window.button_down?(Gosu::KB_D)
+      if window.button_down?(GLFW::KEY_D)
         @player.strafe_right(delta_time)
         movement << 'right'
       end
@@ -41,11 +41,11 @@ module Doom
 
     def handle_rotation(window, delta_time)
       rotation = []
-      if window.button_down?(Gosu::KB_LEFT)
+      if window.button_down?(GLFW::KEY_LEFT)
         @player.rotate_left(delta_time)
         rotation << 'left'
       end
-      if window.button_down?(Gosu::KB_RIGHT)
+      if window.button_down?(GLFW::KEY_RIGHT)
         @player.rotate_right(delta_time)
         rotation << 'right'
       end
@@ -56,7 +56,7 @@ module Doom
     def handle_special_keys(window)
       # We need to track key presses to avoid toggling multiple times per press
       @last_n_state ||= false
-      n_pressed = window.button_down?(Gosu::KB_N)
+      n_pressed = window.button_down?(GLFW::KEY_N)
 
       if n_pressed && !@last_n_state
         @player.toggle_noclip

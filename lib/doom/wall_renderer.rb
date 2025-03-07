@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'gosu'
+require 'opengl'
 
 module Doom
   class WallRenderer
@@ -81,7 +81,7 @@ module Doom
 
     def get_texture_color(texture_name, x, y)
       texture = @textures[texture_name]
-      return Gosu::Color::BLACK unless texture
+      return [0, 0, 0] unless texture
 
       # Clamp texture coordinates
       x = x.clamp(0, texture.width - 1)
@@ -89,16 +89,16 @@ module Doom
 
       # Get color from texture data
       color_index = texture.data[(y * texture.width) + x]
-      Gosu::Color.rgb(color_index.to_i, color_index.to_i, color_index.to_i)
+      [color_index.to_i, color_index.to_i, color_index.to_i]
     end
 
     def apply_fog(color, distance)
       # Simple distance-based fog
       fog_factor = [1.0 - (distance / 10.0), 0.0].max
-      r = (color.red * fog_factor).to_i
-      g = (color.green * fog_factor).to_i
-      b = (color.blue * fog_factor).to_i
-      Gosu::Color.rgb(r, g, b)
+      r = (color[0] * fog_factor).to_i
+      g = (color[1] * fog_factor).to_i
+      b = (color[2] * fog_factor).to_i
+      [r, g, b]
     end
   end
 end

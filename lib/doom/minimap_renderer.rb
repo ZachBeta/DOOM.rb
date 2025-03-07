@@ -35,10 +35,10 @@ module Doom
 
     def draw_background
       @window.draw_quad(
-        @window.width - MINIMAP_SIZE, @window.height - MINIMAP_SIZE, Gosu::Color::BLACK,
-        @window.width, @window.height - MINIMAP_SIZE, Gosu::Color::BLACK,
-        @window.width, @window.height, Gosu::Color::BLACK,
-        @window.width - MINIMAP_SIZE, @window.height, Gosu::Color::BLACK
+        @window.width - MINIMAP_SIZE, @window.height - MINIMAP_SIZE, [0, 0, 0],
+        @window.width, @window.height - MINIMAP_SIZE, [0, 0, 0],
+        @window.width, @window.height, [0, 0, 0],
+        @window.width - MINIMAP_SIZE, @window.height, [0, 0, 0]
       )
     end
 
@@ -53,10 +53,10 @@ module Doom
 
           # Draw wall cell
           @window.draw_quad(
-            cell_x, cell_y, Gosu::Color::WHITE,
-            cell_x + cell_size, cell_y, Gosu::Color::WHITE,
-            cell_x + cell_size, cell_y + cell_size, Gosu::Color::WHITE,
-            cell_x, cell_y + cell_size, Gosu::Color::WHITE
+            cell_x, cell_y, [255, 255, 255],
+            cell_x + cell_size, cell_y, [255, 255, 255],
+            cell_x + cell_size, cell_y + cell_size, [255, 255, 255],
+            cell_x, cell_y + cell_size, [255, 255, 255]
           )
         end
       end
@@ -69,10 +69,10 @@ module Doom
 
       # Draw player dot
       @window.draw_quad(
-        player_x - (PLAYER_SIZE / 2), player_y - (PLAYER_SIZE / 2), Gosu::Color::RED,
-        player_x + (PLAYER_SIZE / 2), player_y - (PLAYER_SIZE / 2), Gosu::Color::RED,
-        player_x + (PLAYER_SIZE / 2), player_y + (PLAYER_SIZE / 2), Gosu::Color::RED,
-        player_x - (PLAYER_SIZE / 2), player_y + (PLAYER_SIZE / 2), Gosu::Color::RED
+        player_x - (PLAYER_SIZE / 2), player_y - (PLAYER_SIZE / 2), [255, 0, 0],
+        player_x + (PLAYER_SIZE / 2), player_y - (PLAYER_SIZE / 2), [255, 0, 0],
+        player_x + (PLAYER_SIZE / 2), player_y + (PLAYER_SIZE / 2), [255, 0, 0],
+        player_x - (PLAYER_SIZE / 2), player_y + (PLAYER_SIZE / 2), [255, 0, 0]
       )
     end
 
@@ -89,8 +89,8 @@ module Doom
 
       # Draw direction line
       @window.draw_line(
-        start_x, start_y, Gosu::Color::RED,
-        end_x, end_y, Gosu::Color::RED
+        start_x, start_y, [255, 0, 0],
+        end_x, end_y, [255, 0, 0]
       )
     end
   end
