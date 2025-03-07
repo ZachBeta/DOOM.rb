@@ -5,6 +5,29 @@ Rebuilding the renderer from scratch, inspired by Chocolate DOOM's architecture.
 `reference/chocolate-doom`
 `levels/freedoom-0.13.0/freedoom1.wad`
 
+## Done
+- [x] Removed old renderer code and tests
+- [x] Created base renderer interface
+- [x] Started software renderer implementation
+- [x] Created TDD plan for rebuild
+- [x] Updated renderer rebuild plan to align with Chocolate DOOM architecture
+- [x] Added detailed implementation steps for each component
+- [x] Enhanced test coverage for all rendering components
+- [x] Added sprite and weapon rendering support
+- [x] Implemented Viewport resolution tests
+  - [x] Added test for 320x200 base resolution
+  - [x] Added test for aspect ratio preservation
+  - [x] Added test for integer scaling (1x, 2x, 3x)
+- [x] Implemented Viewport core functionality
+  - [x] Added resolution management
+  - [x] Added aspect ratio correction
+  - [x] Added integer scaling support
+  - [x] Added centerx/centery calculations
+- [x] Added performance benchmarks
+  - [x] Measured frame rate impact of scaling
+  - [x] Profiled memory usage during resize
+  - [x] Validated 35 FPS target at 2x scaling
+
 ## Test-Driven Development Approach
 
 ### Test Categories
@@ -200,18 +223,4 @@ Using freedoom1.wad for testing:
   - Memory usage target: < 100MB
 - E1M4: Performance testing
   - Test cases: Large open areas, many sprites
-  - Performance target: 25 FPS
-
-## Progress Log
-
-### 2025-03-07
-- [x] Removed old renderer code and tests
-- [x] Created base renderer interface
-- [x] Started software renderer implementation
-- [x] Created TDD plan for rebuild
-
-### 2025-03-07
-- [x] Updated renderer rebuild plan to align with Chocolate DOOM architecture
-- [x] Added detailed implementation steps for each component
-- [x] Enhanced test coverage for all rendering components
-- [x] Added sprite and weapon rendering support 
+  - Performance target: 25 FPS 
