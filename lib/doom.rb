@@ -3,7 +3,7 @@
 
 require_relative 'doom/logger'
 require_relative 'doom/config'
-require_relative 'doom/glfw'
+require_relative 'doom/glfw_wrapper'
 require_relative 'doom/game'
 require_relative 'doom/window'
 require_relative 'doom/player'

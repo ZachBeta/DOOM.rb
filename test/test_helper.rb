@@ -9,7 +9,7 @@ require 'doom/config'
 require 'fileutils'
 require 'opengl'
 require 'doom/player'
-require 'doom/glfw'
+require 'doom/glfw_wrapper'
 require_relative '../lib/doom'
 
 SimpleCov.start do

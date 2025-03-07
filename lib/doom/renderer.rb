@@ -1,15 +1,15 @@
 # frozen_string_literal: true
 
-require 'doom/renderer/core/base_renderer'
-require 'doom/renderer/core/opengl_renderer'
-require 'doom/renderer/components/viewport'
-require 'doom/renderer/components/screen_buffer'
-require 'doom/renderer/components/ray_caster'
-require 'doom/renderer/components/ray'
-require 'doom/renderer/components/wall_intersection'
-require 'doom/renderer/components/wall_renderer'
-require 'doom/renderer/utils/texture'
-require 'doom/renderer/utils/texture_composer'
+require_relative 'renderer/core/base_renderer'
+require_relative 'renderer/core/opengl_renderer'
+require_relative 'renderer/components/viewport'
+require_relative 'renderer/components/screen_buffer'
+require_relative 'renderer/components/ray_caster'
+require_relative 'renderer/components/ray'
+require_relative 'renderer/components/wall_intersection'
+require_relative 'renderer/components/wall_renderer'
+require_relative 'renderer/utils/texture'
+require_relative 'renderer/utils/texture_composer'
 
 module Doom
   module Renderer

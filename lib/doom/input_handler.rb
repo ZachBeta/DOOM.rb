@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require_relative 'logger'
-require_relative 'glfw'
+require_relative 'glfw_wrapper'
 
 module Doom
   class InputHandler

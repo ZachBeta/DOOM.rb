@@ -61,7 +61,7 @@ PLATFORMS
 
 DEPENDENCIES
   chunky_png (~> 1.4.0)
-  glfw3 (~> 0.3.0)
+  glfw3
   matrix (~> 0.4.2)
   minitest (~> 5.18.0)
   opengl-bindings (~> 1.6.0)

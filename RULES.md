@@ -5,6 +5,7 @@
 - Keep explanations and follow-up questions minimal to save tokens
 - Follow vanilla DOOM behavior as documented in Chocolate DOOM source code in `reference/chocolate-doom`
 - Use glfw3 gem for opengl and reference its code in `.gems/ruby/3.3.0/gems/glfw3-0.3.3`
+- Do not try to use ffi on glfw directly
 - Ensure GPL-2.0 license compliance
 
 ## Code Style Guidelines

@@ -42,9 +42,41 @@ Rebuilding the renderer from scratch, inspired by Chocolate DOOM's architecture.
   - [x] Add state validation
 
 ## Current Focus
-- Ray casting implementation
+- Texture mapping system implementation
+  - [ ] Add texture coordinate calculation
+    - [ ] Implement U/V coordinate mapping
+    - [ ] Add texture sampling with bilinear filtering
+    - [ ] Add texture caching system
+  - [ ] Add texture loading from WAD
+    - [ ] Implement texture data parsing
+    - [ ] Add texture palette support
+    - [ ] Add texture compression
+  - [ ] Add memory management
+    - [ ] Implement texture pooling
+    - [ ] Add texture streaming
+    - [ ] Add texture eviction policy
 - Wall rendering optimization
-- Texture mapping system
+  - [ ] Add clipping system
+    - [ ] Implement clip arrays
+    - [ ] Add wall clipping
+    - [ ] Add portal clipping
+  - [ ] Add performance optimizations
+    - [ ] Implement wall merging
+    - [ ] Add distance-based culling
+    - [ ] Add view frustum culling
+  - [ ] Add lighting system
+    - [ ] Implement dynamic lighting
+    - [ ] Add light attenuation
+    - [ ] Add light batching
+- Floor/ceiling rendering
+  - [ ] Add basic rendering
+    - [ ] Implement perspective correction
+    - [ ] Add texture mapping
+    - [ ] Add distance fog
+  - [ ] Add optimization
+    - [ ] Implement sector merging
+    - [ ] Add distance culling
+    - [ ] Add texture caching
 
 ## Architecture Principles
 - Clear separation of concerns
@@ -53,6 +85,8 @@ Rebuilding the renderer from scratch, inspired by Chocolate DOOM's architecture.
 - State management
 - Performance profiling
 - Memory optimization
+- Texture streaming and caching
+- Efficient clipping and culling
 
 ## Implementation Plan
 
@@ -109,20 +143,25 @@ Rebuilding the renderer from scratch, inspired by Chocolate DOOM's architecture.
 - [ ] Add texture coordinate calculation
   - [ ] Calculate U coordinates
   - [ ] Add texture mapping support
+  - [ ] Add bilinear filtering
 - [ ] Add caching
   - [ ] Cache ray results
   - [ ] Implement cache invalidation
+  - [ ] Add cache warming
 
 #### TextureMapper [NEXT]
 - [ ] Add texture loading
   - [ ] Load textures from WAD
   - [ ] Add texture caching
+  - [ ] Add texture streaming
 - [ ] Implement texture mapping
   - [ ] Add U/V coordinate calculation
   - [ ] Add texture sampling
+  - [ ] Add bilinear filtering
 - [ ] Add memory management
   - [ ] Implement texture pooling
   - [ ] Add texture compression
+  - [ ] Add texture eviction
 
 ### Phase 3: Rendering Pipeline
 
@@ -133,17 +172,29 @@ Rebuilding the renderer from scratch, inspired by Chocolate DOOM's architecture.
 - [ ] Add clipping
   - [ ] Implement clip arrays
   - [ ] Add wall clipping
+  - [ ] Add portal clipping
 - [ ] Add optimization
   - [ ] Implement wall merging
   - [ ] Add culling
+  - [ ] Add batching
+- [ ] Add lighting
+  - [ ] Add dynamic lighting
+  - [ ] Add light attenuation
+  - [ ] Add light batching
 
 #### FloorCeilingRenderer [PENDING]
 - [ ] Add floor/ceiling rendering
   - [ ] Implement perspective correction
   - [ ] Add texture mapping
+  - [ ] Add distance fog
 - [ ] Add optimization
   - [ ] Implement sector merging
   - [ ] Add distance culling
+  - [ ] Add texture caching
+- [ ] Add lighting
+  - [ ] Add dynamic lighting
+  - [ ] Add light attenuation
+  - [ ] Add light batching
 
 ### Phase 4: Integration
 
@@ -154,9 +205,14 @@ Rebuilding the renderer from scratch, inspired by Chocolate DOOM's architecture.
 - [ ] Add sprite rendering
   - [ ] Implement sprite sorting
   - [ ] Add sprite drawing
+  - [ ] Add sprite lighting
 - [x] Add performance monitoring
   - [x] Track frame times
   - [x] Monitor memory usage
+- [ ] Add advanced features
+  - [ ] Add particle effects
+  - [ ] Add dynamic lighting
+  - [ ] Add post-processing
 
 ## Test Data
 Using freedoom1.wad for testing:
@@ -166,6 +222,12 @@ Using freedoom1.wad for testing:
 - E1M2: Complex geometry
   - Test cases: Complex intersections, varying heights
   - Performance target: 30 FPS
+- E1M3: Texture mapping
+  - Test cases: Various texture sizes, transparency
+  - Performance target: 28 FPS
+- E1M4: Lighting and effects
+  - Test cases: Dynamic lighting, particle effects
+  - Performance target: 25 FPS
 
 ## Performance Targets
 - Target resolution: 800x600
@@ -177,4 +239,9 @@ Using freedoom1.wad for testing:
   - Floor/ceiling: 5ms
   - Sprite rendering: 5ms
   - Buffer management: 5ms
-  - Total: 30ms (33 FPS) 
+  - Total: 30ms (33 FPS)
+- Texture memory budget:
+  - Active textures: 32MB
+  - Texture cache: 16MB
+  - Streaming buffer: 8MB
+  - Total: 56MB 
