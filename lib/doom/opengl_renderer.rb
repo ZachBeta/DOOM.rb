@@ -14,6 +14,8 @@ module Doom
       @viewport = Viewport.new
       @viewport.scale = 2
       @screen_buffer = ScreenBuffer.new(@viewport)
+      setup_gl
+      @logger.info("OpenGL renderer initialized with viewport #{@viewport.width}x#{@viewport.height}")
     end
 
     def render(player)
@@ -26,6 +28,9 @@ module Doom
       # Cast rays and draw walls
       ray_angle_step = @ray_caster.fov / @ray_caster.num_rays
       start_angle = player.angle - (@ray_caster.fov / 2)
+
+      @logger.debug("Rendering frame with #{@ray_caster.num_rays} rays")
+      @logger.debug("Player angle: #{player.angle}, FOV: #{@ray_caster.fov}")
 
       @ray_caster.num_rays.times do |x|
         angle = start_angle + (x * ray_angle_step)
@@ -47,9 +52,10 @@ module Doom
       @screen_buffer.flip
 
       # Draw the buffer to the screen
-      draw_buffer
+      @screen_buffer.render_to_window(window)
 
       @last_render_time = Time.now - start_time
+      @logger.debug("Frame rendered in #{(@last_render_time * 1000).round(2)}ms")
     end
 
     attr_reader :last_render_time, :last_texture_time
@@ -62,6 +68,7 @@ module Doom
       glEnable(GL_BLEND)
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
       glClearColor(0.0, 0.0, 0.0, 1.0)
+      @logger.info('OpenGL state initialized')
     end
 
     def draw_buffer
