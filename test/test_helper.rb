@@ -95,27 +95,3 @@ Doom::Logger.configure(
   base_dir: 'logs',
   env: :test
 )
-
-# FIXME: remove all gosu code
-module Doom
-  class Map
-    def wall_at?(x, y)
-      (x == 6 && y == 5) || # Wall one unit to the right of default player position
-        x.negative? || y.negative? || x >= 10 || y >= 10 # Boundary walls
-    end
-
-    def width = 10
-    def height = 10
-    def empty?(x, y) = !wall_at?(x, y)
-  end
-
-  class Textures
-    def initialize
-      @textures = {}
-    end
-
-    def get(name)
-      @textures[name]
-    end
-  end
-end
