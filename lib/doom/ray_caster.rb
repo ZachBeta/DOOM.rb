@@ -6,7 +6,8 @@ require_relative 'viewport'
 
 module Doom
   class RayCaster
-    attr_reader :fov, :num_rays, :map, :player, :viewport
+    attr_reader :fov, :num_rays, :map, :viewport
+    attr_accessor :player
 
     def initialize(map, player)
       @fov = 90
