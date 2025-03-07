@@ -46,6 +46,8 @@ Rebuilding the renderer from scratch, inspired by Chocolate DOOM's architecture.
 
 ### Phase 1: Core Rendering Components
 
+- only use 800x600, do not bother with different resolutions
+
 #### Viewport [IN PROGRESS]
 - [x] Remove old renderer code and tests
 - [x] Create base renderer interface

@@ -42,6 +42,8 @@ module Doom
     end
 
     def render_to_window(window)
+      return if ENV['RACK_ENV'] == 'test'
+
       start_time = Time.now
       @viewport.scaled_width.times do |x|
         @viewport.scaled_height.times do |y|

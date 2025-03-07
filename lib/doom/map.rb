@@ -4,6 +4,10 @@ module Doom
   class Map
     attr_reader :width, :height
 
+    def self.create_map_from_level_data(level_data)
+      new(level_data)
+    end
+
     def initialize(level_data = nil)
       if level_data
         @width = 64 # Standard DOOM map size
