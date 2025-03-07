@@ -4,7 +4,7 @@ require 'matrix'
 
 module Doom
   class Player
-    attr_reader :position, :direction, :plane, :map
+    attr_reader :position, :direction, :plane, :map, :angle
     attr_accessor :noclip_mode
 
     def initialize(map = nil)
@@ -15,6 +15,7 @@ module Doom
       @movement = Movement.new(self)
       @rotation = Rotation.new(self)
       @noclip_mode = false
+      @angle = 0 # Start facing right
     end
 
     def position=(new_position)

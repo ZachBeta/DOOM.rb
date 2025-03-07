@@ -1,14 +1,24 @@
 # frozen_string_literal: true
 
+require 'doom/ray'
+require 'doom/wall_intersection'
+require 'doom/viewport'
+
 module Doom
   class RayCaster
-    def initialize(map, player, ray)
+    attr_reader :fov, :num_rays, :map, :player, :viewport
+
+    def initialize(map, player)
+      @fov = 90
+      @num_rays = 320 # One ray per screen column
       @map = map
       @player = player
-      @ray = ray
+      @viewport = Viewport.new
     end
 
-    def cast
+    def cast_ray(angle)
+      @ray = Ray.new(angle)
+
       # Calculate ray position and direction
       ray_pos_x = @player.position[0]
       ray_pos_y = @player.position[1]
@@ -80,6 +90,27 @@ module Doom
         ray_dir_x: @ray.direction_x,
         ray_dir_y: @ray.direction_y
       )
+    end
+
+    def calculate_distance(ray_length)
+      # Distance is already calculated in cast_ray
+      ray_length
+    end
+
+    def calculate_wall_height(distance)
+      # Wall height is inversely proportional to distance
+      # This prevents the fisheye effect
+      (viewport.height / distance).to_i
+    end
+
+    def calculate_texture_x(wall_x)
+      # Convert wall_x to texture coordinate (0-63)
+      (wall_x * 64).to_i % 64
+    end
+
+    def apply_perspective_correction(distance, angle)
+      # Apply perspective correction to prevent fisheye effect
+      distance * Math.cos(angle - @player.angle)
     end
   end
 end

@@ -14,10 +14,15 @@ module Doom
         @height = 10
         @grid = Grid.new(create_default_layout)
       end
+      @walls = {}
+    end
+
+    def set_wall(x, y)
+      @walls[[x, y]] = true
     end
 
     def wall_at?(x, y)
-      @grid.wall_at?(x, y)
+      @walls[[x, y]] || @grid.wall_at?(x, y)
     end
 
     private
