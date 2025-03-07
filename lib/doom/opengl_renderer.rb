@@ -6,19 +6,6 @@ require 'chunky_png'
 
 module Doom
   class OpenGLRenderer
-    GL_COLOR_BUFFER_BIT = 0x00004000
-    GL_TRIANGLES = 0x0004
-    GL_TEXTURE_2D = 0x0DE1
-    GL_TEXTURE_MAG_FILTER = 0x2800
-    GL_LINEAR = 0x2601
-    GL_TEXTURE_MIN_FILTER = 0x2801
-    GL_NEAREST = 0x2600
-    GL_TEXTURE_WRAP_S = 0x2802
-    GL_TEXTURE_WRAP_T = 0x2803
-    GL_CLAMP_TO_EDGE = 0x812F
-    GL_RGBA = 0x1908
-    GL_UNSIGNED_BYTE = 0x1401
-
     attr_reader :last_render_time, :last_texture_time
 
     def initialize(window, map, textures)
@@ -27,7 +14,7 @@ module Doom
       @textures = textures
       @minimap_renderer = MinimapRenderer.new(window, map)
       @logger = Logger.instance
-      @logger.debug('Initializing OpenGL renderer')
+      @logger.debug('Initializing renderer')
       @texture_cache = {}
       @last_frame_time = Time.now
       @last_render_time = 0
@@ -36,11 +23,16 @@ module Doom
       @fps = 0
       @fps_update_time = Time.now
       @font = Gosu::Font.new(20)
-      @textures_setup = false
+      @fps_text = 'FPS: 0'
+      @wall_slices = []
+      @screen_width = window.width
+      @screen_height = window.height
+      @wall_cache = {}
+      setup_textures
     end
 
     def render(player)
-      @logger.debug('OpenGL renderer starting frame')
+      @logger.debug('Renderer starting frame')
       start_time = Time.now
       frame_time = (start_time - @last_frame_time).to_f
       @last_frame_time = start_time
@@ -51,22 +43,36 @@ module Doom
         @fps = @frame_count
         @frame_count = 0
         @fps_update_time = Time.now
+        @fps_text = "FPS: #{@fps}"
       end
 
-      @window.gl do
-        setup_textures unless @textures_setup
-        glClear(GL_COLOR_BUFFER_BIT)
-        render_walls(player)
-      end
+      calculate_walls(player)
 
-      # Render minimap and HUD using Gosu (since they're 2D)
+      # Render minimap and HUD
       @minimap_renderer.render(player)
-      draw_fps
 
       # Log performance metrics
-      @logger.debug("OpenGL renderer frame time: #{(frame_time * 1000).round(2)}ms")
-      @logger.debug("OpenGL renderer FPS: #{@fps}")
-      @logger.debug('OpenGL renderer frame complete')
+      @logger.debug("Renderer frame time: #{(frame_time * 1000).round(2)}ms")
+      @logger.debug("Renderer FPS: #{@fps}")
+      @logger.debug('Renderer frame complete')
+    end
+
+    def draw
+      @wall_slices.each do |slice|
+        slice[:texture].draw(
+          slice[:x], slice[:y], 0,
+          1.0, 1.0,
+          slice[:color]
+        )
+      end
+
+      # Draw FPS counter
+      @font.draw_text(
+        @fps_text,
+        10, 10, 0,
+        1.0, 1.0,
+        Gosu::Color::WHITE
+      )
     end
 
     private
@@ -82,7 +88,7 @@ module Doom
           texture.height.times do |y|
             texture.width.times do |x|
               # Convert indexed color to RGB
-              color_index = texture.data[(y * texture.width) + x]
+              color_index = texture.data[(y * texture.width) + x].to_i
               r = (color_index * 255 / 255).to_i
               g = (color_index * 255 / 255).to_i
               b = (color_index * 255 / 255).to_i
@@ -99,40 +105,48 @@ module Doom
           temp_file.unlink
         end
       end
-      @textures_setup = true
     end
 
-    def render_walls(player)
-      screen_width = @window.width
-      screen_height = @window.height
+    def calculate_walls(player)
+      @wall_slices = []
+      texture = @texture_cache['STARTAN3']
+      return unless texture
 
-      screen_width.times do |x|
-        ray = Ray.new(player, x, screen_width)
+      # Cache key based on player position and direction
+      cache_key = [player.position[0].round(2), player.position[1].round(2),
+                   player.direction[0].round(2), player.direction[1].round(2)]
+
+      # Check cache first
+      if @wall_cache[cache_key]
+        @wall_slices = @wall_cache[cache_key]
+        return
+      end
+
+      # Calculate wall slices
+      @screen_width.times do |x|
+        ray = Ray.new(player, x, @screen_width)
         caster = RayCaster.new(@map, player, ray)
         intersection = caster.cast
 
         # Calculate wall height
         line_height = if intersection.distance.zero?
-                        screen_height
+                        @screen_height
                       else
-                        (screen_height / intersection.distance).to_i
+                        (@screen_height / intersection.distance).to_i
                       end
-        draw_start = (-line_height + screen_height) / 2
-        draw_end = (line_height + screen_height) / 2
+        draw_start = (-line_height + @screen_height) / 2
+        draw_end = (line_height + @screen_height) / 2
 
         # Clamp values
         draw_start = 0 if draw_start.negative?
-        draw_end = screen_height - 1 if draw_end >= screen_height
+        draw_end = @screen_height - 1 if draw_end >= @screen_height
 
         # Calculate texture coordinates
         tex_x = calculate_texture_x(intersection)
         step = 1.0 * @textures['STARTAN3'].height / line_height
-        tex_pos = (draw_start - (screen_height / 2) + (line_height / 2)) * step
+        tex_pos = (draw_start - (@screen_height / 2) + (line_height / 2)) * step
 
-        # Get texture
-        texture = @texture_cache['STARTAN3']
-
-        # Draw wall slice
+        # Store wall slice for drawing
         draw_start.upto(draw_end) do |y|
           tex_y = tex_pos.to_i
           tex_pos += step
@@ -141,14 +155,22 @@ module Doom
           color = get_texture_color('STARTAN3', tex_x, tex_y)
           color = apply_fog(color, intersection.distance)
 
-          # Draw quad for wall slice
-          texture.draw(
-            x, y, 0,
-            1.0, 1.0,
-            color
-          )
+          @wall_slices << {
+            texture: texture,
+            x: x,
+            y: y,
+            color: color
+          }
         end
       end
+
+      # Cache the results
+      @wall_cache[cache_key] = @wall_slices.dup
+
+      # Limit cache size
+      return unless @wall_cache.size > 100
+
+      @wall_cache.delete(@wall_cache.keys.first)
     end
 
     def calculate_texture_x(intersection)
@@ -182,15 +204,6 @@ module Doom
       g = (color.green * fog_factor).to_i
       b = (color.blue * fog_factor).to_i
       Gosu::Color.rgb(r, g, b)
-    end
-
-    def draw_fps
-      @font.draw_text(
-        "FPS: #{@fps}",
-        10, 10, 0,
-        1.0, 1.0,
-        Gosu::Color::WHITE
-      )
     end
   end
 end

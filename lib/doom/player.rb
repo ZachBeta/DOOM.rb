@@ -17,6 +17,18 @@ module Doom
       @noclip_mode = false
     end
 
+    def position=(new_position)
+      @position = Vector[*new_position]
+    end
+
+    def direction=(new_direction)
+      @direction = Vector[*new_direction]
+    end
+
+    def plane=(new_plane)
+      @plane = Vector[*new_plane]
+    end
+
     def update(delta_time)
       # Any per-frame updates that aren't input-related
     end

@@ -8,8 +8,8 @@ module Doom
 
     def initialize(player, screen_x, screen_width)
       @camera_x = (2 * screen_x.to_f / screen_width) - 1
-      direction = Vector[player.direction[0], player.direction[1]]
-      plane = Vector[player.plane[0], player.plane[1]]
+      direction = player&.direction || Vector[1.0, 0.0]
+      plane = player&.plane || Vector[0.0, 0.66]
       @direction_x = direction[0] + (plane[0] * @camera_x)
       @direction_y = direction[1] + (plane[1] * @camera_x)
     end

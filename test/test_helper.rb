@@ -10,6 +10,8 @@ require 'doom/texture'
 require 'doom/texture_composer'
 require 'doom/config'
 require 'fileutils'
+require 'gosu'
+require 'doom/player'
 
 SimpleCov.start do
   add_filter '/test/'
@@ -107,50 +109,32 @@ Doom::Logger.configure(
   env: :test
 )
 
-# Don't require the entire doom.rb file as it starts the game
-# Instead, require only the specific files needed for testing
-
 module Doom
-  class MockWindow
-    attr_reader :width, :height
-
+  class TestWindow < Gosu::Window
     def initialize(width = 800, height = 600)
+      super(width, height, false)
       @width = width
       @height = height
     end
 
-    def draw_quad(*); end
-    def draw_line(*); end
-    def draw_triangle(*); end
-    def draw_text(*); end
-    def gl = yield
-  end
-
-  class MockPlayer
-    attr_accessor :position, :direction, :plane, :map, :noclip_mode
-
-    def initialize(map = nil)
-      @position = Vector[2.0, 2.0]
-      @direction = Vector[1.0, 0.0]
-      @plane = Vector[0.0, 0.66]
-      @map = map
-      @noclip_mode = false
+    def needs_cursor?
+      false
     end
 
-    def update_position(new_position)
-      @position = new_position
+    def button_down(id)
+      close if id == Gosu::KB_ESCAPE
     end
 
-    def update_direction(new_direction)
-      @direction = new_direction
+    def update
+      # No-op for testing
     end
 
-    def update_plane(new_plane)
-      @plane = new_plane
+    def draw
+      # No-op for testing
     end
   end
 
-  class MockMap
+  class Map
     def wall_at?(x, y)
       (x == 6 && y == 5) || # Wall one unit to the right of default player position
         x.negative? || y.negative? || x >= 10 || y >= 10 # Boundary walls
