@@ -9,6 +9,20 @@ require_relative 'opengl_renderer'
 
 module Doom
   # Main renderer module that coordinates all rendering components
-  class Renderer < OpenGLRenderer
+  class Renderer
+    def initialize(window, map, textures)
+      @window = window
+      @map = map
+      @textures = textures
+      @logger = Logger.new(STDOUT)
+    end
+
+    def render(player)
+      raise NotImplementedError, "#{self.class} must implement render(player)"
+    end
+
+    private
+
+    attr_reader :window, :map, :textures, :logger
   end
 end
