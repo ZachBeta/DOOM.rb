@@ -1,0 +1,63 @@
+# frozen_string_literal: true
+
+require 'glfw3'
+require_relative 'logger'
+
+module Doom
+  class Glfw
+    class << self
+      def instance
+        @instance ||= new
+      end
+
+      private :new
+    end
+
+    def initialize
+      @logger = Logger.instance
+      @initialized = false
+    end
+
+    def init
+      return if @initialized
+
+      @logger.debug('Initializing GLFW')
+      Glfw3.init
+      @initialized = true
+      @logger.info('GLFW initialized successfully')
+    end
+
+    def terminate
+      return unless @initialized
+
+      @logger.debug('Terminating GLFW')
+      Glfw3.terminate
+      @initialized = false
+      @logger.info('GLFW terminated successfully')
+    end
+
+    def initialized?
+      @initialized
+    end
+
+    def poll_events
+      @logger.debug('Polling GLFW events')
+      Glfw3.poll_events
+    end
+
+    def window_hint(hint, value)
+      @logger.debug("Setting window hint: #{hint} = #{value}")
+      Glfw3::Window.window_hint(hint, value)
+    end
+
+    def default_window_hints
+      @logger.debug('Setting default window hints')
+      Glfw3::Window.default_window_hints
+    end
+
+    def create_window(width, height, title)
+      @logger.debug("Creating window: #{width}x#{height} - #{title}")
+      Glfw3::Window.new(width, height, title)
+    end
+  end
+end

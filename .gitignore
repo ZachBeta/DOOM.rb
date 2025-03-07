@@ -65,5 +65,6 @@ game.log
 .DS_Store
 
 freedoom-0.13.0/
+glfw3-0.3.3/
 *.wad
 .gems

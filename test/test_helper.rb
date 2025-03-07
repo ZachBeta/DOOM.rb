@@ -33,20 +33,24 @@ module TestHelper
   end
 
   def setup_opengl
-    Glfw.init
-    Glfw::Window.default_window_hints do
-      context_version_major 2
-      context_version_minor 1
-      opengl_profile :core
-    end
-    @window = Glfw::Window.new(800, 600, 'Test Window')
+    @glfw = Doom::Glfw.instance
+    @glfw.init
+    @glfw.default_window_hints
+    @glfw.window_hint(Glfw3::CONTEXT_VERSION_MAJOR, 3)
+    @glfw.window_hint(Glfw3::CONTEXT_VERSION_MINOR, 3)
+    @glfw.window_hint(Glfw3::OPENGL_PROFILE, Glfw3::OPENGL_CORE_PROFILE)
+    @glfw.window_hint(Glfw3::VISIBLE, Glfw3::FALSE)
+    @window = @glfw.create_window(800, 600, 'Test Window')
     @window.make_context_current
     OpenGL.load_lib
+    glEnable(GL_DEPTH_TEST)
+    glEnable(GL_BLEND)
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
   end
 
   def teardown_opengl
     @window.destroy if @window
-    Glfw.terminate
+    @glfw.terminate if @glfw
   end
 
   def assert_vector_equal(expected, actual, msg = nil)

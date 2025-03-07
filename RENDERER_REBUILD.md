@@ -12,12 +12,22 @@ Rebuilding the renderer from scratch, inspired by Chocolate DOOM's architecture.
 
 ## Implementation Plan
 
-- bundle gems into local dir that is ignored from commits, but in repo so we can search the code
-- update readme about glfw requirements - brew install?
+### Phase 0: Window Management [IN PROGRESS]
+- [ ] Set up GLFW window
+  - [ ] Initialize GLFW context
+  - [ ] Create 800x600 window
+  - [ ] Add window event handling
+- [ ] Implement OpenGL context
+  - [ ] Set up OpenGL bindings
+  - [ ] Configure basic OpenGL state
+- [ ] Add input handling
+  - [ ] Keyboard input
+  - [ ] Mouse input
+  - [ ] Window resize handling
 
 ### Phase 1: Core Components
 
-#### Viewport [IN PROGRESS]
+#### Viewport [NEXT]
 - [ ] Implement fixed 800x600 resolution
   - [ ] Create Viewport class with width/height constants
   - [ ] Add basic screen buffer management

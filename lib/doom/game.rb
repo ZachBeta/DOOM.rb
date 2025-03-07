@@ -17,7 +17,7 @@ module Doom
       @logger = Logger.instance
       @logger.info('Initializing DOOM.rb')
 
-      @window = Window.new
+      @window = Window.new(Window::WIDTH, Window::HEIGHT, Window::TITLE)
       load_wad(wad_path)
       @map = Map.new
       @player = Player.new(@map)
@@ -38,8 +38,20 @@ module Doom
     private
 
     def cleanup
-      @renderer.cleanup if @renderer
-      @window.close if @window
+      @logger.info('Starting game cleanup sequence')
+      begin
+        @logger.debug('Step 1: Cleaning up renderer')
+        @renderer.cleanup if @renderer
+
+        @logger.debug('Step 2: Closing window')
+        @window.close if @window
+
+        @logger.info('Game cleanup sequence completed successfully')
+      rescue StandardError => e
+        @logger.error("Error during game cleanup: #{e.message}")
+        @logger.error(e.backtrace.join("\n"))
+        raise
+      end
     end
 
     def game_loop

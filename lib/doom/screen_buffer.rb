@@ -19,8 +19,20 @@ module Doom
     def cleanup
       return unless @texture_id
 
-      glDeleteTextures(1, [@texture_id].pack('L'))
-      @texture_id = nil
+      @logger.info('Starting screen buffer cleanup')
+      begin
+        @logger.debug('Deleting OpenGL texture')
+        glDeleteTextures(1, [@texture_id].pack('L'))
+        @texture_id = nil
+        @front_buffer = nil
+        @back_buffer = nil
+        @palette = nil
+        @logger.info('Screen buffer cleanup completed successfully')
+      rescue StandardError => e
+        @logger.error("Error during screen buffer cleanup: #{e.message}")
+        @logger.error(e.backtrace.join("\n"))
+        raise
+      end
     end
 
     def clear

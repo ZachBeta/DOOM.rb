@@ -19,19 +19,19 @@ module Doom
 
     def handle_movement(window, delta_time)
       movement = []
-      if window.button_down?(GLFW::KEY_W)
+      if window.button_down?(Glfw::KEY_W)
         @player.move_forward(delta_time)
         movement << 'forward'
       end
-      if window.button_down?(GLFW::KEY_S)
+      if window.button_down?(Glfw::KEY_S)
         @player.move_backward(delta_time)
         movement << 'backward'
       end
-      if window.button_down?(GLFW::KEY_A)
+      if window.button_down?(Glfw::KEY_A)
         @player.strafe_left(delta_time)
         movement << 'left'
       end
-      if window.button_down?(GLFW::KEY_D)
+      if window.button_down?(Glfw::KEY_D)
         @player.strafe_right(delta_time)
         movement << 'right'
       end

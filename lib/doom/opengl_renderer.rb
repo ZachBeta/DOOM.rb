@@ -25,7 +25,19 @@ module Doom
     end
 
     def cleanup
-      @screen_buffer.cleanup
+      @logger.info('Starting OpenGL renderer cleanup')
+      begin
+        @logger.debug('Cleaning up screen buffer')
+        @screen_buffer.cleanup
+        @ray_caster = nil
+        @viewport = nil
+        @metrics = nil
+        @logger.info('OpenGL renderer cleanup completed successfully')
+      rescue StandardError => e
+        @logger.error("Error during renderer cleanup: #{e.message}")
+        @logger.error(e.backtrace.join("\n"))
+        raise
+      end
     end
 
     def render(player)
