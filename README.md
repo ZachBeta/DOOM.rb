@@ -32,11 +32,15 @@ rake doom
 - Test-driven development
 - Texture system with TEXTURE1/TEXTURE2 support
 - Basic texture rendering and caching
+- Wall rendering with directional coloring
+- Debug information display
+- Keyboard input handling
 
 ### In Progress 🚧
 - Vanilla DOOM feature parity
 - Original DOOM source code study
 - Advanced texture features (filtering, mip-mapping)
+- Performance optimization
 
 ### Planned 🎯
 - Full WAD file loading

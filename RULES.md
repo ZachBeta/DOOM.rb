@@ -5,6 +5,7 @@
 - Keep explanations and follow-up questions minimal to save tokens
 - Follow vanilla DOOM behavior as documented in Chocolate DOOM source code in `reference/chocolate-doom`
 - Use glfw3 gem for opengl and reference its code in `.gems/ruby/3.3.0/gems/glfw3-0.3.3`
+- Follow the modernization plan in `RENDERER_PLAN.md` for OpenGL and GLFW3 implementation
 - Do not try to use ffi on glfw directly
 - Ensure GPL-2.0 license compliance
 - Hard lock to 800x600 resolution for now
@@ -28,15 +29,29 @@
 - Prefer small, focused classes with clear public interfaces
 
 ## Testing Requirements
-- Write Minitest tests focusing on behavior
+- Write Minitest tests focusing on behavior for non-rendering components
 - Use freedoom1.wad from `levels/freedoom-0.13.0/freedoom1.wad` for WAD file testing
 - Follow Arrange-Act-Assert pattern
 - Keep tests isolated
 - All automated tests must pass (`rake test`) before marking tasks complete
 
+### Renderer Testing
+- Test renderer components manually by running the game with `rake doom`
+- Analyze logs for rendering performance and errors
+- Collect feedback on visual appearance and behavior
+- Document any visual artifacts or rendering issues
+- Verify FPS counter and debug information display
+- Test player movement and collision detection visually
+- Check minimap functionality and accuracy
+- After testing, document observations in WORKLOGS.md
+- Do not rely on automated tests for visual rendering components
+
 ## Performance Guidelines
 
 ### Rendering and Physics
+- Follow modern OpenGL practices as outlined in `RENDERER_PLAN.md`
+- Use shader-based rendering instead of fixed-function pipeline
+- Replace immediate mode rendering with VBOs and VAOs
 - Avoid unnecessary object creation in tight loops
 - Consider using memoization or caching for expensive calculations
 - Use profiling to identify bottlenecks
@@ -50,6 +65,14 @@
 - Log performance data at appropriate intervals
 
 ## Feature-Specific Guidelines
+
+### OpenGL and GLFW3 Implementation
+- Follow the phased approach outlined in `RENDERER_PLAN.md`
+- Use modern OpenGL (3.3+) with shader-based rendering
+- Implement proper GLFW3 callback handling for events
+- Use VBOs and VAOs for efficient geometry rendering
+- Implement proper texture management with OpenGL texture objects
+- Follow the migration strategy in `RENDERER_PLAN.md` for incremental improvements
 
 ### WAD File Parsing
 - Follow vanilla DOOM WAD format specifications
@@ -89,7 +112,7 @@
 - Update cursor rules as project evolves
 - Ensure rules stay aligned with current project priorities
 - Before marking tasks complete:
-  1. Pass all automated tests
+  1. Pass all automated tests for non-rendering components
   2. Follow project style guidelines
   3. Update cursor rules if needed
-  4. Manually test with `rake doom` 
+  4. Manually test with `rake doom` and document observations 

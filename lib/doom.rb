@@ -1,18 +1,28 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require_relative 'doom/logger'
-require_relative 'doom/config'
-require_relative 'doom/game'
-require_relative 'doom/player'
-require_relative 'doom/map'
-require_relative 'doom/input_handler'
-require_relative 'doom/wad_file'
+require 'opengl'
+require 'glfw3'
 
-# Configure logger for game environment
-Doom::Logger.configure(level: :debug, base_dir: 'logs', env: :development)
+# Load OpenGL libraries
+OpenGL.load_lib
+GLFW.load_lib if defined?(GLFW)
 
 module Doom
+  # Include OpenGL module at the module level
+  include OpenGL
+
+  require_relative 'doom/logger'
+  require_relative 'doom/config'
+  require_relative 'doom/game'
+  require_relative 'doom/player'
+  require_relative 'doom/map'
+  require_relative 'doom/input_handler'
+  require_relative 'doom/wad_file'
+
+  # Configure logger for game environment
+  Logger.configure(level: :debug, base_dir: 'logs', env: :development)
+
   # Only run the game when this file is executed directly
   if __FILE__ == $PROGRAM_NAME
     wad_path = ARGV[0] || Config::DEFAULT_WAD_PATH

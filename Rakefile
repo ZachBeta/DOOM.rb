@@ -121,4 +121,73 @@ task :doom do
   Rake::Task[:run].invoke
 end
 
+desc 'Run the test renderer'
+task :test_renderer do
+  logger = Doom::Logger.instance
+  logger.info('Starting test renderer')
+  ruby 'bin/test_renderer.rb'
+end
+
+desc 'Test the renderer with a time limit and analyze logs'
+task :test_renderer_manual, [:time_limit] do |_, args|
+  time_limit = args[:time_limit] ? args[:time_limit].to_i : 30
+  logger = Doom::Logger.instance
+  logger.info("Starting manual renderer test (#{time_limit} seconds)")
+
+  puts "\n========== RENDERER MANUAL TEST =========="
+  puts "Running DOOM.rb for #{time_limit} seconds to test the renderer"
+  puts 'Please observe the following during testing:'
+  puts '1. Wall rendering and colors'
+  puts '2. Minimap functionality'
+  puts '3. FPS counter and debug information'
+  puts '4. Player movement and collision detection'
+  puts '5. Noclip mode (toggle with N key)'
+  puts 'Press ESC to exit early or wait for timeout'
+  puts "==========================================\n\n"
+
+  begin
+    Timeout.timeout(time_limit) do
+      Rake::Task[:run].invoke
+    end
+  rescue Timeout::Error
+    puts "\nRenderer test completed after #{time_limit} seconds"
+  end
+
+  # Analyze logs
+  puts "\n========== LOG ANALYSIS =========="
+  puts 'Analyzing logs for renderer performance and errors...'
+
+  # Read the game log
+  game_log = begin
+    File.read('logs/game.log')
+  rescue StandardError
+    'Could not read game.log'
+  end
+
+  # Extract FPS information
+  fps_data = game_log.scan(/FPS: ([\d.]+)/).flatten.map(&:to_f)
+  if fps_data.any?
+    avg_fps = fps_data.sum / fps_data.size
+    min_fps = fps_data.min
+    max_fps = fps_data.max
+    puts 'FPS Statistics:'
+    puts "  Average: #{avg_fps.round(2)}"
+    puts "  Minimum: #{min_fps.round(2)}"
+    puts "  Maximum: #{max_fps.round(2)}"
+  else
+    puts 'No FPS data found in logs'
+  end
+
+  # Check for errors
+  error_count = game_log.scan('ERROR').count
+  if error_count > 0
+    puts "Found #{error_count} errors in the game log"
+  else
+    puts 'No errors found in the game log'
+  end
+
+  puts "\nPlease document your observations in WORKLOGS.md"
+  puts "==========================================\n"
+end
+
 task default: :run_all

@@ -1,5 +1,7 @@
 # DOOM.rb Renderer Documentation
 
+> **Note:** For the modernization plan and implementation details for improving the renderer with modern OpenGL and GLFW3, see [RENDERER_PLAN.md](RENDERER_PLAN.md).
+
 ## Overview
 This document consolidates all information related to the DOOM.rb renderer implementation, including architecture, strategies, learnings, and future plans.
 
@@ -67,6 +69,10 @@ lib/doom/      # Core game components
 - Support for TEXTURE1/TEXTURE2
 - Integration with renderer
 - Debug tools (wad:info, wad:textures)
+- Wall rendering with directional coloring
+- Minimap with player position and direction
+- Debug information display (FPS, position, etc.)
+- Keyboard input handling for player movement
 
 ### In Progress
 - Performance Optimization
@@ -107,6 +113,46 @@ lib/doom/      # Core game components
 - Calculate texture coordinates based on wall hit positions
 - Use efficient texture lookup methods
 - Consider texture caching
+
+## Testing Approach
+
+### Manual Testing Strategy
+We've adopted a manual testing approach for the renderer components due to the visual nature of rendering and the challenges of automated testing for graphical output. This approach includes:
+
+1. **Manual Observation**
+   - Run the game with `rake test_renderer_manual[time_limit]`
+   - Observe wall rendering, colors, and visual artifacts
+   - Test player movement and collision detection
+   - Verify minimap functionality and accuracy
+   - Check FPS counter and debug information display
+
+2. **Log Analysis**
+   - Analyze performance metrics from logs
+   - Track FPS statistics (average, minimum, maximum)
+   - Identify any errors or warnings in the logs
+   - Monitor memory usage and performance bottlenecks
+
+3. **Documentation**
+   - Document observations in WORKLOGS.md using the provided template
+   - Record any issues or visual artifacts
+   - Note performance characteristics
+   - Suggest improvements based on observations
+
+4. **Iterative Improvement**
+   - Use documented observations to guide further development
+   - Prioritize fixes for identified issues
+   - Implement performance optimizations based on findings
+   - Retest after changes to verify improvements
+
+### Why Manual Testing?
+Automated testing of rendering components presents several challenges:
+- Visual output is difficult to verify programmatically
+- Performance characteristics vary by hardware
+- User experience aspects require human judgment
+- OpenGL context management complicates test automation
+- Interactive elements need real-time feedback
+
+By focusing on manual testing with structured observation and documentation, we can more effectively evaluate the renderer's quality and performance while maintaining development velocity.
 
 ## Test Coverage
 

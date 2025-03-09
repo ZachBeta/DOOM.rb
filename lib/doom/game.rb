@@ -5,6 +5,8 @@ require_relative 'map'
 require_relative 'logger'
 require_relative 'wad_file'
 require_relative 'config'
+require_relative 'input_handler'
+require_relative 'renderer/base_renderer'
 
 module Doom
   class Game
@@ -17,6 +19,11 @@ module Doom
       @map = Map.new
       @player = Player.new(@map)
       @game_clock = GameClock.new
+      @renderer = Renderer::BaseRenderer.new
+      @input_handler = InputHandler.new(@player)
+
+      # Connect renderer with game objects
+      @renderer.set_game_objects(@map, @player)
 
       load_wad(wad_path) if wad_path
     end
@@ -28,20 +35,36 @@ module Doom
 
     def cleanup
       @logger.info('Starting game cleanup sequence')
+      @renderer.cleanup if @renderer
       @logger.info('Game cleanup complete')
     end
 
     private
 
     def game_loop
-      loop do
+      @logger.info('Entering game loop')
+
+      until @renderer.window_should_close?
         delta_time = @game_clock.tick
         update(delta_time)
+        render
+        process_input
       end
+
+      @logger.info('Exiting game loop')
+      cleanup
     end
 
     def update(delta_time)
       @player.update(delta_time)
+    end
+
+    def render
+      @renderer.render
+    end
+
+    def process_input
+      @input_handler.process_input(@renderer.window)
     end
 
     def load_wad(wad_path)

@@ -35,6 +35,39 @@
   - WAD format documentation
   - Project guidelines in RULES.md
 
+## Renderer Test Observations
+
+### Test Date: [DATE]
+
+#### Performance
+- Average FPS: [VALUE]
+- Minimum FPS: [VALUE]
+- Maximum FPS: [VALUE]
+- Noticeable stuttering: [YES/NO]
+- Performance bottlenecks observed: [DESCRIPTION]
+
+#### Visual Quality
+- Wall rendering: [DESCRIPTION]
+- Color accuracy: [DESCRIPTION]
+- Minimap clarity: [DESCRIPTION]
+- Debug information readability: [DESCRIPTION]
+
+#### Functionality
+- Player movement: [DESCRIPTION]
+- Collision detection: [DESCRIPTION]
+- Noclip mode: [DESCRIPTION]
+- Camera rotation: [DESCRIPTION]
+
+#### Issues Identified
+1. [ISSUE DESCRIPTION]
+2. [ISSUE DESCRIPTION]
+3. [ISSUE DESCRIPTION]
+
+#### Improvement Ideas
+1. [IMPROVEMENT IDEA]
+2. [IMPROVEMENT IDEA]
+3. [IMPROVEMENT IDEA]
+
 ## Current Tasks
 
 ### High Priority
