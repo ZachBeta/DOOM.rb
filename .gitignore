@@ -67,4 +67,9 @@ game.log
 freedoom-0.13.0/
 glfw3-0.3.3/
 *.wad
-.gems
+
+reference/
+
+.gems/
+*.swp
+data/
