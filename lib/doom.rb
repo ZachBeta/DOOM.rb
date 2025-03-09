@@ -13,7 +13,10 @@ require_relative 'doom/wad_file'
 Doom::Logger.configure(level: :debug, base_dir: 'logs', env: :development)
 
 module Doom
-  wad_path = ARGV[0] || File.expand_path('../../data/wad/freedoom1.wad', __dir__)
-  game = Game.new(wad_path)
-  game.start
+  # Only run the game when this file is executed directly
+  if __FILE__ == $PROGRAM_NAME
+    wad_path = ARGV[0] || File.expand_path('../../data/wad/freedoom1.wad', __dir__)
+    game = Game.new(wad_path)
+    game.start
+  end
 end
