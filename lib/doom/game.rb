@@ -1,13 +1,11 @@
 # frozen_string_literal: true
 
 require_relative 'window'
-require_relative 'renderer'
 require_relative 'player'
 require_relative 'map'
 require_relative 'logger'
 require_relative 'input_handler'
 require_relative 'wad_file'
-require_relative 'renderer/utils/texture_composer'
 
 module Doom
   class Game
@@ -17,11 +15,9 @@ module Doom
       @logger = Logger.instance
       @logger.info('Initializing DOOM.rb')
 
-      @window = Window.new(Window::WIDTH, Window::HEIGHT, Window::TITLE)
       load_wad(wad_path)
       @map = Map.new
       @player = Player.new(@map)
-      @renderer = Renderer::Core::OpenGLRenderer.new(@window, @map, @textures)
       @input_handler = InputHandler.new(@player)
       @game_clock = GameClock.new
 
@@ -40,12 +36,6 @@ module Doom
     def cleanup
       @logger.info('Starting game cleanup sequence')
       begin
-        @logger.debug('Step 1: Cleaning up renderer')
-        @renderer.cleanup if @renderer
-
-        @logger.debug('Step 2: Closing window')
-        @window.close if @window
-
         @logger.info('Game cleanup sequence completed successfully')
       rescue StandardError => e
         @logger.error("Error during game cleanup: #{e.message}")
@@ -55,15 +45,10 @@ module Doom
     end
 
     def game_loop
-      until @window.should_close?
+      loop do
         delta_time = @game_clock.tick
-        @input_handler.handle_input(@window, delta_time)
+        @input_handler.handle_input(delta_time)
         @player.update(delta_time)
-
-        @window.clear
-        @renderer.render(@player)
-        @window.swap_buffers
-        @window.update
 
         @logger.verbose("Frame delta: #{delta_time}")
         @logger.verbose("Player position: #{@player.position}, direction: #{@player.direction}")
@@ -74,7 +59,6 @@ module Doom
     def load_wad(wad_path)
       @logger.info("Loading WAD file: #{wad_path}")
       @wad_file = WadFile.new(wad_path)
-      @textures = Renderer::Utils::TextureComposer.new
       @logger.info('WAD file loaded successfully')
     end
   end

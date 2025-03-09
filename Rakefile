@@ -93,13 +93,6 @@ namespace :wad do
 
     ruby "bin/wad_info.rb #{args[:wad_path]}"
   end
-
-  desc 'Display WAD texture information'
-  task :textures, [:wad_path] do |_, args|
-    raise 'Please provide a WAD file path: rake wad:textures[path/to/wad]' unless args[:wad_path]
-
-    ruby "bin/texture_info.rb #{args[:wad_path]}"
-  end
 end
 
 task :run_all do
@@ -110,9 +103,6 @@ task :run_all do
 
   puts "\nRunning WAD info task with Freedoom WAD..."
   Rake::Task['wad:info'].invoke(freedoom_wad)
-
-  puts "\nRunning WAD textures task with Freedoom WAD..."
-  Rake::Task['wad:textures'].invoke(freedoom_wad)
 
   puts "\nRunning DOOM game (will be terminated after 5 seconds)..."
   begin

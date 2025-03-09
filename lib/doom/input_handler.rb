@@ -11,10 +11,9 @@ module Doom
       @logger.info('Input handler initialized')
     end
 
-    def handle_input(window, delta_time)
-      handle_movement(window, delta_time)
-      handle_rotation(window, delta_time)
-      handle_noclip(window)
+    def handle_input(delta_time)
+      # Placeholder for input handling without window
+      # This would need to be reimplemented based on your new input system
     end
 
     private
