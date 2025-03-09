@@ -18,14 +18,15 @@ def fetch_url(url)
   end
 rescue StandardError => e
   puts "Error fetching #{url}: #{e.message}"
+  puts "Full error: #{e.class}: #{e.backtrace.join("\n")}"
   nil
 end
 
 def extract_ruby_file_links(html_content)
   return [] unless html_content
 
-  # Simple regex to find links containing "StinomXE" and either "peek" or "download"
-  links = html_content.scan(/href="([^"]*StinomXE[^"]*(?:peek|download)[^"]*)"/)
+  # Find all hrefs that end in .rb
+  links = html_content.scan(/href="([^"]*\.rb)"/)
   links.flatten.uniq
 end
 
@@ -71,7 +72,12 @@ puts 'Fetching main page...'
 main_page = fetch_url(BASE_URL)
 
 if main_page
-  puts 'Extracting Ruby file links...'
+  puts "\nPage content received:"
+  puts '=' * 40
+  puts main_page[0..500] # Print first 500 characters to see what we got
+  puts '=' * 40
+
+  puts '\nExtracting Ruby file links...'
   links = extract_ruby_file_links(main_page)
 
   if links.empty?
