@@ -15,7 +15,7 @@ Doom::Logger.configure(level: :debug, base_dir: 'logs', env: :development)
 module Doom
   # Only run the game when this file is executed directly
   if __FILE__ == $PROGRAM_NAME
-    wad_path = ARGV[0] || File.expand_path('../../data/wad/freedoom1.wad', __dir__)
+    wad_path = ARGV[0] || Config::DEFAULT_WAD_PATH
     game = Game.new(wad_path)
     game.start
   end

@@ -96,7 +96,7 @@ namespace :wad do
 end
 
 task :run_all do
-  freedoom_wad = 'data/wad/freedoom1.wad'
+  freedoom_wad = Doom::Config::DEFAULT_WAD_PATH
 
   puts "\nRunning tests..."
   Rake::Task['test'].invoke

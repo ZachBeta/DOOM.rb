@@ -4,10 +4,11 @@ require_relative 'player'
 require_relative 'map'
 require_relative 'logger'
 require_relative 'wad_file'
+require_relative 'config'
 
 module Doom
   class Game
-    DEFAULT_WAD_PATH = File.expand_path('../../data/wad/freedoom1.wad', __dir__)
+    DEFAULT_WAD_PATH = Doom::Config::DEFAULT_WAD_PATH
 
     def initialize(wad_path = nil)
       @logger = Logger.instance

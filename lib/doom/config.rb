@@ -1,8 +1,10 @@
 module Doom
   class Config
+    DEFAULT_WAD_PATH = File.expand_path('../../../levels/freedoom-0.13.0/freedoom1.wad', __dir__)
+
     class << self
       def wad_path
-        File.expand_path('../../data/wad/freedoom1.wad', __dir__)
+        DEFAULT_WAD_PATH
       end
     end
   end
