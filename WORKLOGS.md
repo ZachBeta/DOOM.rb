@@ -30,6 +30,11 @@
   - Test environment optimization
   - Rake task for log management
 
+- [x] Documentation
+  - Consolidated renderer documentation in RENDERER.md
+  - WAD format documentation
+  - Project guidelines in RULES.md
+
 ## Current Tasks
 
 ### High Priority

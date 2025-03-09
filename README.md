@@ -68,6 +68,13 @@ lib/doom/      # Core game components
 └── logging/   # Logging system
 ```
 
+### Documentation
+
+- [RENDERER.md](RENDERER.md) - Comprehensive documentation of the rendering system
+- [RULES.md](RULES.md) - Project guidelines and rules
+- [WORKLOGS.md](WORKLOGS.md) - Development progress and task tracking
+- [docs/wad_format.md](docs/wad_format.md) - WAD file format documentation
+
 ## Credits
 
 - Based on [can-it-run-doom](https://github.com/zvolchak/can-it-run-doom)
