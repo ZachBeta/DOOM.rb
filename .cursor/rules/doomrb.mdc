@@ -3,4 +3,4 @@ description: reference RULES.md
 globs: 
 alwaysApply: false
 ---
-[RULES.md](mdc:RULES.md)
+reference [RULES.md](mdc:RULES.md) for guidance on how we should work on this project in general

@@ -2,6 +2,7 @@
 
 require 'minitest/autorun'
 require 'minitest/pride'
+require 'minitest/focus'
 require 'matrix'
 require 'simplecov'
 require 'doom/logger'
@@ -11,6 +12,9 @@ require 'opengl'
 require 'doom/player'
 require 'doom/glfw_wrapper'
 require_relative '../lib/doom'
+
+# Add the lib directory to the load path
+$LOAD_PATH.unshift File.expand_path('../lib', __dir__)
 
 SimpleCov.start do
   add_filter '/test/'
@@ -85,6 +89,13 @@ class Minitest::Test
     return unless defined?(Rake::Task) && Rake::Task.task_defined?('rotate_logs')
 
     Rake::Task['rotate_logs'].execute
+  end
+
+  # Add any shared test methods here
+  def assert_gl_error
+    error = glGetError
+
+    assert_equal GL_NO_ERROR, error, "OpenGL error: #{error}"
   end
 end
 

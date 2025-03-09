@@ -3,188 +3,75 @@
 module Doom
   module Renderer
     module Utils
-      class Patch
-        attr_reader :name, :width, :height, :data
-
-        def initialize(name:, width:, height:, data:)
-          @name = name
-          @width = width
-          @height = height
-          @data = data
-        end
-      end
-
-      class ComposedTexture
-        attr_reader :width, :height, :data, :mipmaps
-
-        def initialize(width:, height:, data:)
-          @width = width
-          @height = height
-          @data = data
-          @mipmaps = generate_mipmaps(data, width, height)
-        end
-
-        private
-
-        def generate_mipmaps(data, width, height)
-          mipmaps = []
-          current_width = width
-          current_height = height
-          current_data = data.dup
-
-          while current_width > 1 && current_height > 1
-            next_width = [current_width / 2, 1].max
-            next_height = [current_height / 2, 1].max
-            next_data = Array.new(next_width * next_height, 0)
-
-            (0...next_height).each do |y|
-              (0...next_width).each do |x|
-                # Calculate source indices with bounds checking
-                x2 = x * 2
-                y2 = y * 2
-                i1 = (y2 * current_width) + x2
-                i2 = i1 + (x2 + 1 < current_width ? 1 : 0)
-                i3 = ((y2 + 1 < current_height ? y2 + 1 : y2) * current_width) + x2
-                i4 = i3 + (x2 + 1 < current_width ? 1 : 0)
-
-                # Calculate average color index with bounds checking
-                sum = current_data[i1].to_i
-                count = 1
-
-                if x2 + 1 < current_width
-                  sum += current_data[i2].to_i
-                  count += 1
-                end
-
-                if y2 + 1 < current_height
-                  sum += current_data[i3].to_i
-                  count += 1
-                end
-
-                if x2 + 1 < current_width && y2 + 1 < current_height
-                  sum += current_data[i4].to_i
-                  count += 1
-                end
-
-                next_data[(y * next_width) + x] = (sum / count).to_i
-              end
-            end
-
-            mipmaps << {
-              width: next_width,
-              height: next_height,
-              data: next_data
-            }
-
-            break if next_width == 1 || next_height == 1
-
-            current_width = next_width
-            current_height = next_height
-            current_data = next_data
-          end
-
-          mipmaps
-        end
-      end
-
       class TextureComposer
-        def compose(texture, patches, pnames = nil)
-          data = Array.new(texture.width * texture.height, 0)
+        def initialize
+          @textures = {}
+          @patches = {}
+        end
+
+        def compose_texture(texture, patch_data)
+          return @textures[texture.name] if @textures.key?(texture.name)
+
+          composed_texture = Array.new(texture.height) { Array.new(texture.width, 0) }
 
           texture.patches.each do |patch|
-            patch_name = pnames ? pnames[patch.patch_index] : patch.name
-            source_patch = patches[patch_name]
-            compose_patch(data, source_patch, patch.x_offset, patch.y_offset, texture.width)
+            patch_pixels = get_patch_pixels(patch.name, patch_data)
+            next unless patch_pixels
+
+            patch_height = patch_pixels.size
+            patch_width = patch_pixels.first.size
+
+            patch_height.times do |y|
+              dest_y = y + patch.y_offset
+              next if dest_y < 0 || dest_y >= texture.height
+
+              patch_width.times do |x|
+                dest_x = x + patch.x_offset
+                next if dest_x < 0 || dest_x >= texture.width
+
+                pixel = patch_pixels[y][x]
+                composed_texture[dest_y][dest_x] = pixel if pixel != 0
+              end
+            end
           end
 
-          composed = ComposedTexture.new(
-            width: texture.width,
-            height: texture.height,
-            data: data
-          )
-
-          # Generate mipmaps after composition
-          composed.instance_variable_set(:@mipmaps,
-                                         generate_mipmaps(data, texture.width, texture.height))
-          composed
+          @textures[texture.name] = composed_texture
+          composed_texture
         end
 
         private
 
-        def compose_patch(target_data, patch, x_offset, y_offset, target_width)
-          return unless patch
+        def get_patch_pixels(patch_name, patch_data)
+          return @patches[patch_name] if @patches.key?(patch_name)
+          return nil unless patch_data && patch_data[patch_name]
 
-          patch.height.times do |y|
-            patch.width.times do |x|
-              target_x = x + x_offset
-              target_y = y + y_offset
-              next if target_x < 0 || target_x >= target_width
+          data = patch_data[patch_name]
+          width = data[0, 2].unpack1('v')
+          height = data[2, 2].unpack1('v')
 
-              source_index = (y * patch.width) + x
-              target_index = (target_y * target_width) + target_x
-              target_data[target_index] = patch.data[source_index]
-            end
-          end
-        end
+          pixels = Array.new(height) { Array.new(width, 0) }
+          column_offsets = data[8, width * 4].unpack('V*')
 
-        def generate_mipmaps(data, width, height)
-          mipmaps = []
-          current_width = width
-          current_height = height
-          current_data = data.dup
+          width.times do |x|
+            offset = column_offsets[x]
+            next unless offset
 
-          while current_width > 1 && current_height > 1
-            next_width = [current_width / 2, 1].max
-            next_height = [current_height / 2, 1].max
-            next_data = Array.new(next_width * next_height, 0)
+            while (post_start = data[offset])
+              break if post_start == 255
 
-            (0...next_height).each do |y|
-              (0...next_width).each do |x|
-                # Calculate source indices with bounds checking
-                x2 = x * 2
-                y2 = y * 2
-                i1 = (y2 * current_width) + x2
-                i2 = i1 + (x2 + 1 < current_width ? 1 : 0)
-                i3 = ((y2 + 1 < current_height ? y2 + 1 : y2) * current_width) + x2
-                i4 = i3 + (x2 + 1 < current_width ? 1 : 0)
+              pixel_count = data[offset + 1]
+              pixel_data = data[offset + 3, pixel_count]
 
-                # Calculate average color index with bounds checking
-                sum = current_data[i1].to_i
-                count = 1
-
-                if x2 + 1 < current_width
-                  sum += current_data[i2].to_i
-                  count += 1
-                end
-
-                if y2 + 1 < current_height
-                  sum += current_data[i3].to_i
-                  count += 1
-                end
-
-                if x2 + 1 < current_width && y2 + 1 < current_height
-                  sum += current_data[i4].to_i
-                  count += 1
-                end
-
-                next_data[(y * next_width) + x] = (sum / count).to_i
+              pixel_count.times do |y|
+                pixels[post_start + y][x] = pixel_data[y]
               end
+
+              offset += pixel_count + 4
             end
-
-            mipmaps << {
-              width: next_width,
-              height: next_height,
-              data: next_data
-            }
-
-            break if next_width == 1 || next_height == 1
-
-            current_width = next_width
-            current_height = next_height
-            current_data = next_data
           end
 
-          mipmaps
+          @patches[patch_name] = pixels
+          pixels
         end
       end
     end

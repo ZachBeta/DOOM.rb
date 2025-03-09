@@ -51,7 +51,7 @@ class WadFileTest < Minitest::Test
     textures = @wad_file.textures
 
     assert_operator textures.size, :>, 0
-    assert_includes textures.keys, 'STARTAN3'
+    assert_includes textures.keys, 'AQCONC01' # A texture known to exist in Freedoom
   end
 
   def test_parses_texture_data
@@ -106,7 +106,11 @@ class WadFileTest < Minitest::Test
     flats = @wad_file.flats
 
     assert_operator flats.size, :>, 0
-    assert(flats.any? { |name, _| name.start_with?('FLAT') || name.start_with?('FLOOR') })
+    assert( # Freedoom uses AQF prefix for some flats
+      flats.any? do |name, _|
+        name.start_with?('FLAT') || name.start_with?('AQF')
+      end
+    )
   end
 
   def test_finds_levels

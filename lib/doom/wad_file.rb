@@ -60,7 +60,7 @@ module Doom
         @logger.debug("Texture data size: #{data&.size || 'nil'}")
         next unless data
 
-        TextureParser.parse(data, pnames).each do |texture|
+        Renderer::Utils::TextureParser.parse(data, pnames).each do |texture|
           @logger.debug("Found texture: #{texture.name} (#{texture.width}x#{texture.height})")
           textures[texture.name] = texture
         end
@@ -72,7 +72,7 @@ module Doom
         next unless name.match?(/^[A-Z0-9]+$/)
 
         @logger.debug("Found individual texture: #{name}")
-        textures[name] = Texture.new(
+        textures[name] = Renderer::Utils::Texture.new(
           name: name,
           width: 64, # Default size for individual textures
           height: 128,
@@ -128,18 +128,22 @@ module Doom
       return [] unless lump
 
       data = lump.read
+      @logger.debug("Texture lump data size: #{data&.size || 'nil'}")
       return [] if data.nil? || data.empty?
+
+      # Dump the first few bytes for debugging
+      @logger.debug("First 16 bytes: #{data[0, 16].unpack1('H*')}")
 
       # If this is a TEXTURE1/TEXTURE2 lump, parse it as a texture list
       textures = if name.match?(/^TEXTURE[12]$/i)
-                   TextureParser.parse(data, pnames)
+                   Renderer::Utils::TextureParser.parse(data, pnames)
                  else
                    # Otherwise treat it as a single texture
-                   [Texture.new(
+                   [Renderer::Utils::Texture.new(
                      name: name.upcase,
                      width: 64,
                      height: 128,
-                     patches: [TexturePatch.new(
+                     patches: [Renderer::Utils::TexturePatch.new(
                        x_offset: 0,
                        y_offset: 0,
                        name: name.upcase,
@@ -208,11 +212,10 @@ module Doom
         end
       end
       @logger.debug("Parsed #{@lumps.size} valid lumps")
-      @logger.debug('Looking for required lumps: STARTAN3, E1M1, TEXTURE1, TEXTURE2')
-      @logger.debug("STARTAN3 present: #{@lumps['STARTAN3'] ? 'yes' : 'no'}")
-      @logger.debug("E1M1 present: #{@lumps['E1M1'] ? 'yes' : 'no'}")
+      @logger.debug('Looking for required lumps: TEXTURE1, TEXTURE2, PNAMES')
       @logger.debug("TEXTURE1 present: #{@lumps['TEXTURE1'] ? 'yes' : 'no'}")
       @logger.debug("TEXTURE2 present: #{@lumps['TEXTURE2'] ? 'yes' : 'no'}")
+      @logger.debug("PNAMES present: #{@lumps['PNAMES'] ? 'yes' : 'no'}")
     end
 
     def find_lumps_between_markers(start_markers, end_suffix)

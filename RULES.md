@@ -7,6 +7,8 @@
 - Use glfw3 gem for opengl and reference its code in `.gems/ruby/3.3.0/gems/glfw3-0.3.3`
 - Do not try to use ffi on glfw directly
 - Ensure GPL-2.0 license compliance
+- Hard lock to 800x600 resolution for now
+- After running `rake test` or `rake doom`, pause and ask for any additional test notes
 
 ## Code Style Guidelines
 

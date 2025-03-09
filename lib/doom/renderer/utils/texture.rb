@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative '../../logger'
+
 module Doom
   module Renderer
     module Utils
@@ -15,122 +17,78 @@ module Doom
       end
 
       class TexturePatch
-        attr_reader :name, :patch_index, :x_offset, :y_offset
+        attr_reader :x_offset, :y_offset, :name, :patch_index
 
-        def initialize(x_offset:, y_offset:, name: nil, patch_index: nil)
-          @name = name
-          @patch_index = patch_index
+        def initialize(x_offset:, y_offset:, name:, patch_index:)
           @x_offset = x_offset
           @y_offset = y_offset
+          @name = name
+          @patch_index = patch_index
         end
       end
 
       class TextureParser
-        TEXTURE_NAME_LENGTH = 8
-        HEADER_SIZE = 4
-        OFFSET_SIZE = 4
-        TEXTURE_DEF_SIZE = 22
-        PATCH_DEF_SIZE = 10
-
         def self.parse(data, pnames = nil)
-          new(data, pnames).parse
-        end
+          logger = Doom::Logger.instance
+          logger.debug("Parsing texture data (#{data.bytesize} bytes)")
+          return [] if data.nil? || data.empty?
 
-        def initialize(data, pnames = nil)
-          @data = data
-          @pnames = pnames
-          @offset = 0
-          @logger = Logger.instance
-        end
+          # First 4 bytes are the number of textures
+          num_textures = data[0, 4].unpack1('V')
+          logger.debug("Number of textures: #{num_textures}")
 
-        def parse
-          @logger.debug("Parsing texture data of size: #{@data&.size || 'nil'}")
-          num_textures = read_long
-          @logger.debug("Number of textures: #{num_textures}")
-          texture_offsets = read_texture_offsets(num_textures)
-          @logger.debug("Texture offsets: #{texture_offsets.inspect}")
+          # Next 4 bytes are offsets to each texture definition
+          offsets = data[4, num_textures * 4].unpack('V*')
+          logger.debug("Found #{offsets.size} texture offsets")
 
-          texture_offsets.map do |offset|
-            # Offset is relative to the start of the TEXTURE1 lump
-            @offset = offset
-            parse_texture
+          textures = []
+
+          offsets.each_with_index do |offset, i|
+            logger.debug("Processing texture #{i + 1}/#{num_textures} at offset #{offset}")
+            texture_data = data[offset..]
+            break if texture_data.nil? || texture_data.size < 22
+
+            name = texture_data[0, 8].delete("\x00").strip
+            width = texture_data[12, 2].unpack1('v')
+            height = texture_data[14, 2].unpack1('v')
+            num_patches = texture_data[20, 2].unpack1('v')
+
+            logger.debug("Texture #{i + 1}/#{num_textures}: #{name} (#{width}x#{height}, #{num_patches} patches)")
+
+            patches = []
+            patch_offset = 22
+
+            num_patches.times do |j|
+              patch_data = texture_data[patch_offset, 10]
+              break if patch_data.nil? || patch_data.size < 10
+
+              x_offset = patch_data[0, 2].unpack1('v')
+              y_offset = patch_data[2, 2].unpack1('v')
+              patch_index = patch_data[4, 2].unpack1('v')
+
+              patch_name = pnames ? pnames[patch_index] : nil
+              logger.debug("  Patch #{j + 1}/#{num_patches}: index=#{patch_index}, name=#{patch_name}, offset=(#{x_offset},#{y_offset})")
+
+              patches << TexturePatch.new(
+                x_offset: x_offset,
+                y_offset: y_offset,
+                name: patch_name,
+                patch_index: patch_index
+              )
+
+              patch_offset += 10
+            end
+
+            textures << Texture.new(
+              name: name,
+              width: width,
+              height: height,
+              patches: patches
+            )
           end
-        end
 
-        private
-
-        def read_texture_offsets(count)
-          offsets = []
-          count.times do
-            offset = read_long
-            # Offsets are relative to the start of the texture lump
-            offsets << offset
-          end
-          offsets
-        end
-
-        def parse_texture
-          name = read_string(TEXTURE_NAME_LENGTH).strip.upcase # WAD files store names in uppercase
-          @logger.debug("Parsing texture: #{name}")
-          skip_bytes(4) # Skip flags (unused)
-          width = read_short
-          height = read_short
-          @logger.debug("Texture dimensions: #{width}x#{height}")
-          skip_bytes(4) # Skip column directory (unused)
-          num_patches = read_short
-          @logger.debug("Number of patches: #{num_patches}")
-
-          patches = num_patches.times.map do |i|
-            patch = parse_patch
-            @logger.debug("Patch #{i + 1}: index=#{patch.patch_index}, offset=(#{patch.x_offset},#{patch.y_offset})")
-            patch
-          end
-
-          Texture.new(
-            name: name,
-            width: width,
-            height: height,
-            patches: patches
-          )
-        end
-
-        def parse_patch
-          x_offset = read_short
-          y_offset = read_short
-          patch_number = read_short
-          skip_bytes(4) # Skip stepdir and colormap (unused)
-
-          patch_name = @pnames ? @pnames[patch_number] : nil
-          @logger.debug("Patch name: #{patch_name || 'unknown'} (index #{patch_number})")
-
-          TexturePatch.new(
-            patch_index: patch_number,
-            x_offset: x_offset,
-            y_offset: y_offset,
-            name: patch_name
-          )
-        end
-
-        def read_long
-          value = @data[@offset, 4].unpack1('V')
-          @offset += 4
-          value
-        end
-
-        def read_short
-          value = @data[@offset, 2].unpack1('v')
-          @offset += 2
-          value
-        end
-
-        def read_string(length)
-          value = @data[@offset, length].tr("\x00", '')
-          @offset += length
-          value
-        end
-
-        def skip_bytes(count)
-          @offset += count
+          logger.debug("Parsed #{textures.size} textures")
+          textures
         end
       end
     end

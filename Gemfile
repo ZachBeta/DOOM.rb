@@ -17,4 +17,5 @@ group :development do
   gem 'rubocop', '~> 1.60', require: false
   gem 'rubocop-minitest', '~> 0.34.1', require: false
   gem 'rubocop-rake', '~> 0.6.0', require: false
+  gem 'minitest-focus', '~> 1.3.1'  # Focus on specific tests
 end
