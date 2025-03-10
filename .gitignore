@@ -65,3 +65,7 @@ game.log
 .DS_Store
 
 freedoom-0.13.0/
+
+.gems/
+data/
+reference/
