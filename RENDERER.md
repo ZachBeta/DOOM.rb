@@ -1,74 +1,185 @@
 # DOOM.rb Renderer Documentation
 
-> **Note:** For the modernization plan and implementation details for improving the renderer with modern OpenGL and GLFW3, see [RENDERER_PLAN.md](RENDERER_PLAN.md).
-
 ## Overview
-This document consolidates all information related to the DOOM.rb renderer implementation, including architecture, strategies, learnings, and future plans.
+This document consolidates all information related to the DOOM.rb renderer implementation, including architecture, strategies, and future plans.
+
+## Current Implementation Analysis
+- Simplify GLFW3 window management
+- Improve event handling with proper callbacks
+- Optimize software rendering approach
+- Enhance pixel buffer operations
+- Improve memory usage for textures
+
+## Implementation Goals
+- Achieve 30+ FPS at 800x600 resolution
+- Optimize pixel buffer operations
+- Efficient texture caching
+- Reduce memory usage
+- Better separation of concerns
+- Maintainable architecture
+- Improved sprite rendering
+- Efficient raycasting
+
+## Detailed Implementation Plan
+
+### Phase 1: Basic Window Management
+1. Remove all OpenGL-specific code and dependencies
+2. Create basic window management using only GLFW3
+3. Implement proper window creation and destruction
+4. Set up basic input handling through GLFW callbacks
+5. Implement graceful exit handling (ESC key)
+
+### Phase 2: Basic Rendering
+1. Use GLFW's native buffer management
+2. Implement basic pixel buffer rendering
+3. Set up double buffering for smooth display
+4. Create basic frame timing system
+5. Implement FPS counter using GLFW time functions
+
+### Phase 3: Game Rendering
+1. Implement raycasting directly to pixel buffer
+2. Create texture management system using raw pixel data
+3. Implement wall rendering using software rendering techniques
+4. Add basic color and shading calculations
+5. Implement minimap using pixel-based drawing
+
+### Phase 4: Performance Optimization
+1. Optimize pixel buffer operations
+2. Implement efficient texture caching
+3. Optimize ray calculations
+4. Add frame timing smoothing
+5. Implement vertical synchronization
+
+### Phase 5: Advanced Features
+1. Add sprite rendering
+2. Implement floor and ceiling rendering
+3. Add basic lighting effects
+4. Implement weapon rendering
+5. Add screen effects (damage, pickup flashes)
+
+## Key Technical Decisions
+- Use GLFW3's window as the primary display surface
+- Implement software rendering instead of hardware acceleration
+- Use direct pixel manipulation for all rendering
+- Keep the 800x600 resolution lock
+- Maintain separation between game logic and rendering
+- Use GLFW's time functions for consistent frame timing
+
+## Implementation Notes
+- All rendering will be done through software-based techniques
+- No external graphics libraries beyond GLFW3
+- Focus on efficient pixel buffer manipulation
+- Use GLFW3's built-in timing and input handling
+- Maintain clean separation between game logic and rendering
+- Follow original DOOM's rendering techniques where applicable
+
+## Technical Components and Architecture
+- Software-based rendering engine with raycasting
+- Texture system with TEXTURE1/TEXTURE2 support
+- GLFW3-based window management
+- Direct pixel buffer manipulation
+- Resolution locked to 800x600
+
+## Performance Guidelines
+- Efficient pixel buffer operations
+- Texture caching system
+- Optimized raycasting calculations
+- Frame timing management
+- Avoid unnecessary object creation
+- Regular profiling to identify bottlenecks
+
+## Testing Approach
+- Visual inspection of rendering
+- Performance monitoring
+- Input response verification
+- Memory usage tracking
+- Unit tests for core components
+- Performance benchmarks
+- Memory leak detection
+- State validation
+
+## Migration Strategy
+- Incremental implementation
+- Maintain functionality during transition
+- Regular performance testing
+- Cross-platform compatibility
+
+## Timeline
+- **Phase 1**: 1 week
+- **Phase 2**: 1-2 weeks
+- **Phase 3**: 2 weeks
+- **Phase 4**: 1 week
+- **Phase 5**: 1 week
+
+Total estimated time: 6-7 weeks
+
+## Resources
+- [GLFW Documentation](https://www.glfw.org/docs/latest/)
+- Original DOOM source code
+- Software rendering resources
 
 ## Core Architecture
 
 ### Renderer Components
-- 3D rendering engine with raycasting
+- Software-based rendering engine with raycasting
 - Texture system with TEXTURE1/TEXTURE2 support
 - Basic texture rendering and caching
-- OpenGL-based implementation
+- GLFW3-based window management
 
 ### Project Structure
 ```
 lib/doom/      # Core game components
-├── renderer/  # 3D rendering system
+├── renderer/  # Rendering system
 ```
 
-## Key Learnings from Renderer Rebuild
+## Key Implementation Details
 
 ### Architecture Decisions
 
-1. **State Management Complexity**
-   - OpenGL state tracking proved more complex than anticipated
-   - Need for explicit state validation at key points
-   - Importance of state transition logging for debugging
+1. **Window Management**
+   - GLFW3 for window creation and management
+   - Software-based rendering approach
+   - Direct pixel buffer manipulation
+   - Resolution locked to 800x600
 
-2. **Performance Bottlenecks**
-   - Texture mapping performance critical for frame rate
-   - Memory management for textures needs careful consideration
-   - Wall segment merging essential for reducing draw calls
+2. **Performance Considerations**
+   - Efficient pixel buffer operations
+   - Texture caching system
+   - Optimized raycasting calculations
+   - Frame timing management
 
 3. **Memory Management**
-   - Texture streaming and caching crucial for performance
-   - Need for efficient texture pooling system
-   - Importance of texture compression for large WAD files
+   - Texture streaming and caching
+   - Efficient texture pooling system
+   - Texture compression for large WAD files
 
-### Technical Insights
+### Technical Components
 
 1. **Rendering Pipeline**
-   - Clear separation between geometry and texture processing needed
-   - Importance of efficient clipping algorithms
-   - Need for better sprite sorting and management
+   - Clear separation between geometry and texture processing
+   - Efficient clipping algorithms
+   - Sprite sorting and management
+   - Double buffering for smooth display
 
 2. **Resource Management**
-   - WAD file texture extraction needs optimization
-   - Texture palette management complexity
-   - Memory budgeting crucial for stable performance
+   - WAD file texture extraction
+   - Texture palette management
+   - Memory budgeting for stable performance
 
 3. **Performance Targets**
-   - Original targets:
-     - 800x600 resolution
-     - 35 FPS target
-     - <100MB memory usage
-   - Frame time budget distribution needs revision
-   - Texture memory management needs refinement
+   - Resolution: 800x600
+   - FPS Target: 30+
+   - Memory Usage: <100MB
 
 ## Current Implementation
 
 ### Completed Features
-- Window creation and rendering loop
+- Window creation and management with GLFW3
 - Map representation and raycasting
 - Texture system with WAD file parsing
 - Texture composition from patches
 - Texture caching and scaling
 - Support for TEXTURE1/TEXTURE2
-- Integration with renderer
-- Debug tools (wad:info, wad:textures)
 - Wall rendering with directional coloring
 - Minimap with player position and direction
 - Debug information display (FPS, position, etc.)
@@ -76,15 +187,14 @@ lib/doom/      # Core game components
 
 ### In Progress
 - Performance Optimization
-  - Profile rendering and Ruby bottlenecks
+  - Profile rendering bottlenecks
   - Optimize texture caching
   - Improve line batching
   - Enhance view distance culling
-  - Implement texture mipmap system
   - Current FPS: 3-6, Target: 30+
 
 ### Planned Features
-- Advanced texture features (filtering, mip-mapping)
+- Advanced texture features
 - Texture mapping improvements
 - Texture Animation
   - Parse ANIMATED lump
@@ -99,150 +209,39 @@ lib/doom/      # Core game components
 
 ### Core Guidelines
 - Keep rendering logic separate from game logic
-- Hard lock to 800x600 resolution for now
-- Follow vanilla DOOM behavior as documented in Chocolate DOOM source code
+- Hard lock to 800x600 resolution
+- Follow vanilla DOOM behavior as documented in Chocolate DOOM
+- Use software rendering techniques exclusively
+- Maintain clean separation of concerns
 
 ### Performance Guidelines
 - Avoid unnecessary object creation in tight loops
-- Consider using memoization or caching for expensive calculations
-- Use profiling to identify bottlenecks
-- Implement efficient texture lookup methods
-- Cache textures for performance
-
-### Texture Mapping
-- Calculate texture coordinates based on wall hit positions
-- Use efficient texture lookup methods
-- Consider texture caching
+- Use memoization and caching for expensive calculations
+- Regular profiling to identify bottlenecks
+- Efficient texture lookup methods
+- Smart texture caching strategies
 
 ## Testing Approach
 
-### Manual Testing Strategy
-We've adopted a manual testing approach for the renderer components due to the visual nature of rendering and the challenges of automated testing for graphical output. This approach includes:
+### Manual Testing
+- Visual inspection of rendering
+- Performance monitoring
+- Input response verification
+- Memory usage tracking
 
-1. **Manual Observation**
-   - Run the game with `rake test_renderer_manual[time_limit]`
-   - Observe wall rendering, colors, and visual artifacts
-   - Test player movement and collision detection
-   - Verify minimap functionality and accuracy
-   - Check FPS counter and debug information display
-
-2. **Log Analysis**
-   - Analyze performance metrics from logs
-   - Track FPS statistics (average, minimum, maximum)
-   - Identify any errors or warnings in the logs
-   - Monitor memory usage and performance bottlenecks
-
-3. **Documentation**
-   - Document observations in WORKLOGS.md using the provided template
-   - Record any issues or visual artifacts
-   - Note performance characteristics
-   - Suggest improvements based on observations
-
-4. **Iterative Improvement**
-   - Use documented observations to guide further development
-   - Prioritize fixes for identified issues
-   - Implement performance optimizations based on findings
-   - Retest after changes to verify improvements
-
-### Why Manual Testing?
-Automated testing of rendering components presents several challenges:
-- Visual output is difficult to verify programmatically
-- Performance characteristics vary by hardware
-- User experience aspects require human judgment
-- OpenGL context management complicates test automation
-- Interactive elements need real-time feedback
-
-By focusing on manual testing with structured observation and documentation, we can more effectively evaluate the renderer's quality and performance while maintaining development velocity.
-
-## Test Coverage
-
-### Core Renderer Tests
-1. **OpenGL Renderer Tests** (`test/doom/opengl_renderer_test.rb`)
-   - Initialization and resource management
-   - Render pipeline execution
-   - Performance metrics tracking
-   - Frame logging and metrics accumulation
-
-2. **Base Renderer Tests** (`test/doom/renderer_test.rb`)
-   - Basic renderer initialization
-   - Texture management
-   - Wall rendering components
-   - Shader compilation and management
-
-### Component Tests
-1. **Screen Buffer Tests** (`test/doom/renderer/components/screen_buffer_test.rb`)
-   - Buffer initialization and cleanup
-   - Pixel drawing operations
-   - Vertical line rendering
-   - Buffer flipping and window rendering
-
-2. **Ray Caster Tests** (`test/doom/ray_caster_test.rb`)
-   - Ray angle calculations
-   - Wall intersection detection
-   - Distance calculations
-   - Texture coordinate mapping
-   - Perspective correction
-
-3. **OpenGL State Tests** (`test/doom/renderer/components/opengl_state_test.rb`)
-   - Matrix mode transitions
-   - Feature enabling/disabling
-   - Texture binding
-   - Blend state management
-
-4. **Render State Tests** (`test/doom/renderer/components/render_state_test.rb`)
-   - Viewport configuration
-   - Matrix transformations
-   - Texture coordinate management
-
-### Integration Tests
-1. **Cleanup Tests** (`test/doom/cleanup_test.rb`)
-   - Resource cleanup sequences
-   - OpenGL state cleanup
-   - Memory management validation
-
-2. **Window Integration Tests** (`test/doom/window_test.rb`)
-   - Window creation and management
-   - OpenGL context handling
-   - Event processing
-
-## Future Considerations
-
-### Potential Improvements
-
-1. **Architecture**
-   - Consider implementing a command buffer system
-   - Add better error recovery mechanisms
-   - Implement more robust state validation
-
-2. **Performance**
-   - Implement sector-based visibility determination
-   - Add view frustum culling
-   - Optimize texture coordinate calculation
-
-3. **Memory Management**
-   - Implement smarter texture streaming
-   - Add better texture cache management
-   - Implement texture atlas system
-
-### Testing Strategy
-
-1. **Performance Testing**
-   - Need for automated performance benchmarks
-   - Better profiling tools integration
-   - Systematic testing across different WAD files
-
-2. **Validation**
-   - Need for visual regression testing
-   - State validation framework
-   - Memory leak detection
+### Automated Testing
+- Unit tests for core components
+- Performance benchmarks
+- Memory leak detection
+- State validation
 
 ## References
 
 - Chocolate DOOM architecture
 - Original DOOM rendering pipeline
 - FreeDOOM WAD specifications
-- [StinomXE](https://gugquettex.com/en/project/stinomxe/index.php) - A 3 or more dimensional drawing math thing that works on averages only
+- GLFW3 documentation (https://www.glfw.org/docs/latest/)
 
-## Conclusion
+## Implementation Plan
 
-The renderer implementation in DOOM.rb aims to balance accuracy to the original DOOM with modern development practices. While we've encountered challenges with state management and performance optimization, these learnings continue to guide our development toward a more robust and performant rendering system. 
+For detailed implementation steps and phases, please refer to [GLFW3_PLAN.md](GLFW3_PLAN.md). 

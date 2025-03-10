@@ -4,7 +4,7 @@ source 'https://rubygems.org'
 
 # gem "rails"
 
-gem 'opengl-bindings', '~> 1.6.0'  # OpenGL bindings
+# OpenGL bindings will be added later
 gem 'matrix', '~> 0.4.2'           # Matrix operations for 3D math
 gem 'minitest', '~> 5.18.0'        # Testing framework
 gem 'pry', '~> 0.14.2'             # Debugging tool

@@ -4,9 +4,10 @@
 - Write Ruby code following Sandi Metz's POODR principles
 - Keep explanations and follow-up questions minimal to save tokens
 - Follow vanilla DOOM behavior as documented in Chocolate DOOM source code in `reference/chocolate-doom`
-- Use glfw3 gem for opengl and reference its code in `.gems/ruby/3.3.0/gems/glfw3-0.3.3`
-- Follow the modernization plan in `RENDERER_PLAN.md` for OpenGL and GLFW3 implementation
+- Use only the glfw3 gem for window management and rendering
+- Follow the modernization plan in `RENDERER_PLAN.md` for GLFW3 implementation
 - Do not try to use ffi on glfw directly
+- Do not use additional OpenGL bindings or gems
 - Ensure GPL-2.0 license compliance
 - Hard lock to 800x600 resolution for now
 - After running `rake test` or `rake doom`, pause and ask for any additional test notes
@@ -49,9 +50,9 @@
 ## Performance Guidelines
 
 ### Rendering and Physics
-- Follow modern OpenGL practices as outlined in `RENDERER_PLAN.md`
-- Use shader-based rendering instead of fixed-function pipeline
-- Replace immediate mode rendering with VBOs and VAOs
+- Use software rendering techniques for all graphics
+- Implement efficient pixel buffer operations
+- Focus on optimizing raycasting calculations
 - Avoid unnecessary object creation in tight loops
 - Consider using memoization or caching for expensive calculations
 - Use profiling to identify bottlenecks
@@ -66,13 +67,13 @@
 
 ## Feature-Specific Guidelines
 
-### OpenGL and GLFW3 Implementation
-- Follow the phased approach outlined in `RENDERER_PLAN.md`
-- Use modern OpenGL (3.3+) with shader-based rendering
+### GLFW3 Implementation
+- Use GLFW3 for window management only
 - Implement proper GLFW3 callback handling for events
-- Use VBOs and VAOs for efficient geometry rendering
-- Implement proper texture management with OpenGL texture objects
+- Use software rendering with pixel buffer manipulation
 - Follow the migration strategy in `RENDERER_PLAN.md` for incremental improvements
+- Do not use any OpenGL features or extensions
+- Focus on efficient buffer management and frame timing
 
 ### WAD File Parsing
 - Follow vanilla DOOM WAD format specifications
@@ -82,15 +83,16 @@
 - Use streaming for large files
 - Follow DOOM source code naming conventions
 
+### Texture Mapping
+- Calculate texture coordinates based on wall hit positions
+- Use efficient pixel buffer operations for texture rendering
+- Implement texture caching for performance
+- Focus on software-based texture mapping techniques
+
 ### Collision Detection
 - Implement using simple geometric calculations
 - Consider grid-based approach for efficiency
 - Separate collision detection from movement logic
-
-### Texture Mapping
-- Calculate texture coordinates based on wall hit positions
-- Use efficient texture lookup methods
-- Consider texture caching
 
 ### Developer Console
 - Implement using command pattern

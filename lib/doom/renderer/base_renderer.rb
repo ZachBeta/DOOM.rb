@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 require 'glfw3'
-require 'opengl'
+require 'gl'
+require 'glu'
 require 'matrix'
 require_relative 'ray_caster'
 require_relative 'shader_manager'
@@ -13,12 +14,12 @@ require_relative 'debug_renderer'
 require_relative '../logger'
 
 # Load OpenGL
-OpenGL.load_lib
+GL.load_lib
 
 module Doom
   module Renderer
     class BaseRenderer
-      include OpenGL
+      include GL
 
       WINDOW_WIDTH = 800
       WINDOW_HEIGHT = 600
@@ -77,8 +78,8 @@ module Doom
         @logger.debug('BaseRenderer: Starting render cycle')
 
         # Clear the screen with the current background color
-        OpenGL.glClearColor(*@background_color)
-        OpenGL.glClear(OpenGL::GL_COLOR_BUFFER_BIT | OpenGL::GL_DEPTH_BUFFER_BIT)
+        GL.ClearColor(*@background_color)
+        GL.Clear(GL::GL_COLOR_BUFFER_BIT | GL::GL_DEPTH_BUFFER_BIT)
 
         # Cast rays
         rays = @ray_caster.cast_rays(WINDOW_WIDTH)
@@ -264,15 +265,15 @@ module Doom
         @logger.info('BaseRenderer: Setting up OpenGL')
 
         # Enable depth testing
-        OpenGL.glEnable(OpenGL::GL_DEPTH_TEST)
-        OpenGL.glDepthFunc(OpenGL::GL_LESS)
+        GL.Enable(GL::GL_DEPTH_TEST)
+        GL.DepthFunc(GL::GL_LESS)
 
         # Enable alpha blending
-        OpenGL.glEnable(OpenGL::GL_BLEND)
-        OpenGL.glBlendFunc(OpenGL::GL_SRC_ALPHA, OpenGL::GL_ONE_MINUS_SRC_ALPHA)
+        GL.Enable(GL::GL_BLEND)
+        GL.BlendFunc(GL::GL_SRC_ALPHA, GL::GL_ONE_MINUS_SRC_ALPHA)
 
         # Set viewport
-        OpenGL.glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)
+        GL.Viewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)
 
         @logger.info('BaseRenderer: OpenGL setup complete')
       end
