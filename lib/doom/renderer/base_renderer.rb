@@ -20,6 +20,8 @@ module Doom
 
         @frame_count = 0
         @start_time = Time.now
+        @last_frame_time = Time.now
+        @frame_budget = 1.0 / 30.0  # Target 30 FPS
         @background_color = [0, 0, 0, 255] # RGBA black
 
         @logger.info('BaseRenderer: Initialization complete')
@@ -35,24 +37,30 @@ module Doom
       def render
         return unless @map && @player
 
+        # Frame time budgeting
+        current_time = Time.now
+        delta = current_time - @last_frame_time
+        if delta < @frame_budget
+          sleep(@frame_budget - delta)
+        end
+        @last_frame_time = Time.now
+
         clear_pixel_buffer
         rays = @ray_caster.cast_rays(@window_manager.width)
         
-        # Draw walls
+        # Draw walls using optimized buffer access
         rays.each_with_index do |ray, x|
           next unless ray.hit?
           
-          # Calculate wall height
           wall_height = (@window_manager.height / ray.distance).to_i
-          wall_start = (@window_manager.height - wall_height) / 2
-          wall_end = wall_start + wall_height
+          wall_start = [(@window_manager.height - wall_height) / 2, 0].max
+          wall_end = [wall_start + wall_height, @window_manager.height].min
           
-          # Clamp values to screen bounds
-          wall_start = [wall_start, 0].max
-          wall_end = [wall_end, @window_manager.height].min
-          
-          # Calculate wall color based on distance (darker = further)
+          # Calculate wall color based on distance and side
           intensity = [(1.0 - ray.distance / 10.0), 0.2].max
+          # Darker for y-side walls to create contrast
+          intensity *= 0.8 if ray.side == 1
+          
           color = [
             (intensity * 255).to_i,  # Red
             (intensity * 200).to_i,  # Green
@@ -60,10 +68,8 @@ module Doom
             255                      # Alpha
           ]
           
-          # Draw the wall column
-          (wall_start...wall_end).each do |y|
-            set_pixel(x, y, color)
-          end
+          # Batch draw wall column
+          draw_column(x, wall_start, wall_end, color)
         end
         
         update_window
@@ -88,25 +94,48 @@ module Doom
 
       def init_pixel_buffer
         @logger.info('BaseRenderer: Initializing pixel buffer')
-        @pixel_buffer = Array.new(@window_manager.width * @window_manager.height * BYTES_PER_PIXEL, 0)
+        buffer_size = @window_manager.width * @window_manager.height * BYTES_PER_PIXEL
+        
+        # Pre-allocate buffers
+        @pixel_buffer = String.new(capacity: buffer_size)
+        @pixel_buffer << "\x00" * buffer_size
+        @temp_buffer = String.new(capacity: BYTES_PER_PIXEL * @window_manager.height)
       end
 
       def clear_pixel_buffer
-        @pixel_buffer.fill(0)
+        # Fast clear using string operations
+        @pixel_buffer.clear
+        @pixel_buffer << "\x00" * (@window_manager.width * @window_manager.height * BYTES_PER_PIXEL)
       end
 
-      def set_pixel(x, y, color)
-        return unless x >= 0 && x < @window_manager.width && y >= 0 && y < @window_manager.height
-        offset = (y * @window_manager.width + x) * BYTES_PER_PIXEL
-        @pixel_buffer[offset] = color[0]     # Red
-        @pixel_buffer[offset + 1] = color[1] # Green
-        @pixel_buffer[offset + 2] = color[2] # Blue
-        @pixel_buffer[offset + 3] = color[3] # Alpha
+      def draw_column(x, start_y, end_y, color)
+        return unless x >= 0 && x < @window_manager.width
+        
+        # Pre-calculate color string once
+        @temp_buffer.clear
+        color_str = color.pack('C*')
+        height = end_y - start_y
+        
+        # Fill temp buffer with repeated color
+        height.times { @temp_buffer << color_str }
+        
+        # Calculate offset once
+        offset = (start_y * @window_manager.width + x) * BYTES_PER_PIXEL
+        
+        # Single string operation to update column
+        @pixel_buffer[offset, height * BYTES_PER_PIXEL] = @temp_buffer[0, height * BYTES_PER_PIXEL]
       end
 
       def update_window
-        # For now, just swap buffers to keep the window responsive
-        # We'll implement proper software rendering in the next iteration
+        # Direct buffer update without conversion
+        @window_manager.window.set_pixels(
+          0, 0,
+          @window_manager.width,
+          @window_manager.height,
+          Glfw::RGBA,
+          @pixel_buffer
+        )
+        
         @window_manager.swap_buffers
         @window_manager.poll_events
       end

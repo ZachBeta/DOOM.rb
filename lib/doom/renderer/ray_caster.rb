@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'ray'
+
 module Doom
   module Renderer
     class RayCaster
@@ -88,7 +90,7 @@ module Doom
           wall_x -= wall_x.to_i
 
           # Store ray information
-          rays << {
+          rays << Ray.new(
             x: x,
             perp_wall_dist: perp_wall_dist,
             draw_start: draw_start,
@@ -101,7 +103,7 @@ module Doom
             step_y: step_y,
             ray_dir_x: ray_dir_x,
             ray_dir_y: ray_dir_y
-          }
+          )
         end
 
         rays

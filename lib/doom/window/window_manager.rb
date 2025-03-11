@@ -81,18 +81,13 @@ module Doom
         Glfw::Window.window_hint(Glfw::DECORATED, 1)
         Glfw::Window.window_hint(Glfw::FOCUSED, 1)
         Glfw::Window.window_hint(Glfw::VISIBLE, 1)
-        Glfw::Window.window_hint(Glfw::CLIENT_API, Glfw::NO_API)  # No OpenGL context
+        Glfw::Window.window_hint(Glfw::CONTEXT_VERSION_MAJOR, 2)  # Use minimal version
+        Glfw::Window.window_hint(Glfw::CONTEXT_VERSION_MINOR, 1)
         
         @window = Glfw::Window.new(@width, @height, WINDOW_TITLE)
         raise 'Failed to create GLFW window' unless @window
         
         @logger.info('WindowManager: Window created successfully')
-      end
-
-      def update_buffer(pixel_data)
-        # Keep window responsive while we figure out software rendering
-        poll_events
-        swap_buffers
       end
 
       def setup_signal_handlers
