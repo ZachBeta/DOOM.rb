@@ -6,6 +6,7 @@
 - Follow vanilla DOOM behavior as documented in Chocolate DOOM source code in `reference/chocolate-doom`
 - Use only the glfw3 gem for window management and rendering
 - Follow the modernization plan in `RENDERER_PLAN.md` for GLFW3 implementation
+- reference `.gems/ruby/3.3.0/gems/glfw3-0.3.3` for glfw3 gem documentation
 - Do not try to use ffi on glfw directly
 - Do not use additional OpenGL bindings or gems
 - Ensure GPL-2.0 license compliance

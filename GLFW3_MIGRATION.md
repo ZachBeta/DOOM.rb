@@ -1,19 +1,24 @@
-# GLFW3 Migration Progress
+# DOOM.rb Renderer Documentation
 
 ## Overview
-Migration of DOOM.rb from OpenGL to pure GLFW3 with software rendering, following project guidelines and rules.
+Documentation for DOOM.rb's software renderer implementation, covering the migration from OpenGL to pure GLFW3 and ongoing development.
 
-## Current Status
+## Core Requirements
+- Use only GLFW3 gem for window management
+- Implement software rendering with pixel buffers
+- No OpenGL dependencies
+- No FFI on GLFW
+- Hard lock to 800x600 resolution
+- Follow software rendering techniques for all graphics
+
+## Migration Progress
 
 ### Completed Changes
 1. **Removed OpenGL Dependencies**
    - Removed OpenGL-related code from `doom.rb`
-   - Removed `shader_manager.rb` (no longer needed)
-   - Removed `geometry_manager.rb` (no longer needed)
-   - Cleaned up all OpenGL-related gems:
-     - Removed `opengl-bindings`
-     - Removed `ruby-opengl`
-   - Removed `chunky_png` gem (implementing our own software rendering)
+   - Removed `shader_manager.rb` and `geometry_manager.rb`
+   - Cleaned up OpenGL-related gems (`opengl-bindings`, `ruby-opengl`)
+   - Removed `chunky_png` gem for custom software rendering
 
 2. **Base Renderer Updates**
    - Migrated to pure GLFW3 window management
@@ -27,64 +32,82 @@ Migration of DOOM.rb from OpenGL to pure GLFW3 with software rendering, followin
    - `debug_renderer.rb`: Modified for software rendering
    - `base_renderer_test.rb`: Updated tests for new rendering approach
 
-## Technical Details
+### Technical Components
 
-### Software Rendering Implementation
-- Using direct pixel buffer manipulation for rendering
-- RGBA color format (4 bytes per pixel)
-- Manual buffer management for all rendering operations
-- No hardware acceleration or OpenGL features
+1. **Window Management**
+   - GLFW3-based window creation and lifecycle
+   - Event polling for game loop
+   - Input handling via callbacks
+   - Proper window cleanup
 
-### GLFW3 Usage
-- Window management only (no OpenGL context)
-- Input handling through GLFW3 callbacks
-- Event polling for game loop
-- Manual frame buffer management
+2. **Rendering Pipeline**
+   - Direct pixel buffer manipulation
+   - Double buffering for smooth display
+   - Texture system with WAD file parsing
+   - Texture composition from patches
+   - Wall rendering with directional coloring
+   - Basic frame timing system
+
+3. **Resource Management**
+   - WAD file texture extraction
+   - Texture palette management
+   - Memory budgeting
+   - Texture caching system
 
 ## Current Challenges
-1. **Buffer Management**
-   - Need to implement efficient pixel buffer updates
-   - Investigating best approach for frame buffer synchronization
-   - Working on reducing potential screen tearing
 
-2. **Performance Optimization**
-   - Need to optimize wall rendering calculations
-   - Looking into efficient texture mapping techniques
-   - Planning to implement frame timing improvements
+1. **Performance Optimization**
+   - Current FPS: 3-6, Target: 30+
+   - Need efficient pixel buffer updates
+   - Frame buffer synchronization
+   - Screen tearing prevention
+   - Profile rendering bottlenecks
+   - Optimize texture caching
+   - Improve line batching
+   - Enhance view distance culling
 
-## Next Steps
-1. **Rendering Pipeline**
-   - Complete implementation of software-based texture mapping
-   - Add floor and ceiling rendering
-   - Implement sprite rendering system
+2. **Memory Management**
+   - Texture streaming and caching
+   - Efficient texture pooling
+   - Texture compression for large WAD files
+   - Memory usage target: <100MB
 
-2. **Testing and Validation**
-   - Add comprehensive tests for rendering components
-   - Validate rendering performance
-   - Document any visual artifacts or issues
+## Implementation Plan
 
-3. **Documentation**
-   - Update code documentation for new rendering system
-   - Add performance guidelines for software rendering
-   - Document texture format specifications
+### Phase 1: Core Rendering (In Progress)
+1. Optimize pixel buffer operations
+2. Implement efficient texture caching
+3. Optimize ray calculations
+4. Add frame timing smoothing
+5. Implement vertical synchronization
 
-## Project Guidelines
-1. **Core Requirements**
-   - Use only GLFW3 gem for window management
-   - Implement software rendering with pixel buffers
-   - No OpenGL dependencies
-   - No FFI on GLFW
-   - Hard lock to 800x600 resolution
-   - Follow software rendering techniques for all graphics
+### Phase 2: Advanced Features
+1. Complete software-based texture mapping
+2. Add floor and ceiling rendering
+3. Implement sprite rendering system
+4. Add basic lighting effects
+5. Implement weapon rendering
+6. Add screen effects (damage, pickup flashes)
 
-2. **Code Style**
-   - Follow Ruby best practices
-   - Maintain clear separation of concerns
-   - Keep rendering logic isolated from game logic
-   - Ensure proper error handling and logging
+### Phase 3: Polish
+1. Texture Animation
+   - Parse ANIMATED lump
+   - Handle wall switches
+2. Performance tuning
+3. Memory optimization
+4. Bug fixes and stability
+
+## Testing Strategy
+- Visual inspection of rendering
+- Performance monitoring and benchmarks
+- Input response verification
+- Memory usage tracking
+- Unit tests for core components
+- Memory leak detection
+- State validation
 
 ## Resources
 - GLFW3 gem documentation
-- Project RULES.md
-- Original DOOM source code for reference
+- Original DOOM source code
 - Software rendering techniques documentation
+- Project RULES.md

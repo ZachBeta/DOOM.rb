@@ -7,6 +7,7 @@ require_relative 'wad_file'
 require_relative 'config'
 require_relative 'input_handler'
 require_relative 'renderer/base_renderer'
+require_relative 'window/window_manager'
 
 module Doom
   class Game
@@ -64,7 +65,8 @@ module Doom
     end
 
     def process_input
-      @input_handler.process_input(@renderer.window)
+      # Pass the window manager instance instead of raw GLFW window
+      @input_handler.process_input(@renderer.instance_variable_get(:@window_manager))
     end
 
     def load_wad(wad_path)
