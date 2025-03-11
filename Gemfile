@@ -8,7 +8,7 @@ gem 'minitest', '~> 5.18.0'        # Testing framework
 gem 'pry', '~> 0.14.2'             # Debugging tool
 gem 'rake', '~> 13.0.6'            # Task automation
 gem 'simplecov', '~> 0.22.0', require: false # Test coverage reporting
-gem 'glfw3'                        # Window management and input handling
+gem 'gosu', '~> 1.4.6'             # Modern 2D game development and rendering
 
 group :development do
   gem 'rubocop', '~> 1.60', require: false

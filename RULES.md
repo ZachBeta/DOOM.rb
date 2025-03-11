@@ -4,10 +4,10 @@
 - Write Ruby code following Sandi Metz's POODR principles
 - Keep explanations and follow-up questions minimal to save tokens
 - Follow vanilla DOOM behavior as documented in Chocolate DOOM source code in `reference/chocolate-doom`
-- Use only the glfw3 gem for window management and rendering
-- Follow the modernization plan in `RENDERER_PLAN.md` for GLFW3 implementation
-- reference `.gems/ruby/3.3.0/gems/glfw3-0.3.3` for glfw3 gem documentation
-- Do not try to use ffi on glfw directly
+- Use Gosu gem for window management and rendering
+- Follow the modernization plan in `RENDERER_PLAN.md` for Gosu implementation
+- reference `.gems/ruby/3.3.0/gems/gosu-0.15.0` for Gosu gem documentation
+- Do not try to use ffi on Gosu directly
 - Do not use additional OpenGL bindings or gems
 - Ensure GPL-2.0 license compliance
 - Hard lock to 800x600 resolution for now
@@ -52,30 +52,32 @@
 ## Performance Guidelines
 
 ### Rendering and Physics
-- Use software rendering techniques for all graphics
-- Implement efficient pixel buffer operations
+- Use Gosu's 2D graphics capabilities for rendering
+- Implement efficient pixel buffer operations using Gosu's API
 - Focus on optimizing raycasting calculations
 - Avoid unnecessary object creation in tight loops
 - Consider using memoization or caching for expensive calculations
 - Use profiling to identify bottlenecks
 - Implement efficient texture lookup methods
 - Cache textures for performance
+- Target 30+ FPS with smooth frame timing
 
 ### Performance Monitoring
 - Implement monitoring with minimal overhead
-- Use efficient time calculations
+- Use Gosu's built-in timing system
 - Consider frame timing and rate smoothing
 - Log performance data at appropriate intervals
 
 ## Feature-Specific Guidelines
 
-### GLFW3 Implementation
-- Use GLFW3 for window management only
-- Implement proper GLFW3 callback handling for events
-- Use software rendering with pixel buffer manipulation
-- Follow the migration strategy in `RENDERER_PLAN.md` for incremental improvements
-- Do not use any OpenGL features or extensions
+### Gosu Implementation
+- Use Gosu::Window as base class for window management
+- Implement proper update/draw cycle using Gosu's game loop
+- Use Gosu's pixel buffer API for efficient rendering
+- Follow modern Ruby game development practices
 - Focus on efficient buffer management and frame timing
+- Leverage Gosu's built-in double buffering
+- Use Gosu's input handling system
 
 ### WAD File Parsing
 - Follow vanilla DOOM WAD format specifications
@@ -87,7 +89,7 @@
 
 ### Texture Mapping
 - Calculate texture coordinates based on wall hit positions
-- Use efficient pixel buffer operations for texture rendering
+- Use Gosu's pixel operations for texture rendering
 - Implement texture caching for performance
 - Focus on software-based texture mapping techniques
 
@@ -119,4 +121,4 @@
   1. Pass all automated tests for non-rendering components
   2. Follow project style guidelines
   3. Update cursor rules if needed
-  4. Manually test with `rake doom` and document observations 
+  4. Manually test with `rake doom` and document observations

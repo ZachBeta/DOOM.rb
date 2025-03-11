@@ -23,8 +23,8 @@ rake doom
 
 ## Features
 
-### Current ✅
-- 3D rendering engine with raycasting
+### Current 
+- 3D rendering engine with raycasting using Gosu
 - Player movement with collision detection
 - Noclip mode (N key)
 - Minimap and FPS display
@@ -34,19 +34,24 @@ rake doom
 - Basic texture rendering and caching
 - Wall rendering with directional coloring
 - Debug information display
-- Keyboard input handling
+- Keyboard input handling with Gosu
+- Efficient pixel buffer operations
+- Double buffering with Gosu
+- Frame timing optimization
 
-### In Progress 🚧
+### In Progress 
 - Vanilla DOOM feature parity
 - Original DOOM source code study
 - Advanced texture features (filtering, mip-mapping)
-- Performance optimization
+- Performance optimization targeting 30+ FPS
+- Gosu-specific rendering optimizations
+- Texture mapping with Gosu's pixel operations
 
-### Planned 🎯
+### Planned 
 - Full WAD file loading
-- Texture mapping
+- Advanced texture mapping
 - Enemies and weapons
-- Sound and music
+- Sound and music using Gosu's audio system
 - Multiplayer support
 
 ## Development
@@ -64,10 +69,10 @@ rake wad:textures[path/to/wad]  # Display texture information
 
 ```
 lib/doom/      # Core game components
-├── renderer/  # 3D rendering system
+├── renderer/  # 3D rendering system using Gosu
 ├── player/    # Player mechanics
 ├── map/       # Level handling
-├── input/     # Input handling
+├── input/     # Input handling with Gosu
 ├── wad/       # WAD file parsing
 └── logging/   # Logging system
 ```
@@ -88,9 +93,10 @@ lib/doom/      # Core game components
 - Chocolate Doom
 - The doom source port community
 - The Doom Slayer for ripping and tearing
+- [Gosu](https://www.libgosu.org/) - 2D game development library
 
 ## License
 
 [GNU General Public License v2.0](LICENSE)
 
-This project is licensed under GPL-2.0 to align with the original DOOM and Chocolate DOOM codebases. 
+This project is licensed under GPL-2.0 to align with the original DOOM and Chocolate DOOM codebases.

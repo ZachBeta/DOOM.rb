@@ -55,12 +55,6 @@ build-iPhoneSimulator/
 # Used by RuboCop. Remote config files pulled in from inherit_from directive.
 # .rubocop-https?--*
 
-*.log
-log/
-logs/
-tmp/log/
-debug.log
-game.log
 
 .DS_Store
 
@@ -70,6 +64,9 @@ glfw3-0.3.3/
 
 reference/
 
-.gems/
 *.swp
 data/
+
+.gems/
+*.log
+logs/

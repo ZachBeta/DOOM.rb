@@ -29,7 +29,7 @@ module Doom
           assert_equal 800, BaseRenderer::WINDOW_WIDTH, 'Window width should be 800'
           assert_equal 600, BaseRenderer::WINDOW_HEIGHT, 'Window height should be 600'
           assert_equal 4, BaseRenderer::BYTES_PER_PIXEL, 'Should use RGBA format (4 bytes per pixel)'
-          assert renderer.window.is_a?(Glfw::Window), 'Should create a GLFW window'
+          assert renderer.window.is_a?(Gosu::Window), 'Should create a Gosu window'
         end
 
         # Clean up if renderer was created

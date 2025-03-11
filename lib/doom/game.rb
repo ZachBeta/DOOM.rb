@@ -69,12 +69,21 @@ module Doom
       last_fps_time = Time.now
       frames = 0
 
+      # Main game loop
       until @renderer.window_should_close?
         begin
+          # Process window events first
+          @renderer.instance_variable_get(:@window_manager).poll_events
+
+          # Update game state
           delta_time = @game_clock.tick
           update(delta_time)
-          render
+          
+          # Process input before rendering
           process_input
+          
+          # Render frame
+          render
           
           # FPS logging
           frames += 1
@@ -84,6 +93,9 @@ module Doom
             frames = 0
             last_fps_time = Time.now
           end
+
+          # Small sleep to prevent CPU overload
+          sleep(0.001)
         rescue StandardError => e
           @logger.error("Game: Error in game loop: #{e.message}")
           @logger.error(e.backtrace.join("\n"))
