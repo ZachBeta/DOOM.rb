@@ -12,6 +12,7 @@
 - Ensure GPL-2.0 license compliance
 - Hard lock to 800x600 resolution for now
 - After running `rake test` or `rake doom`, pause and ask for any additional test notes
+* use extensive logging to help track down issues
 
 ## Code Style Guidelines
 
