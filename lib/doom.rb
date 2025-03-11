@@ -1,16 +1,15 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'opengl'
 require 'glfw3'
 
 # Load OpenGL libraries
-OpenGL.load_lib
+# OpenGL.load_lib
 GLFW.load_lib if defined?(GLFW)
 
 module Doom
   # Include OpenGL module at the module level
-  include OpenGL
+  # include OpenGL
 
   require_relative 'doom/logger'
   require_relative 'doom/config'

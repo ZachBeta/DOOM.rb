@@ -1,11 +1,7 @@
 # frozen_string_literal: true
 
-require 'opengl'
 require 'matrix'
 require_relative '../logger'
-
-# Load OpenGL
-OpenGL.load_lib
 
 module Doom
   module Renderer

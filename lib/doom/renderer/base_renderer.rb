@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 require 'glfw3'
-require 'gl'
-require 'glu'
 require 'matrix'
 require_relative 'ray_caster'
 require_relative 'shader_manager'
@@ -13,14 +11,9 @@ require_relative 'minimap_renderer'
 require_relative 'debug_renderer'
 require_relative '../logger'
 
-# Load OpenGL
-GL.load_lib
-
 module Doom
   module Renderer
     class BaseRenderer
-      include GL
-
       WINDOW_WIDTH = 800
       WINDOW_HEIGHT = 600
       WINDOW_TITLE = 'DOOM.rb'
@@ -34,7 +27,6 @@ module Doom
         setup_signal_handlers
         init_glfw
         create_window
-        setup_opengl
 
         # Initialize managers
         @shader_manager = ShaderManager.new
@@ -77,14 +69,10 @@ module Doom
 
         @logger.debug('BaseRenderer: Starting render cycle')
 
-        # Clear the screen with the current background color
-        GL.ClearColor(*@background_color)
-        GL.Clear(GL::GL_COLOR_BUFFER_BIT | GL::GL_DEPTH_BUFFER_BIT)
-
         # Cast rays
         rays = @ray_caster.cast_rays(WINDOW_WIDTH)
 
-        # Render scene using modern OpenGL
+        # Render scene using GLFW3-based window management and rendering
         render_scene(rays)
 
         # Calculate and log FPS every 100 frames
@@ -259,23 +247,6 @@ module Doom
         @logger.info('BaseRenderer: Setting up callbacks')
         # We'll handle key input in the input handler instead of using callbacks
         @logger.info('BaseRenderer: Callbacks set up')
-      end
-
-      def setup_opengl
-        @logger.info('BaseRenderer: Setting up OpenGL')
-
-        # Enable depth testing
-        GL.Enable(GL::GL_DEPTH_TEST)
-        GL.DepthFunc(GL::GL_LESS)
-
-        # Enable alpha blending
-        GL.Enable(GL::GL_BLEND)
-        GL.BlendFunc(GL::GL_SRC_ALPHA, GL::GL_ONE_MINUS_SRC_ALPHA)
-
-        # Set viewport
-        GL.Viewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)
-
-        @logger.info('BaseRenderer: OpenGL setup complete')
       end
 
       def init_shaders

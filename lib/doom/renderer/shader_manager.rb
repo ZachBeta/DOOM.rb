@@ -1,16 +1,8 @@
 # frozen_string_literal: true
 
-require 'opengl'
-require_relative '../logger'
-
-# Load OpenGL
-OpenGL.load_lib
-
 module Doom
   module Renderer
     class ShaderManager
-      include OpenGL
-
       # Basic vertex shader for 2D rendering
       BASIC_VERTEX_SHADER = <<~GLSL
         #version 330 core
