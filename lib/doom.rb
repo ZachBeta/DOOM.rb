@@ -1,16 +1,9 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'glfw3'
-
-# Load OpenGL libraries
-# OpenGL.load_lib
-GLFW.load_lib if defined?(GLFW)
+require 'glfw3' # TODO: move this closer to the actual usage of the renderer code itself
 
 module Doom
-  # Include OpenGL module at the module level
-  # include OpenGL
-
   require_relative 'doom/logger'
   require_relative 'doom/config'
   require_relative 'doom/game'

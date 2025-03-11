@@ -6,86 +6,54 @@ require_relative '../logger'
 module Doom
   module Renderer
     class WallRenderer
-      include OpenGL
-
-      def initialize(width, height, shader_manager, texture_manager, geometry_manager)
+      def initialize(width, height)
         @logger = Logger.instance
         @logger.info('WallRenderer: Initializing')
 
         @width = width
         @height = height
-        @shader_manager = shader_manager
-        @texture_manager = texture_manager
-        @geometry_manager = geometry_manager
-
-        # Create wall geometries
-        create_wall_geometries
+        @pixel_buffer = Array.new(width * height * 4, 0) # RGBA format
 
         @logger.info('WallRenderer: Initialization complete')
       end
 
-      def render(rays, projection_matrix, view_matrix)
+      def render(rays)
         @logger.debug('WallRenderer: Rendering walls')
 
-        # Use the wall shader program
-        @shader_manager.use_program('wall')
-
-        # Set projection and view matrices
-        @shader_manager.set_uniform_matrix4('wall', 'projection', projection_matrix)
-        @shader_manager.set_uniform_matrix4('wall', 'view', view_matrix)
-
-        # Bind wall texture
-        @texture_manager.bind_texture('wall')
-        @shader_manager.set_uniform_int('wall', 'textureSampler', 0)
-
-        # Render each wall strip
         rays.each_with_index do |ray, x|
-          # Calculate wall height
+          # Calculate wall height based on distance
           wall_height = (@height / ray[:perp_wall_dist]).to_i
-          wall_height = @height if wall_height > @height # Clamp wall height
+          wall_height = @height if wall_height > @height
 
           # Calculate wall strip position
-          wall_y = (@height - wall_height) / 2
-
-          # Set model matrix for this wall strip
-          model_matrix = Matrix[
-            [1.0, 0.0, 0.0, x.to_f],
-            [0.0, wall_height.to_f, 0.0, wall_y.to_f],
-            [0.0, 0.0, 1.0, 0.0],
-            [0.0, 0.0, 0.0, 1.0]
-          ]
-
-          @shader_manager.set_uniform_matrix4('wall', 'model', model_matrix)
+          wall_top = (@height - wall_height) / 2
+          wall_bottom = wall_top + wall_height
 
           # Draw wall strip
-          @geometry_manager.draw_geometry('wall_strip')
+          (wall_top...wall_bottom).each do |y|
+            # Calculate intensity based on distance
+            intensity = (255.0 * (1.0 - ray[:perp_wall_dist] / 10.0)).to_i
+            intensity = [[intensity, 0].max, 255].min
+
+            # Set pixel color (grayscale for now)
+            set_pixel(x, y, [intensity, intensity, intensity, 255])
+          end
         end
 
         @logger.debug('WallRenderer: Walls rendered')
+        @pixel_buffer
       end
 
       private
 
-      def create_wall_geometries
-        @logger.info('WallRenderer: Creating wall geometries')
+      def set_pixel(x, y, color)
+        return unless x.between?(0, @width - 1) && y.between?(0, @height - 1)
 
-        # Create a single vertical strip for wall rendering
-        vertices = [
-          # Position (x, y, z)     Texture coordinates (u, v)
-          0.0, 0.0, 0.0,          0.0, 1.0,  # Bottom-left
-          1.0, 0.0, 0.0,          1.0, 1.0,  # Bottom-right
-          1.0, 1.0, 0.0,          1.0, 0.0,  # Top-right
-          0.0, 1.0, 0.0,          0.0, 0.0   # Top-left
-        ]
-
-        indices = [
-          0, 1, 2,  # First triangle
-          2, 3, 0   # Second triangle
-        ]
-
-        @geometry_manager.create_geometry('wall_strip', vertices, indices)
-
-        @logger.info('WallRenderer: Wall geometries created')
+        index = (y * @width + x) * 4
+        @pixel_buffer[index] = color[0]     # R
+        @pixel_buffer[index + 1] = color[1] # G
+        @pixel_buffer[index + 2] = color[2] # B
+        @pixel_buffer[index + 3] = color[3] # A
       end
     end
   end
