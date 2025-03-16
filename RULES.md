@@ -122,3 +122,7 @@
   2. Follow project style guidelines
   3. Update cursor rules if needed
   4. Manually test with `rake doom` and document observations
+
+
+
+  * when using git, use cat so view doesn't cause scroll issues
