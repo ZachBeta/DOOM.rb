@@ -24,8 +24,12 @@ end
 
 module TestHelper
   def setup_test_logs
+    FileUtils.rm_rf('logs')
+    FileUtils.rm_rf('data')
     FileUtils.mkdir_p('logs')
     FileUtils.mkdir_p('data')
+    FileUtils.chmod(0o755, 'logs')
+    FileUtils.chmod(0o755, 'data')
     Doom::Logger.setup
   end
 
