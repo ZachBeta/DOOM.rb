@@ -7,9 +7,10 @@ require 'json'
 
 module Doom
   class LogManager
-    def initialize(base_dir = 'logs', db_path = 'data/debug.db')
+    def initialize(base_dir = 'logs', db_path = 'data/debug.db', env = :development)
       @base_dir = base_dir
       @db_path = db_path
+      @env = env
       FileUtils.mkdir_p(@base_dir)
       FileUtils.mkdir_p(File.dirname(@db_path))
       setup_loggers
@@ -34,10 +35,8 @@ module Doom
       # If event is provided, log to database
       log_event(timestamp, event, data) if event
 
-      # If it's a debug event with component, log detailed info
-      return unless component && %i[debug verbose].include?(level)
-
-      log_debug_entry(timestamp, component, message, data, level.to_s.upcase)
+      # Always log to debug_logs table with component if provided
+      log_debug_entry(timestamp, component || '', message, data, level.to_s.upcase)
     end
 
     def log_game_event(event_type, data = {})
@@ -48,43 +47,32 @@ module Doom
     end
 
     def log_player_movement(player, delta_time)
-      execute_sql(
-        'INSERT INTO player_movements (timestamp, position_x, position_y, direction_x, direction_y, angle, noclip_mode, delta_time)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-        [
-          Time.now.to_f,
-          player.position[0],
-          player.position[1],
-          player.direction[0],
-          player.direction[1],
-          player.angle,
-          player.noclip_mode ? 1 : 0,
-          delta_time
-        ]
-      )
+      data = {
+        position: player.position.to_a,
+        direction: player.direction.to_a,
+        angle: player.angle,
+        noclip_mode: player.noclip_mode,
+        delta_time: delta_time
+      }
+      log_game_event('player_movement', data)
     end
 
     def log_render_frame(frame_time, ray_count, fps)
-      execute_sql(
-        'INSERT INTO render_frames (timestamp, frame_time, ray_count, fps)
-         VALUES (?, ?, ?, ?)',
-        [Time.now.to_f, frame_time, ray_count, fps]
-      )
+      data = {
+        frame_time: frame_time,
+        ray_count: ray_count,
+        fps: fps
+      }
+      log_game_event('render_frame', data)
     end
 
     def log_collision(player, attempted_position, successful)
-      execute_sql(
-        'INSERT INTO collision_events (timestamp, player_x, player_y, attempted_x, attempted_y, successful)
-         VALUES (?, ?, ?, ?, ?, ?)',
-        [
-          Time.now.to_f,
-          player.position[0],
-          player.position[1],
-          attempted_position[0],
-          attempted_position[1],
-          successful ? 1 : 0
-        ]
-      )
+      data = {
+        player_position: player.position.to_a,
+        attempted_position: attempted_position.to_a,
+        successful: successful
+      }
+      log_game_event('collision', data)
     end
 
     def query_logs(conditions = {})
@@ -106,12 +94,14 @@ module Doom
           timestamp: row[0],
           component: row[1],
           message: row[2],
-          data: JSON.parse(row[3]),
+          data: row[3] ? JSON.parse(row[3]) : {},
           level: row[4]
         }
       end
     rescue SQLite3::Exception => e
       @doom_log.error("Failed to query debug logs: #{e.message}")
+      raise e if @env == :test
+
       []
     end
 
@@ -133,22 +123,22 @@ module Doom
         {
           timestamp: row[0],
           event_type: row[1],
-          data: JSON.parse(row[2])
+          data: row[2] ? JSON.parse(row[2]) : {}
         }
       end
     rescue SQLite3::Exception => e
       @doom_log.error("Failed to query game events: #{e.message}")
+      raise e if @env == :test
+
       []
     end
 
     def clear_logs
       @db.execute('DELETE FROM debug_logs')
       @db.execute('DELETE FROM game_events')
-      @db.execute('DELETE FROM player_movements')
-      @db.execute('DELETE FROM collision_events')
-      @db.execute('DELETE FROM render_frames')
     rescue SQLite3::Exception => e
       @doom_log.error("Failed to clear logs: #{e.message}")
+      raise e if @env == :test
     end
 
     def close
@@ -181,8 +171,6 @@ module Doom
 
     def setup_database
       @db = SQLite3::Database.new(@db_path)
-      @db.results_as_hash = true
-
       create_tables
       create_indexes
     end
@@ -204,36 +192,6 @@ module Doom
           event_type TEXT NOT NULL,
           event_data TEXT NOT NULL
         );
-
-        CREATE TABLE IF NOT EXISTS player_movements (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          timestamp REAL NOT NULL,
-          position_x REAL NOT NULL,
-          position_y REAL NOT NULL,
-          direction_x REAL NOT NULL,
-          direction_y REAL NOT NULL,
-          angle REAL NOT NULL,
-          noclip_mode INTEGER NOT NULL,
-          delta_time REAL NOT NULL
-        );
-
-        CREATE TABLE IF NOT EXISTS collision_events (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          timestamp REAL NOT NULL,
-          player_x REAL NOT NULL,
-          player_y REAL NOT NULL,
-          attempted_x REAL NOT NULL,
-          attempted_y REAL NOT NULL,
-          successful INTEGER NOT NULL
-        );
-
-        CREATE TABLE IF NOT EXISTS render_frames (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          timestamp REAL NOT NULL,
-          frame_time REAL NOT NULL,
-          ray_count INTEGER NOT NULL,
-          fps REAL NOT NULL
-        );
       SQL
     end
 
@@ -244,9 +202,6 @@ module Doom
         CREATE INDEX IF NOT EXISTS idx_debug_logs_level ON debug_logs(level);
         CREATE INDEX IF NOT EXISTS idx_game_events_timestamp ON game_events(timestamp);
         CREATE INDEX IF NOT EXISTS idx_game_events_type ON game_events(event_type);
-        CREATE INDEX IF NOT EXISTS idx_player_movements_timestamp ON player_movements(timestamp);
-        CREATE INDEX IF NOT EXISTS idx_collision_events_timestamp ON collision_events(timestamp);
-        CREATE INDEX IF NOT EXISTS idx_render_frames_timestamp ON render_frames(timestamp);
       SQL
     end
 
@@ -256,6 +211,7 @@ module Doom
       @doom_log.error("Database error: #{e.message}")
       @doom_log.error("SQL: #{sql}")
       @doom_log.error("Params: #{params.inspect}")
+      raise e if @env == :test
     end
 
     def log_debug_entry(timestamp, component, message, data, level)
@@ -299,7 +255,7 @@ module Doom
 
     def initialize(level = :info, base_dir = 'logs', db_path = 'data/debug.db', env = :development)
       @level = LEVELS.fetch(level, 1)
-      @log_manager = LogManager.new(base_dir, db_path)
+      @log_manager = LogManager.new(base_dir, db_path, env)
       @env = env
     end
 
