@@ -7,6 +7,11 @@ module Doom
   module Renderer
     class BaseRenderer
       BYTES_PER_PIXEL = 4 # RGBA format
+      MONSTER_COLORS = {
+        imp: "\xFF\xFF\x00\x00", # Red
+        demon: "\xFF\x00\xFF\x00",   # Green
+        baron: "\xFF\x00\x00\xFF"    # Blue
+      }.freeze
 
       def initialize(window_manager, width, height)
         @window_manager = window_manager
@@ -15,12 +20,15 @@ module Doom
         @target_fps = 60
         @ceiling_color = "\xFF\x87\x87\x87"  # Light gray
         @floor_color = "\xFF\x38\x38\x38"    # Dark gray
-        @wall_colors = {
-          north: "\xFF\xFF\x00\x00",  # Red
-          south: "\xFF\x00\xFF\x00",  # Green
-          east: "\xFF\x00\x00\xFF",   # Blue
-          west: "\xFF\xFF\xFF\x00"    # Yellow
+
+        # Create simple solid color textures for each wall direction
+        @wall_textures = {
+          north: "\xFF\xFF\x00\x00" * (64 * 64), # Red
+          south: "\xFF\x00\xFF\x00" * (64 * 64), # Green
+          east: "\xFF\x00\x00\xFF" * (64 * 64),  # Blue
+          west: "\xFF\xFF\xFF\x00" * (64 * 64)   # Yellow
         }.freeze
+
         @column_buffer = Array.new(width * height * 4)
         @logger = Logger.instance
         @frame_count = 0
@@ -61,6 +69,9 @@ module Doom
           rays = @ray_caster.cast_rays(@width)
           @logger.debug("BaseRenderer: Processing #{rays.length} rays", component: 'BaseRenderer')
 
+          # Store z-buffer for sprite rendering
+          z_buffer = Array.new(@width)
+
           rays.each_with_index do |ray, x|
             next unless ray.hit?
 
@@ -73,13 +84,17 @@ module Doom
 
             # Calculate wall color based on side
             wall_color = if ray.side == 0
-                           ray.ray_dir_x > 0 ? @wall_colors[:east] : @wall_colors[:west]
+                           ray.ray_dir_x > 0 ? @wall_textures[:east] : @wall_textures[:west]
                          else
-                           ray.ray_dir_y > 0 ? @wall_colors[:south] : @wall_colors[:north]
+                           ray.ray_dir_y > 0 ? @wall_textures[:south] : @wall_textures[:north]
                          end
 
-            draw_wall_column(x, wall_start, wall_end, wall_color)
+            draw_textured_wall_column(x, wall_start, wall_end, wall_color, ray.wall_x)
+            z_buffer[x] = ray.perp_wall_dist
           end
+
+          # Draw sprites (monsters)
+          draw_sprites(z_buffer)
 
           # Draw debug info last
           draw_fps
@@ -143,15 +158,25 @@ module Doom
         end
       end
 
-      def draw_wall_column(x, start_y, end_y, color)
+      def sample_texture(texture, u, v, texture_width = 64, texture_height = 64)
+        x = (u * texture_width).to_i % texture_width
+        y = (v * texture_height).to_i % texture_height
+        offset = ((y * texture_width) + x) * 4
+        texture[offset, 4]
+      end
+
+      def draw_textured_wall_column(x, start_y, end_y, texture, u)
         return if start_y >= end_y || x < 0 || x >= @width
 
+        height = end_y - start_y
         start_y = [start_y, 0].max
-        end_y = [end_y, @height - 1].min
+        end_y = [end_y, @height].min
 
-        (start_y..end_y).each do |y|
+        (start_y...end_y).each do |y|
+          v = (y - start_y).to_f / height
+          color = sample_texture(texture, u, v)
           offset = ((y * @width) + x) * 4
-          @pixel_buffer[offset, 4] = color
+          @pixel_buffer[offset, 4] = color if offset >= 0 && offset < @pixel_buffer.length - 3
         end
       end
 
@@ -207,6 +232,59 @@ module Doom
 
       def draw_rect(x, y, width, height, color)
         @window_manager.draw_rect(x, y, width, height, color)
+      end
+
+      def draw_sprites(z_buffer)
+        # Sort sprites by distance from player (furthest first)
+        sprites = @map.monsters.sort_by do |monster|
+          -(((monster.position[0] - @player.position[0])**2) +
+            ((monster.position[1] - @player.position[1])**2))
+        end
+
+        sprites.each do |sprite|
+          # Translate sprite position relative to player
+          sprite_x = sprite.position[0] - @player.position[0]
+          sprite_y = sprite.position[1] - @player.position[1]
+
+          # Transform sprite with the inverse camera matrix
+          inv_det = 1.0 / ((@player.plane[0] * @player.direction[1]) -
+                          (@player.direction[0] * @player.plane[1]))
+
+          transform_x = inv_det * ((@player.direction[1] * sprite_x) -
+                                 (@player.direction[0] * sprite_y))
+          transform_y = inv_det * ((-@player.plane[1] * sprite_x) +
+                                 (@player.plane[0] * sprite_y))
+
+          sprite_screen_x = (@width / 2) * (1 + (transform_x / transform_y))
+
+          # Calculate sprite dimensions on screen
+          sprite_height = (@height / transform_y).abs
+          draw_start_y = [(-sprite_height / 2) + (@height / 2), 0].max
+          draw_end_y = [(sprite_height / 2) + (@height / 2), @height - 1].min
+
+          sprite_width = sprite_height # Square sprites for now
+          draw_start_x = [(-sprite_width / 2) + sprite_screen_x, 0].max
+          draw_end_x = [(sprite_width / 2) + sprite_screen_x, @width - 1].min
+
+          # Draw the sprite
+          (draw_start_x.to_i..draw_end_x.to_i).each do |stripe|
+            next if transform_y <= 0 || # Behind the camera
+                    stripe < 0 || stripe >= @width || # Outside screen width
+                    transform_y >= z_buffer[stripe] # Behind wall
+
+            color = MONSTER_COLORS[sprite.type]
+            draw_sprite_stripe(stripe, draw_start_y.to_i, draw_end_y.to_i, color)
+          end
+        end
+      end
+
+      def draw_sprite_stripe(x, start_y, end_y, color)
+        (start_y..end_y).each do |y|
+          next if y < 0 || y >= @height
+
+          offset = ((y * @width) + x) * 4
+          @pixel_buffer[offset, 4] = color if offset >= 0 && offset < @pixel_buffer.length - 3
+        end
       end
     end
   end

@@ -30,10 +30,10 @@ module Doom
         @logger.log_game_event('renderer_created')
 
         @logger.info('Game: Creating game objects', component: 'Game')
-        @map = Map.new
+        @map = Map.new # Use test map by default
         @player = Player.new(@map)
         @game_clock = GameClock.new
-        @input_handler = InputHandler.new(@player)
+        @input_handler = InputHandler.new(@player, @window_manager)
         @logger.log_game_event('game_objects_created')
 
         # Connect renderer with game objects
@@ -41,7 +41,8 @@ module Doom
         @renderer.set_game_objects(@map, @player)
         @logger.log_game_event('renderer_connected')
 
-        if wad_path
+        # Only load WAD if explicitly requested
+        if wad_path && !wad_path.empty? && File.exist?(wad_path)
           load_wad(wad_path)
           @logger.log_game_event('wad_loaded', { path: wad_path })
         end
@@ -49,7 +50,6 @@ module Doom
         @logger.info('Game: Initialization complete', component: 'Game')
         @logger.log_game_event('initialization_complete')
       rescue StandardError => e
-        @logger.log_game_event('initialization_error', { error: e.message, backtrace: e.backtrace })
         @logger.error("Game: Error during initialization: #{e.message}", component: 'Game')
         @logger.error(e.backtrace.join("\n"), component: 'Game')
         cleanup
@@ -58,22 +58,17 @@ module Doom
     end
 
     def start
-      return unless @renderer && @map && @player
-
       @logger.info('Game: Starting game loop', component: 'Game')
-      @logger.log_game_event('game_loop_start')
-
       begin
-        @logger.log_game_event('window_show')
-        @window_manager.show do
-          update(@game_clock.tick)
-          process_input
-          render
-        end
+        # Set up the game loop as the window's update procedure
+        @window_manager.set_update_proc(method(:update_frame))
+        # Start the window's event loop
+        @window_manager.show
       rescue StandardError => e
-        @logger.log_game_event('game_loop_error', { error: e.message, backtrace: e.backtrace })
         @logger.error("Game: Error in game loop: #{e.message}", component: 'Game')
         @logger.error(e.backtrace.join("\n"), component: 'Game')
+      ensure
+        cleanup
       end
     end
 
@@ -81,49 +76,55 @@ module Doom
       @logger.info('Game: Starting cleanup sequence', component: 'Game')
       @logger.log_game_event('cleanup_start')
       begin
+        @renderer.cleanup if @renderer
         @window_manager.close! if @window_manager
         @logger.log_game_event('cleanup_complete')
         @logger.info('Game: Cleanup complete', component: 'Game')
       rescue StandardError => e
-        @logger.log_game_event('cleanup_error', { error: e.message, backtrace: e.backtrace })
         @logger.error("Game: Error during cleanup: #{e.message}", component: 'Game')
         @logger.error(e.backtrace.join("\n"), component: 'Game')
       end
     end
 
-    private
-
-    def update(delta_time)
-      @logger.debug('Game: Updating game state', component: 'Game')
-      @player.update(delta_time)
+    def window_should_close?
+      @window_manager.should_close
     end
 
-    def render
-      @logger.debug('Game: Rendering frame', component: 'Game')
+    private
+
+    def update_frame(delta_time)
+      # Handle input
+      @input_handler.handle_input(delta_time)
+
+      # Update game state
+      @player.update(delta_time)
+      @map.update(@player.position)
+
+      # Render frame
       @renderer.render
     end
 
-    def process_input
-      @logger.debug('Game: Processing input', component: 'Game')
-      begin
-        @input_handler.process_input(@window_manager)
-      rescue StandardError => e
-        @logger.log_game_event('input_error', { error: e.message, backtrace: e.backtrace })
-        @logger.error("Game: Error processing input: #{e.message}", component: 'Game')
-        @logger.error(e.backtrace.join("\n"), component: 'Game')
-      end
-    end
-
     def load_wad(wad_path)
-      @logger.info("Game: Loading WAD file: #{wad_path}", component: 'Game')
-      return unless File.exist?(wad_path)
+      return unless wad_path && !wad_path.empty? && File.exist?(wad_path)
 
+      @logger.info("Game: Loading WAD file: #{wad_path}", component: 'Game')
       begin
-        @wad = WadFile.new(wad_path)
-        @wad.load
-        @logger.info('Game: WAD file loaded successfully', component: 'Game')
+        wad_file = WadFile.new(wad_path)
+        first_level = wad_file.levels.first
+        if first_level
+          level_data = wad_file.level_data(first_level)
+          if level_data
+            @map = Map.create_map_from_level_data(level_data)
+            @player.set_map(@map)
+            @renderer.set_game_objects(@map, @player)
+            @logger.info('Game: WAD file loaded successfully', component: 'Game')
+          else
+            @logger.warn('Game: No valid level data found in WAD file', component: 'Game')
+          end
+        else
+          @logger.warn('Game: No levels found in WAD file', component: 'Game')
+        end
       rescue StandardError => e
-        @logger.log_game_event('wad_load_error', { error: e.message, backtrace: e.backtrace })
         @logger.error("Game: Error loading WAD file: #{e.message}", component: 'Game')
         @logger.error(e.backtrace.join("\n"), component: 'Game')
       end
@@ -132,14 +133,14 @@ module Doom
 
   class GameClock
     def initialize
-      @last_time = Time.now
+      @last_tick = Time.now
     end
 
     def tick
       current_time = Time.now
-      delta_time = current_time - @last_time
-      @last_time = current_time
-      delta_time
+      delta = current_time - @last_tick
+      @last_tick = current_time
+      delta
     end
   end
 end

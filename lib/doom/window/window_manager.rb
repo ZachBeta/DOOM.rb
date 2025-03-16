@@ -11,6 +11,7 @@ module Doom
       WINDOW_TITLE = 'DOOM.rb'
 
       attr_reader :width, :height
+      attr_accessor :should_close
 
       def initialize
         @logger = Logger.instance
@@ -23,33 +24,35 @@ module Doom
         @pixel_image = nil
         @text_queue = []
         @rect_queue = []
-        @font = nil
-        @game_block = nil
+        @update_proc = nil
 
         @logger.info('WindowManager: Starting initialization', component: 'WindowManager')
-        super(@width, @height, false) # false = windowed mode
+        super(@width, @height, fullscreen: false) # Initialize Gosu window
         self.caption = WINDOW_TITLE
         setup_signal_handlers
         @font = Gosu::Font.new(14, name: Gosu.default_font_name)
         @logger.info('WindowManager: Initialization complete', component: 'WindowManager')
       end
 
-      def show(&block)
-        @game_block = block
-        super()
+      def needs_cursor?
+        true # Show the system cursor
+      end
+
+      def set_update_proc(proc)
+        @update_proc = proc
       end
 
       def update
         @logger.debug('WindowManager: Update cycle', component: 'WindowManager')
         current_time = Time.now
         delta = current_time - @frame_time
-        if delta < @frame_interval
-          sleep_time = @frame_interval - delta
-          sleep(sleep_time) if sleep_time > 0
-        end
-        @frame_time = Time.now
+        @frame_time = current_time
 
-        @game_block&.call
+        @update_proc.call(delta) if @update_proc
+
+        return unless @should_close
+
+        close
       end
 
       def draw
@@ -60,8 +63,7 @@ module Doom
             @pixel_image = Gosu::Image.from_blob(
               @width,
               @height,
-              @pixel_buffer,
-              tileable: false
+              @pixel_buffer
             )
             @pixel_image.draw(0, 0, 0)
           rescue StandardError => e
@@ -87,9 +89,6 @@ module Doom
               text_item[:color][3]
             )
           )
-        rescue StandardError => e
-          @logger.error("WindowManager: Error drawing text: #{e.message}",
-                        component: 'WindowManager')
         end
 
         # Draw all queued rectangles
@@ -107,9 +106,6 @@ module Doom
             rect[:x] + rect[:width], rect[:y] + rect[:height], color,
             rect[:z] || 1
           )
-        rescue StandardError => e
-          @logger.error("WindowManager: Error drawing rectangle: #{e.message}",
-                        component: 'WindowManager')
         end
 
         # Clear queues after drawing
@@ -125,53 +121,18 @@ module Doom
         @rect_queue << { x: x, y: y, width: width, height: height, color: color, z: z }
       end
 
-      def should_close?
-        @logger.debug('WindowManager: Checking window close state', component: 'WindowManager')
-        @should_close || !open?
-      end
-
-      def should_close=(value)
-        @logger.info("WindowManager: Setting should_close to #{value}", component: 'WindowManager',
-                                                                        event: 'window_close_requested', data: { manual_close: value })
-        @should_close = value
-        close! if value
-      end
-
-      def button_down(id)
-        super
-        return unless id == Gosu::KB_ESCAPE
-
-        @logger.info('WindowManager: Escape key pressed', component: 'WindowManager',
-                                                          event: 'escape_key_pressed')
-        self.should_close = true
-      end
-
-      def close!
-        @logger.info('WindowManager: Closing window', component: 'WindowManager',
-                                                      event: 'window_closing')
-        close
-      end
-
       def key_pressed?(key_code)
-        @logger.debug("WindowManager: Checking key #{key_code}", component: 'WindowManager')
-        begin
-          button_down?(key_code)
-        rescue StandardError => e
-          @logger.error("WindowManager: Error checking key state: #{e.message}",
-                        component: 'WindowManager')
-          false
-        end
+        button_down?(key_code)
       end
 
       def update_framebuffer(buffer)
         @logger.debug('WindowManager: Updating framebuffer', component: 'WindowManager')
         begin
           if buffer.is_a?(String) && buffer.bytesize == @width * @height * 4
-            @pixel_buffer = buffer.dup # Make a copy to avoid buffer modification during draw
+            @pixel_buffer = buffer.dup
           else
-            @logger.error("WindowManager: Invalid buffer format or size: #{buffer.class}, #{if buffer.is_a?(String)
-                                                                                              buffer.bytesize
-                                                                                            end}", component: 'WindowManager')
+            @logger.error('WindowManager: Invalid buffer format or size',
+                          component: 'WindowManager')
           end
         rescue StandardError => e
           @logger.error("WindowManager: Error updating framebuffer: #{e.message}",
@@ -180,18 +141,27 @@ module Doom
         end
       end
 
+      def button_down(id)
+        super
+        case id
+        when Gosu::KB_ESCAPE
+          self.should_close = true
+        end
+      end
+
+      def close!
+        @logger.info('WindowManager: Closing window', component: 'WindowManager')
+        self.should_close = true
+      end
+
       private
 
       def setup_signal_handlers
         @logger.info('WindowManager: Setting up signal handlers', component: 'WindowManager')
-        # Handle Ctrl+C gracefully
         Signal.trap('INT') do
-          @logger.info('WindowManager: Received INT signal', component: 'WindowManager',
-                                                             event: 'signal_interrupt')
+          @logger.info('WindowManager: Received INT signal', component: 'WindowManager')
           self.should_close = true
         end
-        @logger.info('WindowManager: Signal handlers set up successfully',
-                     component: 'WindowManager')
       rescue StandardError => e
         @logger.error("WindowManager: Error setting up signal handlers: #{e.message}",
                       component: 'WindowManager')

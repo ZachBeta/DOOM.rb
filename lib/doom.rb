@@ -15,7 +15,8 @@ module Doom
 
   # Only run the game when this file is executed directly
   if __FILE__ == $PROGRAM_NAME
-    wad_path = ARGV[0] || Config::DEFAULT_WAD_PATH
+    # WAD path is optional - if not provided, use test map
+    wad_path = ARGV[0]
     game = Game.new(wad_path)
     game.start
   end

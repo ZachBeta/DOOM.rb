@@ -52,8 +52,8 @@ Rake::Task.tasks.each do |task|
 end
 
 desc 'Run the DOOM viewer'
-task :run do
-  ruby 'lib/doom.rb', Doom::Config.wad_path
+task :doom do
+  ruby 'lib/doom.rb'
 end
 
 desc 'Run tests with coverage'
@@ -114,11 +114,6 @@ task :run_all do
   end
 
   puts "\nAll tasks completed!"
-end
-
-desc 'Run the DOOM viewer (alias for run)'
-task :doom do
-  Rake::Task[:run].invoke
 end
 
 desc 'Run the test renderer'

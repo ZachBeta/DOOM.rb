@@ -17,3 +17,7 @@ group :development do
   gem 'rubocop-rake', '~> 0.6.0', require: false
   gem 'minitest-focus', '~> 1.3.1'  # Focus on specific tests
 end
+
+gem "logger", "~> 1.6"
+
+gem "ostruct", "~> 0.6.1"

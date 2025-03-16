@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
+require_relative 'monster'
+
 module Doom
   class Map
-    attr_reader :width, :height
+    attr_reader :width, :height, :monsters
 
     def self.create_map_from_level_data(level_data)
       new(level_data)
@@ -14,11 +16,13 @@ module Doom
         @height = 64
         @grid = Grid.new(create_map_from_level_data(level_data))
       else
-        @width = 10
-        @height = 10
-        @grid = Grid.new(create_default_layout)
+        @width = 16
+        @height = 16
+        @grid = Grid.new(create_test_layout)
       end
       @walls = {}
+      @monsters = []
+      spawn_test_monsters unless level_data
     end
 
     def set_wall(x, y)
@@ -29,7 +33,46 @@ module Doom
       @walls[[x, y]] || @grid.wall_at?(x, y)
     end
 
+    def update(player_position)
+      @monsters.each { |monster| monster.update(player_position) }
+    end
+
     private
+
+    def spawn_test_monsters
+      # Add some test monsters in non-wall positions
+      add_monster(4, 4, :imp)
+      add_monster(12, 4, :demon)
+      add_monster(4, 12, :baron)
+      add_monster(12, 12, :imp)
+    end
+
+    def add_monster(x, y, type)
+      return if wall_at?(x, y)
+
+      @monsters << Monster.new(x, y, type)
+    end
+
+    def create_test_layout
+      [
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+        [1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+        [1, 0, 0, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 1],
+        [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        [1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1],
+        [1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+        [1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+        [1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1],
+        [1, 0, 0, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 1],
+        [1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+        [1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+      ]
+    end
 
     def create_map_from_level_data(level_data)
       # Create a 64x64 grid (standard DOOM map size)
