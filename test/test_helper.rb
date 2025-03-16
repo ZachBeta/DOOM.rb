@@ -10,9 +10,13 @@ require 'doom/config'
 require 'fileutils'
 require 'doom/player'
 require_relative '../lib/doom'
+require 'tempfile'
 
 # Add the lib directory to the load path
 $LOAD_PATH.unshift File.expand_path('../lib', __dir__)
+
+# Configure test environment
+ENV['DOOM_ENV'] = 'test'
 
 SimpleCov.start do
   add_filter '/test/'
@@ -55,4 +59,11 @@ class Minitest::Test
   def teardown
     cleanup_old_logs
   end
+end
+
+# Clean up any test files after all tests
+Minitest.after_run do
+  FileUtils.rm_rf('test/tmp')
+  FileUtils.rm_rf('logs')
+  FileUtils.rm_rf('data')
 end

@@ -2,7 +2,6 @@
 
 require 'gosu'
 require_relative '../logger'
-require_relative '../debug_db'
 
 module Doom
   module Window
@@ -22,18 +21,17 @@ module Doom
         @frame_interval = 1.0 / 60.0 # Target 60 FPS
         @pixel_buffer = nil
         @pixel_image = nil
-        @debug_db = DebugDB.new
         @text_queue = []
         @rect_queue = []
         @font = nil
         @game_block = nil
 
-        @logger.info('WindowManager: Starting initialization')
+        @logger.info('WindowManager: Starting initialization', component: 'WindowManager')
         super(@width, @height, false) # false = windowed mode
         self.caption = WINDOW_TITLE
         setup_signal_handlers
         @font = Gosu::Font.new(14, name: Gosu.default_font_name)
-        @logger.info('WindowManager: Initialization complete')
+        @logger.info('WindowManager: Initialization complete', component: 'WindowManager')
       end
 
       def show(&block)
@@ -42,7 +40,7 @@ module Doom
       end
 
       def update
-        @logger.debug('WindowManager: Update cycle')
+        @logger.debug('WindowManager: Update cycle', component: 'WindowManager')
         current_time = Time.now
         delta = current_time - @frame_time
         if delta < @frame_interval
@@ -55,7 +53,7 @@ module Doom
       end
 
       def draw
-        @logger.debug('WindowManager: Draw cycle')
+        @logger.debug('WindowManager: Draw cycle', component: 'WindowManager')
         if @pixel_buffer
           begin
             # Convert raw pixel data to Gosu::Image
@@ -67,24 +65,14 @@ module Doom
             )
             @pixel_image.draw(0, 0, 0)
           rescue StandardError => e
-            @logger.error("WindowManager: Error drawing pixel buffer: #{e.message}")
-            @logger.error(e.backtrace.join("\n"))
+            @logger.error("WindowManager: Error drawing pixel buffer: #{e.message}",
+                          component: 'WindowManager')
+            @logger.error(e.backtrace.join("\n"), component: 'WindowManager')
           end
         end
 
         # Draw all queued text
         @text_queue.each do |text_item|
-          begin
-            @font.draw_text(
-              text_item[:text],
-              text_item[:x],
-              text_item[:y],
-              text_item[:z] || 1,
-              1,
-              1,
-              Gosu::Color.rgba(
-                text_item[:color][0],
-                text_item[:color][1],
           @font.draw_text(
             text_item[:text],
             text_item[:x],
@@ -100,7 +88,8 @@ module Doom
             )
           )
         rescue StandardError => e
-          @logger.error("WindowManager: Error drawing text: #{e.message}")
+          @logger.error("WindowManager: Error drawing text: #{e.message}",
+                        component: 'WindowManager')
         end
 
         # Draw all queued rectangles
@@ -119,7 +108,8 @@ module Doom
             rect[:z] || 1
           )
         rescue StandardError => e
-          @logger.error("WindowManager: Error drawing rectangle: #{e.message}")
+          @logger.error("WindowManager: Error drawing rectangle: #{e.message}",
+                        component: 'WindowManager')
         end
 
         # Clear queues after drawing
@@ -136,16 +126,13 @@ module Doom
       end
 
       def should_close?
-        @logger.debug('WindowManager: Checking window close state')
+        @logger.debug('WindowManager: Checking window close state', component: 'WindowManager')
         @should_close || !open?
       end
 
       def should_close=(value)
-        @logger.info("WindowManager: Setting should_close to #{value}")
-        @debug_db.instance_variable_get(:@db).execute(
-          'INSERT INTO game_events (timestamp, event_type, event_data) VALUES (?, ?, ?)',
-          [Time.now.to_f, 'window_close_requested', { manual_close: value }.to_json]
-        )
+        @logger.info("WindowManager: Setting should_close to #{value}", component: 'WindowManager',
+                                                                        event: 'window_close_requested', data: { manual_close: value })
         @should_close = value
         close! if value
       end
@@ -154,63 +141,60 @@ module Doom
         super
         return unless id == Gosu::KB_ESCAPE
 
-        @debug_db.instance_variable_get(:@db).execute(
-          'INSERT INTO game_events (timestamp, event_type, event_data) VALUES (?, ?, ?)',
-          [Time.now.to_f, 'escape_key_pressed', {}.to_json]
-        )
+        @logger.info('WindowManager: Escape key pressed', component: 'WindowManager',
+                                                          event: 'escape_key_pressed')
         self.should_close = true
       end
 
       def close!
-        @debug_db.instance_variable_get(:@db).execute(
-          'INSERT INTO game_events (timestamp, event_type, event_data) VALUES (?, ?, ?)',
-          [Time.now.to_f, 'window_closing', {}.to_json]
-        )
+        @logger.info('WindowManager: Closing window', component: 'WindowManager',
+                                                      event: 'window_closing')
         close
       end
 
       def key_pressed?(key_code)
-        @logger.debug("WindowManager: Checking key #{key_code}")
+        @logger.debug("WindowManager: Checking key #{key_code}", component: 'WindowManager')
         begin
           button_down?(key_code)
         rescue StandardError => e
-          @logger.error("WindowManager: Error checking key state: #{e.message}")
+          @logger.error("WindowManager: Error checking key state: #{e.message}",
+                        component: 'WindowManager')
           false
         end
       end
 
       def update_framebuffer(buffer)
-        @logger.debug('WindowManager: Updating framebuffer')
+        @logger.debug('WindowManager: Updating framebuffer', component: 'WindowManager')
         begin
           if buffer.is_a?(String) && buffer.bytesize == @width * @height * 4
             @pixel_buffer = buffer.dup # Make a copy to avoid buffer modification during draw
           else
             @logger.error("WindowManager: Invalid buffer format or size: #{buffer.class}, #{if buffer.is_a?(String)
                                                                                               buffer.bytesize
-                                                                                            end}")
+                                                                                            end}", component: 'WindowManager')
           end
         rescue StandardError => e
-          @logger.error("WindowManager: Error updating framebuffer: #{e.message}")
-          @logger.error(e.backtrace.join("\n"))
+          @logger.error("WindowManager: Error updating framebuffer: #{e.message}",
+                        component: 'WindowManager')
+          @logger.error(e.backtrace.join("\n"), component: 'WindowManager')
         end
       end
 
       private
 
       def setup_signal_handlers
-        @logger.info('WindowManager: Setting up signal handlers')
+        @logger.info('WindowManager: Setting up signal handlers', component: 'WindowManager')
         # Handle Ctrl+C gracefully
         Signal.trap('INT') do
-          @logger.info('WindowManager: Received INT signal')
-          @debug_db.instance_variable_get(:@db).execute(
-            'INSERT INTO game_events (timestamp, event_type, event_data) VALUES (?, ?, ?)',
-            [Time.now.to_f, 'signal_interrupt', {}.to_json]
-          )
+          @logger.info('WindowManager: Received INT signal', component: 'WindowManager',
+                                                             event: 'signal_interrupt')
           self.should_close = true
         end
-        @logger.info('WindowManager: Signal handlers set up successfully')
+        @logger.info('WindowManager: Signal handlers set up successfully',
+                     component: 'WindowManager')
       rescue StandardError => e
-        @logger.error("WindowManager: Error setting up signal handlers: #{e.message}")
+        @logger.error("WindowManager: Error setting up signal handlers: #{e.message}",
+                      component: 'WindowManager')
       end
     end
   end

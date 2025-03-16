@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'matrix'
-require_relative 'debug_db'
+require_relative 'logger'
 
 module Doom
   class Player
@@ -17,7 +17,7 @@ module Doom
       @rotation = Rotation.new(self)
       @noclip_mode = false
       @angle = 0 # Start facing right
-      @debug_db = DebugDB.new
+      @logger = Logger.instance
     end
 
     def position=(new_position)
@@ -33,7 +33,7 @@ module Doom
     end
 
     def update(delta_time)
-      @debug_db.log_player_movement(self, delta_time)
+      @logger.log_player_movement(self, delta_time)
     end
 
     def set_map(map)
@@ -117,12 +117,12 @@ module Doom
 
       if @player.noclip_mode
         @player.update_position(new_position)
-        @player.instance_variable_get(:@debug_db).log_collision(@player, new_position, true)
+        @player.instance_variable_get(:@logger).log_collision(@player, new_position, true)
       else
         # Try full movement first
         unless @collision_detector.collides?(@player.map, new_position)
           @player.update_position(new_position)
-          @player.instance_variable_get(:@debug_db).log_collision(@player, new_position, true)
+          @player.instance_variable_get(:@logger).log_collision(@player, new_position, true)
           return
         end
 
@@ -130,19 +130,19 @@ module Doom
         x_slide = Vector[@player.position[0] + movement[0], @player.position[1]]
         unless @collision_detector.collides?(@player.map, x_slide)
           @player.update_position(x_slide)
-          @player.instance_variable_get(:@debug_db).log_collision(@player, new_position, false)
-          @player.instance_variable_get(:@debug_db).log_collision(@player, x_slide, true)
+          @player.instance_variable_get(:@logger).log_collision(@player, new_position, false)
+          @player.instance_variable_get(:@logger).log_collision(@player, x_slide, true)
           return
         end
 
         # Try sliding along Y axis
         y_slide = Vector[@player.position[0], @player.position[1] + movement[1]]
         if @collision_detector.collides?(@player.map, y_slide)
-          @player.instance_variable_get(:@debug_db).log_collision(@player, new_position, false)
+          @player.instance_variable_get(:@logger).log_collision(@player, new_position, false)
         else
           @player.update_position(y_slide)
-          @player.instance_variable_get(:@debug_db).log_collision(@player, new_position, false)
-          @player.instance_variable_get(:@debug_db).log_collision(@player, y_slide, true)
+          @player.instance_variable_get(:@logger).log_collision(@player, new_position, false)
+          @player.instance_variable_get(:@logger).log_collision(@player, y_slide, true)
         end
       end
     end

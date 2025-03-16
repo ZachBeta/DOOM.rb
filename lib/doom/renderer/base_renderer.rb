@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require_relative '../logger'
-require_relative '../debug_db'
 require_relative 'ray_caster'
 
 module Doom
@@ -24,7 +23,6 @@ module Doom
         }.freeze
         @column_buffer = Array.new(width * height * 4)
         @logger = Logger.instance
-        @debug_db = DebugDB.new
         @frame_count = 0
         @start_time = Time.now
         @last_frame_time = Time.now
@@ -33,15 +31,16 @@ module Doom
       end
 
       def set_game_objects(map, player)
-        @logger.info('BaseRenderer: Setting game objects')
+        @logger.info('BaseRenderer: Setting game objects', component: 'BaseRenderer')
         begin
           @map = map
           @player = player
           @ray_caster = RayCaster.new(@map, @player, @height)
-          @logger.info('BaseRenderer: Game objects set successfully')
+          @logger.info('BaseRenderer: Game objects set successfully', component: 'BaseRenderer')
         rescue StandardError => e
-          @logger.error("BaseRenderer: Error setting game objects: #{e.message}")
-          @logger.error(e.backtrace.join("\n"))
+          @logger.error("BaseRenderer: Error setting game objects: #{e.message}",
+                        component: 'BaseRenderer')
+          @logger.error(e.backtrace.join("\n"), component: 'BaseRenderer')
           raise
         end
       end
@@ -49,7 +48,7 @@ module Doom
       def render
         return unless @map && @player
 
-        @logger.debug('BaseRenderer: Starting frame render')
+        @logger.debug('BaseRenderer: Starting frame render', component: 'BaseRenderer')
         begin
           current_time = Time.now
           frame_time = current_time - @last_frame_time
@@ -60,7 +59,7 @@ module Doom
 
           # Cast rays and draw walls
           rays = @ray_caster.cast_rays(@width)
-          @logger.debug("BaseRenderer: Processing #{rays.length} rays")
+          @logger.debug("BaseRenderer: Processing #{rays.length} rays", component: 'BaseRenderer')
 
           rays.each_with_index do |ray, x|
             next unless ray.hit?
@@ -93,13 +92,14 @@ module Doom
           calculate_fps if (@frame_count % 30).zero?
           @frame_count += 1
 
-          # Log frame data to debug database
-          @debug_db.log_render_frame(frame_time, rays.length, @fps)
+          # Log frame data
+          @logger.log_render_frame(frame_time, rays.length, @fps)
 
-          @logger.debug('BaseRenderer: Frame render complete')
+          @logger.debug('BaseRenderer: Frame render complete', component: 'BaseRenderer')
         rescue StandardError => e
-          @logger.error("BaseRenderer: Error during render: #{e.message}")
-          @logger.error(e.backtrace.join("\n"))
+          @logger.error("BaseRenderer: Error during render: #{e.message}",
+                        component: 'BaseRenderer')
+          @logger.error(e.backtrace.join("\n"), component: 'BaseRenderer')
           @window_manager.should_close = true
         end
       end
@@ -120,7 +120,8 @@ module Doom
       end
 
       def clear_and_draw_background
-        @logger.debug('BaseRenderer: Clearing buffer and drawing background')
+        @logger.debug('BaseRenderer: Clearing buffer and drawing background',
+                      component: 'BaseRenderer')
         begin
           # Fill the top half with ceiling color
           ceiling_start = 0
@@ -135,8 +136,9 @@ module Doom
           # Copy back buffer to pixel buffer
           @pixel_buffer = @back_buffer.dup
         rescue StandardError => e
-          @logger.error("BaseRenderer: Error in clear_and_draw_background: #{e.message}")
-          @logger.error(e.backtrace.join("\n"))
+          @logger.error("BaseRenderer: Error in clear_and_draw_background: #{e.message}",
+                        component: 'BaseRenderer')
+          @logger.error(e.backtrace.join("\n"), component: 'BaseRenderer')
           raise
         end
       end
