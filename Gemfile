@@ -9,6 +9,7 @@ gem 'pry', '~> 0.14.2'             # Debugging tool
 gem 'rake', '~> 13.0.6'            # Task automation
 gem 'simplecov', '~> 0.22.0', require: false # Test coverage reporting
 gem 'gosu', '~> 1.4.6'             # Modern 2D game development and rendering
+gem 'sqlite3', '~> 1.6.0'          # SQLite database for debug logging
 
 group :development do
   gem 'rubocop', '~> 1.60', require: false

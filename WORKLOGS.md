@@ -35,6 +35,11 @@
   - WAD format documentation
   - Project guidelines in RULES.md
 
+# TODO
+
+* try to render the wad maps with no textures
+* is DebugLogger moot? can we make it more prominent if it's actually useful? maybe combine into the existing logger
+
 ## Renderer Test Observations
 
 ### Test Date: [DATE]

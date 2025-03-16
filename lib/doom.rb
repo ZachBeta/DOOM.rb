@@ -1,8 +1,6 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'glfw3' # TODO: move this closer to the actual usage of the renderer code itself
-
 module Doom
   require_relative 'doom/logger'
   require_relative 'doom/config'

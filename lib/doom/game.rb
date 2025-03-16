@@ -8,6 +8,7 @@ require_relative 'config'
 require_relative 'input_handler'
 require_relative 'renderer/base_renderer'
 require_relative 'window/window_manager'
+require_relative 'debug_db'
 
 module Doom
   class Game
@@ -15,25 +16,42 @@ module Doom
 
     def initialize(wad_path = nil)
       @logger = Logger.instance
+      @debug_db = DebugDB.new
       @logger.info('Game: Initializing DOOM.rb')
 
       begin
+        log_game_event('initialization_start', { wad_path: wad_path })
+
+        @logger.info('Game: Creating window manager')
+        @window_manager = Window::WindowManager.new
+        log_game_event('window_manager_created')
+
         @logger.info('Game: Creating renderer')
-        @renderer = Renderer::BaseRenderer.new
+        @renderer = Renderer::BaseRenderer.new(@window_manager, @window_manager.width,
+                                               @window_manager.height)
+        log_game_event('renderer_created')
 
         @logger.info('Game: Creating game objects')
         @map = Map.new
         @player = Player.new(@map)
         @game_clock = GameClock.new
         @input_handler = InputHandler.new(@player)
+        log_game_event('game_objects_created')
 
         # Connect renderer with game objects
         @logger.info('Game: Connecting renderer with game objects')
         @renderer.set_game_objects(@map, @player)
+        log_game_event('renderer_connected')
 
-        load_wad(wad_path) if wad_path
+        if wad_path
+          load_wad(wad_path)
+          log_game_event('wad_loaded', { path: wad_path })
+        end
+
         @logger.info('Game: Initialization complete')
+        log_game_event('initialization_complete')
       rescue StandardError => e
+        log_game_event('initialization_error', { error: e.message, backtrace: e.backtrace })
         @logger.error("Game: Error during initialization: #{e.message}")
         @logger.error(e.backtrace.join("\n"))
         cleanup
@@ -43,69 +61,39 @@ module Doom
 
     def start
       return unless @renderer && @map && @player
+
       @logger.info('Game: Starting game loop')
-      game_loop
-    rescue StandardError => e
-      @logger.error("Game: Error during game execution: #{e.message}")
-      @logger.error(e.backtrace.join("\n"))
-      cleanup
+      log_game_event('game_loop_start')
+
+      begin
+        log_game_event('window_show')
+        @window_manager.show do
+          update(@game_clock.tick)
+          process_input
+          render
+        end
+      rescue StandardError => e
+        log_game_event('game_loop_error', { error: e.message, backtrace: e.backtrace })
+        @logger.error("Game: Error in game loop: #{e.message}")
+        @logger.error(e.backtrace.join("\n"))
+      end
     end
 
     def cleanup
       @logger.info('Game: Starting cleanup sequence')
+      log_game_event('cleanup_start')
       begin
-        @renderer.cleanup if @renderer
+        @window_manager.close! if @window_manager
+        log_game_event('cleanup_complete')
         @logger.info('Game: Cleanup complete')
       rescue StandardError => e
+        log_game_event('cleanup_error', { error: e.message, backtrace: e.backtrace })
         @logger.error("Game: Error during cleanup: #{e.message}")
         @logger.error(e.backtrace.join("\n"))
       end
     end
 
     private
-
-    def game_loop
-      @logger.info('Game: Entering game loop')
-      last_fps_time = Time.now
-      frames = 0
-
-      # Main game loop
-      until @renderer.window_should_close?
-        begin
-          # Process window events first
-          @renderer.instance_variable_get(:@window_manager).poll_events
-
-          # Update game state
-          delta_time = @game_clock.tick
-          update(delta_time)
-          
-          # Process input before rendering
-          process_input
-          
-          # Render frame
-          render
-          
-          # FPS logging
-          frames += 1
-          if Time.now - last_fps_time >= 5
-            fps = frames / (Time.now - last_fps_time)
-            @logger.info("Game: FPS: #{fps.round(2)}")
-            frames = 0
-            last_fps_time = Time.now
-          end
-
-          # Small sleep to prevent CPU overload
-          sleep(0.001)
-        rescue StandardError => e
-          @logger.error("Game: Error in game loop: #{e.message}")
-          @logger.error(e.backtrace.join("\n"))
-          break
-        end
-      end
-
-      @logger.info('Game: Exiting game loop')
-      cleanup
-    end
 
     def update(delta_time)
       @logger.debug('Game: Updating game state')
@@ -120,8 +108,9 @@ module Doom
     def process_input
       @logger.debug('Game: Processing input')
       begin
-        @input_handler.process_input(@renderer.instance_variable_get(:@window_manager))
+        @input_handler.process_input(@window_manager)
       rescue StandardError => e
+        log_game_event('input_error', { error: e.message, backtrace: e.backtrace })
         @logger.error("Game: Error processing input: #{e.message}")
         @logger.error(e.backtrace.join("\n"))
       end
@@ -136,9 +125,25 @@ module Doom
         @wad.load
         @logger.info('Game: WAD file loaded successfully')
       rescue StandardError => e
+        log_game_event('wad_load_error', { error: e.message, backtrace: e.backtrace })
         @logger.error("Game: Error loading WAD file: #{e.message}")
         @logger.error(e.backtrace.join("\n"))
       end
+    end
+
+    def log_game_event(event, data = {})
+      execute_sql = <<-SQL
+        INSERT INTO game_events (
+          timestamp, event_type, event_data
+        ) VALUES (?, ?, ?)
+      SQL
+
+      @debug_db.instance_variable_get(:@db).execute(
+        execute_sql,
+        [Time.now.to_f, event, data.to_json]
+      )
+    rescue StandardError => e
+      @logger.error("Failed to log game event: #{e.message}")
     end
   end
 
