@@ -1,0 +1,1 @@
+* when doing a git diff, use cat so there's no view scroll issue

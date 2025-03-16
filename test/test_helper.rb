@@ -25,6 +25,7 @@ end
 module TestHelper
   def setup_test_logs
     FileUtils.mkdir_p('logs')
+    FileUtils.mkdir_p('data')
     Doom::Logger.setup
   end
 
