@@ -53,7 +53,9 @@ end
 
 desc 'Run the DOOM viewer'
 task :doom do
-  ruby 'lib/doom.rb'
+  require_relative 'lib/doom'
+  game = Doom::Game.new
+  game.cleanup
 end
 
 desc 'Run tests with coverage'
@@ -107,7 +109,7 @@ task :run_all do
   puts "\nRunning DOOM game (will be terminated after 5 seconds)..."
   begin
     Timeout.timeout(5) do
-      Rake::Task['run'].invoke
+      Rake::Task['doom'].invoke
     end
   rescue Timeout::Error
     puts 'DOOM game terminated after 5 seconds'
@@ -142,7 +144,7 @@ task :test_renderer_manual, [:time_limit] do |_, args|
 
   begin
     Timeout.timeout(time_limit) do
-      Rake::Task[:run].invoke
+      Rake::Task[:doom].invoke
     end
   rescue Timeout::Error
     puts "\nRenderer test completed after #{time_limit} seconds"

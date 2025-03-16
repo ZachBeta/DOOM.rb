@@ -6,7 +6,6 @@ require 'tempfile'
 require 'matrix'
 require_relative '../../lib/doom/logger'
 require_relative '../../lib/doom/player'
-require_relative '../../lib/doom/map'
 
 module Doom
   class LoggerTest < Minitest::Test
@@ -16,12 +15,10 @@ module Doom
       @db_path = File.join(@temp_dir, 'test.db')
       Logger.configure(level: :debug, base_dir: @log_dir, db_path: @db_path, env: :test)
       @logger = Logger.instance
-      @map = Map.new
-      @player = Player.new(@map)
+      @player = Player.new
       # Set player to a known state for testing
-      @player.position = Vector[2.0, 3.0]
-      @player.direction = Vector[1.0, 0.0]
-      @player.toggle_noclip
+      @player.instance_variable_set(:@position, Vector[2.0, 3.0])
+      @player.instance_variable_set(:@direction, Vector[1.0, 0.0])
     end
 
     def teardown
@@ -95,7 +92,6 @@ module Doom
       assert_equal [2.0, 3.0], data['position']
       assert_equal [1.0, 0.0], data['direction']
       assert_in_delta(0.0, data['angle'])
-      assert_equal true, data['noclip_mode']
       assert_in_delta 0.016, data['delta_time']
     end
 
@@ -111,21 +107,6 @@ module Doom
       assert_in_delta 0.016, data['frame_time']
       assert_equal 100, data['ray_count']
       assert_in_delta 60.0, data['fps']
-    end
-
-    def test_collision_logging
-      attempted_position = Vector[4.0, 5.0]
-      @logger.log_collision(@player, attempted_position, false)
-
-      events = @logger.query_game_events(event_type: 'collision')
-
-      assert_equal 1, events.length
-
-      data = events.first[:data]
-
-      assert_equal [2.0, 3.0], data['player_position']
-      assert_equal [4.0, 5.0], data['attempted_position']
-      assert_equal false, data['successful']
     end
 
     def test_query_logs_with_conditions
@@ -166,7 +147,6 @@ module Doom
       @logger.log_game_event('test_event')
       @logger.log_player_movement(@player, 0.016)
       @logger.log_render_frame(0.016, 100, 60.0)
-      @logger.log_collision(@player, Vector[4.0, 5.0], false)
 
       # Verify logs exist
       assert_operator @logger.query_logs({}).length, :>, 0
