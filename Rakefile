@@ -187,4 +187,11 @@ task :test_renderer_manual, [:time_limit] do |_, args|
   puts "==========================================\n"
 end
 
+desc 'Run the FPS tech demo'
+task :demo do
+  logger = Doom::Logger.instance
+  logger.info('Starting FPS tech demo')
+  ruby 'lib/doom/demo/gosu_fps_demo.rb'
+end
+
 task default: :run_all

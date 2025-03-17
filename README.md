@@ -37,6 +37,17 @@ To run the game:
 rake doom
 ```
 
+To run the FPS tech demo:
+```bash
+rake demo
+```
+
+### FPS Demo Controls
+- WASD: Movement (A/D for strafing)
+- Left/Right Arrows: Rotation
+- Tab: Toggle debug overlay
+- Esc: Exit
+
 To run tests:
 ```bash
 rake test
