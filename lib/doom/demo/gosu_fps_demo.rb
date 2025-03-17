@@ -6,7 +6,8 @@ module Doom
       SCREEN_WIDTH = 800
       SCREEN_HEIGHT = 600
       FOV = Math::PI / 3  # 60 degrees field of view
-      RAY_COUNT = 160     # Number of rays to cast
+      RAY_COUNT = 320     # Doubled for smoother rendering
+      TEXTURE_SIZE = 128  # Increased texture resolution
 
       def initialize
         super(SCREEN_WIDTH, SCREEN_HEIGHT)
@@ -25,6 +26,12 @@ module Doom
         @current_fps = 0
         @debug_visible = true # Start with debug info visible
 
+        # Create test textures
+        create_test_textures
+
+        # Precompute some values for performance
+        @inv_texture_size = 1.0 / TEXTURE_SIZE
+
         # Simple map (1 represents walls, 0 represents empty space)
         @map = [
           [1, 1, 1, 1, 1, 1, 1, 1],
@@ -36,6 +43,74 @@ module Doom
           [1, 0, 1, 0, 0, 1, 0, 1],
           [1, 1, 1, 1, 1, 1, 1, 1]
         ]
+      end
+
+      def create_test_textures
+        @textures = []
+
+        # Checkerboard texture
+        checkerboard = Gosu.render(TEXTURE_SIZE, TEXTURE_SIZE) do
+          (0...TEXTURE_SIZE).each do |y|
+            (0...TEXTURE_SIZE).each do |x|
+              is_checker = ((x / 16) + (y / 16)).even? # Larger checker pattern
+              color = is_checker ? Gosu::Color::WHITE : Gosu::Color::GRAY
+              draw_rect(x, y, 1, 1, color)
+            end
+          end
+        end
+        @textures << checkerboard
+
+        # Brick texture
+        bricks = Gosu.render(TEXTURE_SIZE, TEXTURE_SIZE) do
+          (0...TEXTURE_SIZE).each do |y|
+            (0...TEXTURE_SIZE).each do |x|
+              # Smoother brick pattern
+              is_mortar_h = (y % 32 < 4)  # Horizontal mortar
+              is_mortar_v = (x % 64 < 4)  # Vertical mortar
+              is_mortar = is_mortar_h || is_mortar_v
+
+              # Add some noise to the bricks
+              noise = (((x * 7) + (y * 17)) % 20) / 100.0
+
+              if is_mortar
+                # Mortar color with slight variation
+                gray = 180 + (noise * 30).to_i
+                color = Gosu::Color.new(255, gray, gray, gray)
+              else
+                # Brick color with variation
+                red = 200 + (noise * 55).to_i
+                color = Gosu::Color.new(255, red, 100 + (noise * 20).to_i, 80 + (noise * 20).to_i)
+              end
+              draw_rect(x, y, 1, 1, color)
+            end
+          end
+        end
+        @textures << bricks
+
+        # Grid texture
+        grid = Gosu.render(TEXTURE_SIZE, TEXTURE_SIZE) do
+          (0...TEXTURE_SIZE).each do |y|
+            (0...TEXTURE_SIZE).each do |x|
+              # Smoother grid with gradient
+              dist_to_line_h = (y % 16).abs
+              dist_to_line_v = (x % 16).abs
+              dist_to_line = [dist_to_line_h, dist_to_line_v].min
+
+              # Create a smooth gradient for the grid lines
+              intensity = [1.0 - (dist_to_line / 4.0), 0.0].max
+              color = if intensity > 0
+                        Gosu::Color.new(255,
+                                        (255 * intensity) + (40 * (1 - intensity)),
+                                        (255 * intensity) + (40 * (1 - intensity)),
+                                        (255 * intensity) + (100 * (1 - intensity)))
+                      else
+                        Gosu::Color.new(255, 40, 40, 100)
+                      end
+              draw_rect(x, y, 1, 1, color)
+            end
+          end
+        end
+        @textures << grid
       end
 
       def update
@@ -102,32 +177,56 @@ module Doom
         draw_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT / 2, Gosu::Color::BLUE)
         draw_rect(0, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT / 2, Gosu::Color::GREEN)
 
+        # Calculate strip width once
+        strip_width = (SCREEN_WIDTH / RAY_COUNT.to_f).ceil
+
         # Cast rays and draw walls
         RAY_COUNT.times do |i|
           ray_angle = @player_angle - (FOV / 2) + (FOV * i / RAY_COUNT)
 
           # Ray casting
-          distance, wall_x = cast_ray(ray_angle)
+          distance, wall_x, is_vertical = cast_ray(ray_angle)
 
           # Fix fisheye effect
-          distance *= Math.cos(@player_angle - ray_angle)
+          fixed_distance = distance * Math.cos(@player_angle - ray_angle)
 
           # Calculate wall height
-          wall_height = [(SCREEN_HEIGHT / distance) * 1.5, SCREEN_HEIGHT].min
+          wall_height = [(SCREEN_HEIGHT / fixed_distance) * 1.5, SCREEN_HEIGHT].min
 
-          # Draw wall strip
-          strip_width = (SCREEN_WIDTH / RAY_COUNT.to_f).ceil
+          # Calculate strip position
           x = i * strip_width
           y = (SCREEN_HEIGHT - wall_height) / 2
 
-          # Darken walls based on distance
-          darkness = (1.0 / distance * 5.0).clamp(0.2, 1.0)
-          color = Gosu::Color.new(255,
-                                  (200 * darkness).to_i,
-                                  (200 * darkness).to_i,
-                                  (200 * darkness).to_i)
+          # Choose texture based on wall orientation
+          texture = @textures[is_vertical ? 1 : 0]
 
-          draw_rect(x, y, strip_width + 1, wall_height, color)
+          # Calculate texture coordinates with better precision
+          tex_x = (wall_x * TEXTURE_SIZE).floor
+          tex_x = (TEXTURE_SIZE - 1 - tex_x) if is_vertical # Flip texture for N/S walls
+          tex_x = tex_x.clamp(0, TEXTURE_SIZE - 1) # Ensure we stay within texture bounds
+
+          # Calculate shading with smoother falloff and distance correction
+          shade = (1.0 / fixed_distance * 5.0).clamp(0.2, 1.0)
+          shade = Math.sqrt(shade) # Smoother falloff
+
+          # Add slight color variation based on distance and wall orientation
+          color = Gosu::Color.new(
+            255,
+            (255 * shade).to_i,
+            ((240 + (fixed_distance * 2).clamp(0, 15)) * shade).to_i,
+            ((230 + (fixed_distance * 4).clamp(0, 25)) * shade).to_i
+          )
+
+          # Draw textured wall strip with improved scaling
+          scale_x = strip_width
+          scale_y = wall_height.to_f * @inv_texture_size
+
+          # Draw the wall strip without gaps
+          texture.subimage(tex_x, 0, 1, TEXTURE_SIZE).draw(
+            x, y, 0,
+            scale_x, scale_y,
+            color
+          )
         end
 
         # Draw minimap
@@ -175,27 +274,62 @@ module Doom
         ray_dx = Math.cos(angle)
         ray_dy = Math.sin(angle)
 
-        # Step size along x and y
-        step = 0.1
+        # Calculate step sizes for DDA-like algorithm
+        delta_dist_x = ray_dx.abs < 1e-10 ? 1e10 : (1.0 / ray_dx).abs
+        delta_dist_y = ray_dy.abs < 1e-10 ? 1e10 : (1.0 / ray_dy).abs
 
-        # Distance traveled
-        distance = 0.0
+        # Calculate initial step and side distance
+        map_x = ray_x.floor
+        map_y = ray_y.floor
 
-        # Cast ray until we hit a wall or reach maximum distance
-        while distance < 20
-          # Move ray forward
-          ray_x += ray_dx * step
-          ray_y += ray_dy * step
-          distance += step
+        side_dist_x = if ray_dx < 0
+                        (ray_x - map_x) * delta_dist_x
+                      else
+                        (map_x + 1.0 - ray_x) * delta_dist_x
+                      end
 
-          # Check if ray hit a wall
-          map_x = ray_x.to_i
-          map_y = ray_y.to_i
+        side_dist_y = if ray_dy < 0
+                        (ray_y - map_y) * delta_dist_y
+                      else
+                        (map_y + 1.0 - ray_y) * delta_dist_y
+                      end
 
-          return [distance, ray_x % 1] if wall_at?(map_x, map_y)
+        # Perform DDA
+        step_x = ray_dx < 0 ? -1 : 1
+        step_y = ray_dy < 0 ? -1 : 1
+        hit = false
+        is_vertical = false
+
+        while !hit && (side_dist_x + side_dist_y) < 20
+          # Jump to next map square in x or y direction
+          if side_dist_x < side_dist_y
+            side_dist_x += delta_dist_x
+            map_x += step_x
+            is_vertical = true
+          else
+            side_dist_y += delta_dist_y
+            map_y += step_y
+            is_vertical = false
+          end
+
+          # Check if ray has hit a wall
+          hit = wall_at?(map_x, map_y)
         end
 
-        [distance, 0]
+        return [20, 0, false] unless hit
+
+        # Calculate exact hit position
+        if is_vertical
+          wall_x = ray_y + ((side_dist_x - delta_dist_x) * ray_dy)
+          distance = (map_x - ray_x + ((1 - step_x) / 2)) / ray_dx
+        else
+          wall_x = ray_x + ((side_dist_y - delta_dist_y) * ray_dx)
+          distance = (map_y - ray_y + ((1 - step_y) / 2)) / ray_dy
+        end
+
+        wall_x -= wall_x.floor
+
+        [distance.abs, wall_x, is_vertical]
       end
 
       def wall_at?(x, y)
