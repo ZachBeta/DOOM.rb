@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Doom
   class Config
     PROJECT_ROOT = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))

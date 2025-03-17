@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'minitest/autorun'
 require_relative '../../lib/doom/wad_file'
 require_relative '../../lib/doom/config'

@@ -164,7 +164,7 @@ module Doom
     end
 
     def setup_logger_formatting(logger)
-      logger.formatter = proc do |severity, datetime, _progname, msg|
+      logger.formatter = proc do |severity, _datetime, _progname, msg|
         "[#{severity}] #{msg}\n"
       end
     end

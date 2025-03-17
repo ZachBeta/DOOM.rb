@@ -80,7 +80,7 @@ module Doom
     end
 
     def levels
-      @lumps.keys.select { |name| name.match?(LEVEL_MARKERS) }
+      @lumps.keys.grep(LEVEL_MARKERS)
     end
 
     def level_data(level_name)
@@ -141,7 +141,7 @@ module Doom
       return [] unless data && data.size >= 4
 
       num_textures = data[0, 4].unpack1('V')
-      return [] unless num_textures && num_textures > 0
+      return [] unless num_textures&.positive?
 
       # Read the texture offsets
       offsets = data[4, num_textures * 4].unpack('V*')
@@ -199,7 +199,7 @@ module Doom
       height = data[offset + 14, 2].unpack1('v')
       num_patches = data[offset + 20, 2].unpack1('v')
 
-      return nil unless width && height && num_patches && num_patches > 0
+      return nil unless width && height && num_patches&.positive?
 
       patches = []
       patch_offset = offset + 22

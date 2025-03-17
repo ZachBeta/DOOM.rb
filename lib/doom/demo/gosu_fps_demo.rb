@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'gosu'
 
 module Doom
@@ -98,7 +100,7 @@ module Doom
 
               # Create a smooth gradient for the grid lines
               intensity = [1.0 - (dist_to_line / 4.0), 0.0].max
-              color = if intensity > 0
+              color = if intensity.positive?
                         Gosu::Color.new(255,
                                         (255 * intensity) + (40 * (1 - intensity)),
                                         (255 * intensity) + (40 * (1 - intensity)),
@@ -282,21 +284,21 @@ module Doom
         map_x = ray_x.floor
         map_y = ray_y.floor
 
-        side_dist_x = if ray_dx < 0
+        side_dist_x = if ray_dx.negative?
                         (ray_x - map_x) * delta_dist_x
                       else
                         (map_x + 1.0 - ray_x) * delta_dist_x
                       end
 
-        side_dist_y = if ray_dy < 0
+        side_dist_y = if ray_dy.negative?
                         (ray_y - map_y) * delta_dist_y
                       else
                         (map_y + 1.0 - ray_y) * delta_dist_y
                       end
 
         # Perform DDA
-        step_x = ray_dx < 0 ? -1 : 1
-        step_y = ray_dy < 0 ? -1 : 1
+        step_x = ray_dx.negative? ? -1 : 1
+        step_y = ray_dy.negative? ? -1 : 1
         hit = false
         is_vertical = false
 
@@ -333,7 +335,7 @@ module Doom
       end
 
       def wall_at?(x, y)
-        return true if x < 0 || y < 0 || x >= @map[0].length || y >= @map.length
+        return true if x.negative? || y.negative? || x >= @map[0].length || y >= @map.length
 
         @map[y][x] == 1
       end
@@ -383,4 +385,4 @@ module Doom
 end
 
 # Only run the window if this file is being run directly
-Doom::Demo::GosuFpsDemo.new.show if __FILE__ == $0
+Doom::Demo::GosuFpsDemo.new.show if __FILE__ == $PROGRAM_NAME

@@ -75,7 +75,7 @@ task :profile do
     ruby 'lib/doom.rb', Doom::Config.wad_path
   end
   printer = RubyProf::FlatPrinter.new(result)
-  printer.print(STDOUT)
+  printer.print($stdout)
 end
 
 desc 'Run tests'
@@ -177,7 +177,7 @@ task :test_renderer_manual, [:time_limit] do |_, args|
 
   # Check for errors
   error_count = game_log.scan('ERROR').count
-  if error_count > 0
+  if error_count.positive?
     puts "Found #{error_count} errors in the game log"
   else
     puts 'No errors found in the game log'

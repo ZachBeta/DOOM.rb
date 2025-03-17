@@ -47,22 +47,24 @@ module TestHelper
     end
   end
 
-  def assert_nothing_raised(msg = nil)
+  def assert_nothing_raised(_msg = nil)
     yield
   rescue StandardError => e
     flunk("Expected nothing to be raised, but got #{e.class}: #{e.message}\n#{e.backtrace.join("\n")}")
   end
 end
 
-class Minitest::Test
-  include TestHelper
+module Minitest
+  class Test
+    include TestHelper
 
-  def setup
-    setup_test_logs
-  end
+    def setup
+      setup_test_logs
+    end
 
-  def teardown
-    cleanup_old_logs
+    def teardown
+      cleanup_old_logs
+    end
   end
 end
 
