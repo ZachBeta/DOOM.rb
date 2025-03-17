@@ -1,6 +1,5 @@
 # Development Worklogs
 
-
 ### In Progress
 - Basic Gosu window management
 - Fetch and parse FreeDOOM manual for feature list
@@ -14,6 +13,11 @@
   - Verbose development logging
 
 ### Next Up
+- let's try rendering some test textures and
+- add noclip/clip
+- modulo turn angle, 0 is north, 180 is south, -90 is west, 90 is east
+
+### Soon
 - Render a basic player on a real map with placeholder textures
 - Optimizing renderer performance
   - Target FPS: 30+

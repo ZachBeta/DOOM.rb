@@ -126,3 +126,4 @@
 
 
   * when using git, use cat so view doesn't cause scroll issues
+  * when doing a git commit use `git commit -m "title"\-m "description"`
