@@ -1,17 +1,20 @@
 # Development Worklogs
 
-## Current Sprint (2024-03-21)
 
 ### In Progress
+- Basic Gosu window management
+- Fetch and parse FreeDOOM manual for feature list
 
 ### Completed
-- logging
-- testing tools
 - WAD file parsing
+- Testing tools setup
+- Logging system implementation
+  - Debug and game logging
+  - Appropriate log levels
+  - Verbose development logging
 
 ### Next Up
-- Basic Gosu window management
-- render a basic player on a real map with placeholder textures
+- Render a basic player on a real map with placeholder textures
 - Optimizing renderer performance
   - Target FPS: 30+
   - Investigating pixel buffer operations
