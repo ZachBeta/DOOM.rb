@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'gosu'
+require_relative '../texture/bitmap_texture'
 
 module Doom
   module Demo
@@ -50,69 +51,17 @@ module Doom
       def create_test_textures
         @textures = []
 
-        # Checkerboard texture
-        checkerboard = Gosu.render(TEXTURE_SIZE, TEXTURE_SIZE) do
-          (0...TEXTURE_SIZE).each do |y|
-            (0...TEXTURE_SIZE).each do |x|
-              is_checker = ((x / 16) + (y / 16)).even? # Larger checker pattern
-              color = is_checker ? Gosu::Color::WHITE : Gosu::Color::GRAY
-              draw_rect(x, y, 1, 1, color)
-            end
-          end
-        end
-        @textures << checkerboard
+        # Create checkerboard texture
+        checkerboard = Texture::BitmapTexture.create_checkerboard('checkerboard')
+        @textures << checkerboard.gosu_image
 
-        # Brick texture
-        bricks = Gosu.render(TEXTURE_SIZE, TEXTURE_SIZE) do
-          (0...TEXTURE_SIZE).each do |y|
-            (0...TEXTURE_SIZE).each do |x|
-              # Smoother brick pattern
-              is_mortar_h = (y % 32 < 4)  # Horizontal mortar
-              is_mortar_v = (x % 64 < 4)  # Vertical mortar
-              is_mortar = is_mortar_h || is_mortar_v
+        # Create brick texture
+        bricks = Texture::BitmapTexture.create_brick('bricks')
+        @textures << bricks.gosu_image
 
-              # Add some noise to the bricks
-              noise = (((x * 7) + (y * 17)) % 20) / 100.0
-
-              if is_mortar
-                # Mortar color with slight variation
-                gray = 180 + (noise * 30).to_i
-                color = Gosu::Color.new(255, gray, gray, gray)
-              else
-                # Brick color with variation
-                red = 200 + (noise * 55).to_i
-                color = Gosu::Color.new(255, red, 100 + (noise * 20).to_i, 80 + (noise * 20).to_i)
-              end
-              draw_rect(x, y, 1, 1, color)
-            end
-          end
-        end
-        @textures << bricks
-
-        # Grid texture
-        grid = Gosu.render(TEXTURE_SIZE, TEXTURE_SIZE) do
-          (0...TEXTURE_SIZE).each do |y|
-            (0...TEXTURE_SIZE).each do |x|
-              # Smoother grid with gradient
-              dist_to_line_h = (y % 16).abs
-              dist_to_line_v = (x % 16).abs
-              dist_to_line = [dist_to_line_h, dist_to_line_v].min
-
-              # Create a smooth gradient for the grid lines
-              intensity = [1.0 - (dist_to_line / 4.0), 0.0].max
-              color = if intensity.positive?
-                        Gosu::Color.new(255,
-                                        (255 * intensity) + (40 * (1 - intensity)),
-                                        (255 * intensity) + (40 * (1 - intensity)),
-                                        (255 * intensity) + (100 * (1 - intensity)))
-                      else
-                        Gosu::Color.new(255, 40, 40, 100)
-                      end
-              draw_rect(x, y, 1, 1, color)
-            end
-          end
-        end
-        @textures << grid
+        # Create grid texture
+        grid = Texture::BitmapTexture.create_grid('grid')
+        @textures << grid.gosu_image
       end
 
       def update

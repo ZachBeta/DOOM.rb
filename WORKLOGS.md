@@ -16,6 +16,7 @@
 - let's try rendering some test textures and
 - add noclip/clip
 - modulo turn angle, 0 is north, 180 is south, -90 is west, 90 is east
+* we spawn in a wall, let's move the spawn location
 
 ### Soon
 - Render a basic player on a real map with placeholder textures
