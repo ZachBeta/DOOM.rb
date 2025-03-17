@@ -1,85 +1,66 @@
 # DOOM.rb
 
-A Ruby implementation of the classic DOOM game engine, focusing on vanilla accuracy inspired by Chocolate DOOM.
+A Ruby implementation of the classic DOOM engine using Gosu for rendering.
 
-This is an experiment in gamedev, llm/bdd/tdd driven dev process, ripping and tearing in ruby
+## Overview
 
-[![Ruby Version](https://img.shields.io/badge/ruby-3.0%2B-ruby.svg)](https://www.ruby-lang.org/)
-[![License](https://img.shields.io/badge/license-GPL--2.0-blue.svg)](LICENSE)
-
-## Quick Start
-
-```bash
-git clone https://github.com/ZachBeta/DOOM.rb.git
-cd DOOM.rb
-bundle install
-
-# Install Freedoom WAD files
-cd levels && curl -L https://github.com/freedoom/freedoom/releases/download/v0.13.0/freedoom-0.13.0.zip -O && unzip freedoom-0.13.0.zip
-
-# Run the game
-rake doom
-```
+DOOM.rb is a modern Ruby port of the classic DOOM engine, using Gosu for window management and rendering. The project aims to maintain compatibility with original DOOM WAD files while leveraging modern Ruby practices and object-oriented design principles.
 
 ## Features
 
-### Current ✅
-- 3D rendering engine with raycasting
-- Player movement with collision detection
-- Noclip mode (N key)
-- Minimap and FPS display
-- WAD file parsing and inspection
-- Test-driven development
-- Texture system with TEXTURE1/TEXTURE2 support
-- Basic texture rendering and caching
+- Software-based rendering using Gosu's pixel buffer API
+- WAD file parsing and loading
+- Raycasting-based 3D rendering
+- Player movement and collision detection
+- Minimap display
+- Debug information overlay
+- Performance monitoring
 
-### In Progress 🚧
-- Vanilla DOOM feature parity
-- Original DOOM source code study
-- Advanced texture features (filtering, mip-mapping)
+## Requirements
 
-### Planned 🎯
-- Full WAD file loading
-- Texture mapping
-- Enemies and weapons
-- Sound and music
-- Multiplayer support
+- Ruby 3.3.0+
+- Gosu gem (~> 0.15.0)
+- FreeDOOM WAD file (for testing)
 
-## Development
+## Installation
 
+1. Clone the repository
+2. Install dependencies:
 ```bash
-# Run tests
+bundle install
+```
+
+## Running
+
+To run the game:
+```bash
+rake doom
+```
+
+To run the FPS tech demo:
+```bash
+rake demo
+```
+
+### FPS Demo Controls
+- WASD: Movement (A/D for strafing)
+- Left/Right Arrows: Rotation
+- Tab: Toggle debug overlay
+- Esc: Exit
+
+To run tests:
+```bash
 rake test
-
-# WAD file inspection tools
-rake wad:info[path/to/wad]      # Display WAD file information
-rake wad:textures[path/to/wad]  # Display texture information
 ```
 
-### Project Structure
+## Development Status
 
-```
-lib/doom/      # Core game components
-├── renderer/  # 3D rendering system
-├── player/    # Player mechanics
-├── map/       # Level handling
-├── input/     # Input handling
-├── wad/       # WAD file parsing
-└── logging/   # Logging system
-```
-
-## Credits
-
-- Based on [can-it-run-doom](https://github.com/zvolchak/can-it-run-doom)
-- Uses [Freedoom](https://freedoom.github.io/) WAD files
-- [Can it run Doom?](https://doomwiki.org/wiki/Can_it_run_Doom%3F)
-- Original DOOM by id Software
-- Chocolate Doom
-- The doom source port community
-- The Doom Slayer for ripping and tearing
+Currently implementing:
+- Texture mapping system
+- Performance optimizations for renderer
+- Sprite rendering
+- Sound system
 
 ## License
 
-[GNU General Public License v2.0](LICENSE)
-
-This project is licensed under GPL-2.0 to align with the original DOOM and Chocolate DOOM codebases. 
+GPL-2.0 License - See COPYING.md for details
