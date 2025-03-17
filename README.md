@@ -61,6 +61,15 @@ Currently implementing:
 - Sprite rendering
 - Sound system
 
+## Project Structure
+
+## Development Tracking
+Development progress is tracked in the `.github/worklogs` directory:
+- `main.md`: Global tasks and features
+- `branches/`: Branch-specific worklogs
+  - Each feature branch has its own worklog file
+  - Tasks are moved to main.md when completed
+
 ## License
 
 GPL-2.0 License - See COPYING.md for details
