@@ -17,6 +17,8 @@
 - add noclip/clip
 - modulo turn angle, 0 is north, 180 is south, -90 is west, 90 is east
 * we spawn in a wall, let's move the spawn location
+* at certain angles and at longer distance textures don't render at all
+* try to replicate the shape of e1m1 - documented in https://doomwiki.org/wiki/E1M1:_Hangar_(Doom)
 
 ### Soon
 - Render a basic player on a real map with placeholder textures
